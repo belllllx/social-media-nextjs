@@ -7,10 +7,13 @@ import {
   Avatar,
   Box,
   Button,
-  Flex,
   HStack,
+  Icon,
+  IconButton,
+  Image,
   Input,
   SkeletonCircle,
+  Text,
 } from "@chakra-ui/react";
 import { EmojiPicker } from "./emoji-picker";
 import { useForm } from "react-hook-form";
@@ -19,10 +22,25 @@ import {
   CreateContentSchema,
 } from "@/utils/validations/create-content";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef } from "react";
+import { ChangeEvent, RefObject, useRef, useState } from "react";
+import { MdAddPhotoAlternate } from "react-icons/md";
+import { FaPlayCircle } from "react-icons/fa";
+import { callApi } from "@/utils/helpers/call-api";
+import { toast } from "react-toastify";
+import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import NextImage from "next/image";
+import { getFileDir } from "@/utils/helpers/get-file-dir";
+import { SocialVideoPlayer } from "@/components/social-video-player";
+import { FaXmark } from "react-icons/fa6";
+import { ICreatePostPayload, IDeleteFilePayload } from "@/utils/types";
 
 export function CreatePost() {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [filesUrl, setFilesUrl] = useState<string[]>([]);
+  const [disabled, setIsDisabled] = useState(false);
 
   const { user, isLoading } = useUserStore((state) => state);
 
@@ -46,10 +64,100 @@ export function CreatePost() {
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {});
+  const onSubmit = handleSubmit(async ({ message }) => {
+    if (!(filesUrl.length || message)) {
+      return;
+    }
+
+    try {
+      setIsDisabled(true);
+      const res = await callApi<ICreatePostPayload>(
+        "post",
+        `post/create/${user?.id}`,
+        {
+          message: !message ? undefined : message,
+          filesUrl,
+        },
+      ).finally(() => setIsDisabled(false));
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
+
+      toast.success(formatToastMessages(res.message));
+      form.reset();
+      setFilesUrl([]);
+    } catch (error) {
+      toast.error("Failed to create post");
+    }
+  });
+
+  function handleInputFilesClick(ref: RefObject<HTMLInputElement | null>) {
+    ref.current?.click();
+  }
+
+  async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
+    try {
+      if (event.target.files) {
+        const formData = new FormData();
+
+        const filesArray = Array.from(event.target.files);
+        filesArray.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        setIsDisabled(true);
+        const res = await callApi(
+          "post",
+          "post/files/create",
+          formData
+        ).finally(() => setIsDisabled(false));
+        if (!res.success) {
+          toast.error(formatToastMessages(res.message));
+          return;
+        }
+
+        const files = (res.data as { filesUrl: string[] }).filesUrl;
+        setFilesUrl(files);
+      }
+    } catch (error) {
+      toast.error("Failed to upload files");
+      setIsDisabled(false);
+    }
+  }
+
+  async function handleDeleteFile(fileUrl: string) {
+    try {
+      setIsDisabled(true);
+      const res = await callApi<IDeleteFilePayload>(
+        "delete", 
+        "post/delete/file", 
+        {
+          data: { fileUrl },
+        }).finally(() => setIsDisabled(false));
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
+
+      toast.success(formatToastMessages(res.message));
+      setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
+    } catch (error) {
+      toast.error("Failed to delete file");
+      setIsDisabled(false);
+    }
+  }
 
   return (
-    <Box borderRadius="lg" width="full" backgroundColor="white" p="4">
+    <Box
+      borderRadius="lg"
+      width="full"
+      backgroundColor="white"
+      p="4"
+      display="flex"
+      flexDirection="column"
+      gap="4"
+    >
       <form
         onSubmit={onSubmit}
         className="flex flex-col justify-center gap-y-4"
@@ -91,17 +199,106 @@ export function CreatePost() {
             valueKey="message"
           />
         </HStack>
-        <Flex justifyContent="flex-end">
+        <HStack justifyContent="space-around" flex="1">
+          <input
+            onChange={handleFilesChange}
+            ref={photoRef}
+            type="file"
+            className="hidden"
+            name="photo"
+            accept=".jpg,.jpeg,.png,.webp"
+            multiple
+          />
+          <input
+            onChange={handleFilesChange}
+            ref={videoRef}
+            type="file"
+            className="hidden"
+            name="video"
+            accept="video/*"
+            multiple
+          />
+
           <Button
-            loading={isSubmitting}
-            disabled={isSubmitting}
+            onClick={() => handleInputFilesClick(photoRef)}
+            disabled={disabled}
+            variant="ghost"
+            width="25%"
             type="submit"
-            width="150px"
+          >
+            <Icon size="lg" color="green.500">
+              <MdAddPhotoAlternate size="24" />
+            </Icon>
+            <Text color="green.500" textStyle="md">
+              Photo
+            </Text>
+          </Button>
+
+          <Button
+            onClick={() => handleInputFilesClick(videoRef)}
+            disabled={disabled}
+            variant="ghost"
+            width="25%"
+            type="submit"
+          >
+            <Icon size="md" color="purple.500">
+              <FaPlayCircle size="24" />
+            </Icon>
+            <Text color="purple.500" textStyle="md">
+              Video
+            </Text>
+          </Button>
+
+          <Button
+            loading={isSubmitting || disabled}
+            disabled={isSubmitting || disabled}
+            type="submit"
+            width="25%"
           >
             Submit
           </Button>
-        </Flex>
+        </HStack>
       </form>
+
+      {filesUrl.length > 0 && (
+        <Box display="flex" alignItems="center" gapX="4" overflowX="auto">
+          {filesUrl.map((fileUrl) => (
+            <Box
+              key={fileUrl}
+              width="300px"
+              height="300px"
+              backgroundColor="grey.500"
+              flexShrink="0"
+              position="relative"
+              rounded="2xl"
+              overflow="hidden"
+            >
+              <IconButton
+                onClick={() => handleDeleteFile(fileUrl)}
+                disabled={disabled}
+                aria-label="Remove file"
+                position="absolute"
+                top="2"
+                right="2"
+                color="white"
+                rounded="full"
+                zIndex="10"
+                backgroundColor="red.500"
+                size="xs"
+              >
+                <FaXmark />
+              </IconButton>
+              {getFileDir(fileUrl) === "image" ? (
+                <Image asChild>
+                  <NextImage src={fileUrl} alt={fileUrl} fill />
+                </Image>
+              ) : (
+                <SocialVideoPlayer src={fileUrl} />
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }

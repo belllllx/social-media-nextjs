@@ -13,7 +13,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Header />
       <main className="max-h-[calc(100vh-8vh)] h-[calc(100vh-8vh)] w-full bg-gray-100">
         <MainLayoutContent>
-          {children}
+          <div className="max-w-screen 2xl:max-w-[35vw] w-full">
+            {children}
+          </div>
         </MainLayoutContent>
       </main>
     </VStack>

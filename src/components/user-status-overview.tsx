@@ -5,7 +5,7 @@ import { PeopleStatus } from "./people-status";
 export function UserStatusOverview() {
   return (
     <Stack
-      width="400px"
+      width="40vw"
       height="full"
       display="none"
       flexDirection="column"

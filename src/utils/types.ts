@@ -116,3 +116,14 @@ export interface IPost {
   likes: ILike[];
   filesUrl?: string[];
 }
+
+export interface ICreatePostPayload {
+  message?: string;
+  filesUrl: string[];
+}
+
+export interface IDeleteFilePayload {
+  data: {
+    fileUrl: string;
+  }
+}

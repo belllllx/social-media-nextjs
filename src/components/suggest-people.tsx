@@ -5,7 +5,7 @@ export function SuggestPeople() {
   return (
     <Box
       borderRadius="lg"
-      width="400px"
+      width="40vw"
       height="full"
       backgroundColor="white"
       p="4"

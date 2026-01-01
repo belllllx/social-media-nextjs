@@ -14,10 +14,10 @@ type HttpMethod =
   | "putForm"
   | "patchForm";
 
-export async function callApi<TBody extends Object>(
+export async function callApi<TBody extends Record<string, any>>(
   method: HttpMethod,
   url: string,
-  body?: ApiBody<TBody>,
+  body?: ApiBody<TBody> | FormData,
   config?: AxiosRequestConfig<any>,
 ): Promise<ICommonResponse> {
   try {

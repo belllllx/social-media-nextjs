@@ -14,9 +14,13 @@ export function MainLayoutContent({ children }: MainLayoutProps) {
 
   return (
     <div className="w-full h-full flex justify-center py-4 px-4 2xl:px-56 gap-x-4">
-      {(pathname === "/feed" || pathname.startsWith("/post")) && <SuggestPeople />}
+      {(pathname === "/feed" || pathname.startsWith("/post")) && (
+        <SuggestPeople />
+      )}
       {children}
-      {(pathname === "/feed" || pathname.startsWith("/post")) && <UserStatusOverview />}
+      {(pathname === "/feed" || pathname.startsWith("/post")) && (
+        <UserStatusOverview />
+      )}
     </div>
   );
 }
