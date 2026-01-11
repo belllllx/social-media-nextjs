@@ -15,7 +15,7 @@ const Picker = dynamic(
 );
 
 interface EmojiPickerProps {
-  inputRef: RefObject<HTMLInputElement | null>;
+  inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   useFormReturn: UseFormReturn;
   valueKey: string;
 }
@@ -25,19 +25,22 @@ export function EmojiPicker({
   useFormReturn,
   valueKey,
 }: EmojiPickerProps) {
-  const { openEmojiPicker, handleOpenEmojiPicker } = usePopoverControl(inputRef);
+  const { openEmojiPicker, handleOpenEmojiPicker } =
+    usePopoverControl(inputRef);
 
   const handleEmojiSelect = useHandleEmojiSelect(
     inputRef,
     useFormReturn,
-    valueKey,
+    valueKey
   );
 
   return (
     <Popover.Root
       open={openEmojiPicker}
       onOpenChange={(e) => handleOpenEmojiPicker(e.open)}
-      positioning={{ placement: "bottom-end" }}
+      positioning={{
+        placement: "bottom-end",
+      }}
     >
       <Popover.Trigger asChild>
         <Circle
@@ -58,9 +61,7 @@ export function EmojiPicker({
         <Popover.Positioner>
           <Popover.Content>
             <Popover.Arrow />
-            <Picker
-              onEmojiClick={(e) => handleEmojiSelect(e)}
-            />
+            <Picker onEmojiClick={(e) => handleEmojiSelect(e)} />
           </Popover.Content>
         </Popover.Positioner>
       </Portal>

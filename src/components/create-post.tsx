@@ -32,9 +32,13 @@ import NextImage from "next/image";
 import { getFileDir } from "@/utils/helpers/get-file-dir";
 import { SocialVideoPlayer } from "@/components/social-video-player";
 import { FaXmark } from "react-icons/fa6";
-import { ICreatePostPayload, IDeleteFilePayload } from "@/utils/types";
+import { ICreatePostPayload, IDeleteFilePayload, IPost } from "@/utils/types";
+import { usePostCreate } from "@/hooks/use-post-create";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CreatePost() {
+  const queryClient = useQueryClient();
+
   const photoRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,10 +88,14 @@ export function CreatePost() {
         return;
       }
 
+      const post = res.data as IPost;
+      usePostCreate(post, queryClient);
+
       toast.success(formatToastMessages(res.message));
       form.reset();
       setFilesUrl([]);
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create post");
     }
   });
@@ -224,7 +232,7 @@ export function CreatePost() {
             disabled={disabled}
             variant="ghost"
             width="25%"
-            type="submit"
+            type="button"
           >
             <Icon size="lg" color="green.500">
               <MdAddPhotoAlternate size="24" />
@@ -239,7 +247,7 @@ export function CreatePost() {
             disabled={disabled}
             variant="ghost"
             width="25%"
-            type="submit"
+            type="button"
           >
             <Icon size="md" color="purple.500">
               <FaPlayCircle size="24" />

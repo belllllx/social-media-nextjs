@@ -17,19 +17,43 @@ export function useNotifySocket(activeUserId?: string) {
           return undefined;
         }
 
-        const newNotifyPage = oldNotifies.pages.map((group) => {
-          const copyNotifies = [...group.notifies];
-          const index = group.notifies.findIndex((oldNotify) => isEqual(oldNotify, newNotify));
-          index !== -1 ? copyNotifies.splice(index, 1) : copyNotifies.unshift(newNotify);
-          return {
-            ...group,
-            notifies: copyNotifies,
-          };
+        let found = false;
+
+        const newNotifyPages = oldNotifies.pages.map((group, pageIndex) => {
+          const index = group.notifies.findIndex((oldNotify) =>
+            isEqual(oldNotify, newNotify)
+          );
+
+          // เจอ notify เดิม → แก้ page นี้
+          if (index !== -1) {
+            found = true;
+
+            const copyNotifies = [...group.notifies];
+            copyNotifies.splice(index, 1);
+
+            return {
+              ...group,
+              notifies: copyNotifies,
+            };
+          }
+
+          // ยังไม่เจอ และเป็น page แรก → เพิ่มเข้า page แรกเท่านั้น
+          if (!found && pageIndex === 0) {
+            found = true;
+
+            return {
+              ...group,
+              notifies: [newNotify, ...group.notifies],
+            };
+          }
+
+          // page อื่น ๆ ไม่แตะ
+          return group;
         });
 
         return {
           ...oldNotifies,
-          pages: [...newNotifyPage],
+          pages: newNotifyPages,
         };
       });
     });

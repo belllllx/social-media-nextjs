@@ -1,7 +1,7 @@
 import { RefObject, useCallback, useState } from "react";
 
 export function usePopoverControl(
-  inputRef: RefObject<HTMLInputElement | null>
+  inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>
 ) {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
 
@@ -11,6 +11,7 @@ export function usePopoverControl(
       setOpenEmojiPicker(true);
       return;
     }
+    
     setOpenEmojiPicker(open);
   }, [setOpenEmojiPicker]);
 

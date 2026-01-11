@@ -1,10 +1,10 @@
 import { formatString } from "@/utils/helpers/format-string";
 import { EmptyState, VStack } from "@chakra-ui/react";
 import { FaPeopleGroup } from "react-icons/fa6";
-import { MdNotificationsActive } from "react-icons/md";
+import { MdNotificationsActive, MdOutlineFeed } from "react-icons/md";
 
 interface ItemsNotFoundProps {
-  title?: "user" | "people" | "notify";
+  title?: "user" | "people" | "notify" | "post";
 }
 
 export function ItemsNotFound({ title }: ItemsNotFoundProps) {
@@ -14,6 +14,8 @@ export function ItemsNotFound({ title }: ItemsNotFoundProps) {
         <EmptyState.Indicator>
           {title === "notify" ? (
             <MdNotificationsActive />
+          ) : title === "post" ? (
+            <MdOutlineFeed />
           ) : (
             <FaPeopleGroup />
           )}

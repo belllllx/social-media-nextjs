@@ -3,7 +3,7 @@ import { RefObject, useCallback } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 export function useHandleEmojiSelect(
-  inputRef: RefObject<HTMLInputElement | null>,
+  inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement | null>,
   { getValues, setValue, setFocus }: UseFormReturn,
   valueKey: string
 ) {
