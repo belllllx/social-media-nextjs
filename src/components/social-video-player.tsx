@@ -105,7 +105,7 @@ export function SocialVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full max-w-md bg-black overflow-hidden rounded-2xl ${className}`}
+      className={`relative w-full h-full bg-black overflow-hidden rounded-2xl ${className}`}
     >
       {/* Video element */}
       <video
