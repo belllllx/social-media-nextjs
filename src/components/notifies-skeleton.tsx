@@ -4,7 +4,6 @@ import {
   Skeleton,
   SkeletonCircle,
   Stack,
-  VStack,
 } from "@chakra-ui/react";
 
 interface NotifiesSkeletonProps {
@@ -13,7 +12,7 @@ interface NotifiesSkeletonProps {
 
 export function NotifiesSkeleton({ amount = 1 }: NotifiesSkeletonProps) {
   return (
-    <VStack gapY="3.5">
+    <Stack gapY="3.5">
       <For each={[...Array(amount).keys()]}>
         {(item) => (
           <HStack 
@@ -31,6 +30,6 @@ export function NotifiesSkeleton({ amount = 1 }: NotifiesSkeletonProps) {
           </HStack>
         )}
       </For>
-    </VStack>
+    </Stack>
   );
 }

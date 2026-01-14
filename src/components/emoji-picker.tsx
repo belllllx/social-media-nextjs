@@ -1,11 +1,12 @@
 "use client";
 
-import { Circle, Popover, Portal } from "@chakra-ui/react";
+import { IconButton, Popover, Portal } from "@chakra-ui/react";
 import { RefObject } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useHandleEmojiSelect } from "@/hooks/use-handle-emoji-select";
 import { usePopoverControl } from "@/hooks/use-popover-control";
 import dynamic from "next/dynamic";
+import { BsEmojiSunglasses } from "react-icons/bs";
 
 const Picker = dynamic(
   () => {
@@ -43,19 +44,13 @@ export function EmojiPicker({
       }}
     >
       <Popover.Trigger asChild>
-        <Circle
-          position="relative"
-          size="11"
-          bg="gray.200"
-          color="black"
-          cursor="pointer"
-          _hover={{
-            backgroundColor: "gray.300",
-            transitionDuration: "slow",
-          }}
+        <IconButton 
+          rounded="full" 
+          variant="surface"
+          color="red.500"
         >
-          <span className="text-xl">😊</span>
-        </Circle>
+          <BsEmojiSunglasses />
+        </IconButton>
       </Popover.Trigger>
       <Portal>
         <Popover.Positioner>

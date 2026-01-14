@@ -103,6 +103,7 @@ export interface ILike {
   userId: string;
   postId: string | null;
   commentId: string | null;
+  user: IUser;
 }
 
 export interface IPost {
@@ -123,7 +124,5 @@ export interface ICreatePostPayload {
 }
 
 export interface IDeleteFilePayload {
-  data: {
-    fileUrl: string;
-  }
+  fileUrl: string;
 }

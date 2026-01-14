@@ -14,7 +14,7 @@ export function PostUserHeader({ post }: PostHeaderProps) {
   const handleUserClick = useNavigateUser(post.user);
 
   return (
-    <HStack gap="4">
+    <HStack gapX="3">
       {post.user.profileUrl ? (
         <Avatar.Root onClick={handleUserClick} size="xl" cursor="pointer">
           <Avatar.Fallback name={post.user.fullname} />

@@ -1,16 +1,31 @@
 "use client";
 
 import { Box, Flex } from "@chakra-ui/react";
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useRef } from "react";
 import { usePosts } from "@/hooks/use-posts";
 import { useInView } from "react-intersection-observer";
 import { Spinner } from "./spinner";
 import { ItemsNotFound } from "./items-not-found";
 import { Post } from "./post";
 import { usePostSocket } from "@/hooks/use-post-socket";
+import { usePostLikeSocket } from "@/hooks/use-post-like-socket";
+import { useSocketIo } from "@/providers/socket-io-provider";
+import { useQueryClient } from "@tanstack/react-query";
+import { PostsSkeleton } from "./posts-skeleton";
+import { useScroll } from "@/hooks/use-scroll";
+import { ScrollBtn } from "./scroll-btn";
 
 export function Posts() {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const { socket } = useSocketIo();
+
+  const queryClient = useQueryClient();
+
   usePostSocket();
+  usePostLikeSocket(socket, queryClient);
+
+  const showButton = useScroll(scrollRef);
 
   const {
     data: posts,
@@ -29,9 +44,19 @@ export function Posts() {
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <Box height="full" overflowY="auto" pr="2">
+    <Box
+      ref={scrollRef}
+      height="full"
+      overflowY="auto"
+      pr="2"
+      position="relative"
+    >
+      {showButton && (
+        <ScrollBtn scrollRef={scrollRef} />
+      )}
+
       {status === "pending" ? (
-        <div>post skeleton</div>
+        <PostsSkeleton amount={3} />
       ) : isLoading ? (
         <Flex
           width="full"
@@ -46,9 +71,7 @@ export function Posts() {
         posts.pages.map((group, i) => (
           <Fragment key={i}>
             {group.posts.length ? (
-              group.posts.map((post) => (
-                <Post key={post.id} post={post} />
-              ))
+              group.posts.map((post) => <Post key={post.id} post={post} />)
             ) : (
               <ItemsNotFound title="post" />
             )}

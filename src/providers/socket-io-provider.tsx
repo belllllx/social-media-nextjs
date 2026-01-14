@@ -1,6 +1,6 @@
 "use client";
 
-import { ICommonResponse, INotify, IPost, IUser } from "@/utils/types";
+import { ICommonResponse, ILike, INotify, IPost, IUser } from "@/utils/types";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
@@ -22,14 +22,15 @@ const SocketIoContext = createContext<SocketIoCoxtentType | undefined>(
   undefined
 );
 
-interface ServerToClientEvents {
+export interface ServerToClientEvents {
   [event: `notification:${string}`]: (notifications: INotify) => void;
   usersActive: (users: (IUser & { active: boolean })[]) => void;
   exception: (error: { success: boolean; message: string }) => void;
   createPost: (post: IPost) => void;
+  newLike: (like: ILike) => void;
 }
 
-interface ClientToServerEvents {
+export interface ClientToServerEvents {
   connected: (activeUser: IUser) => void;
 }
 

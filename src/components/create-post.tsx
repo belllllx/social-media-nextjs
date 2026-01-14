@@ -44,7 +44,7 @@ export function CreatePost() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
-  const [disabled, setIsDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   const { user, isLoading } = useUserStore((state) => state);
 
@@ -74,7 +74,7 @@ export function CreatePost() {
     }
 
     try {
-      setIsDisabled(true);
+      setDisabled(true);
       const res = await callApi<ICreatePostPayload>(
         "post",
         `post/create/${user?.id}`,
@@ -82,7 +82,7 @@ export function CreatePost() {
           message: !message ? undefined : message,
           filesUrl,
         },
-      ).finally(() => setIsDisabled(false));
+      ).finally(() => setDisabled(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -114,12 +114,12 @@ export function CreatePost() {
           formData.append("files", file);
         });
 
-        setIsDisabled(true);
+        setDisabled(true);
         const res = await callApi(
           "post",
           "post/files/create",
           formData
-        ).finally(() => setIsDisabled(false));
+        ).finally(() => setDisabled(false));
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
@@ -130,19 +130,19 @@ export function CreatePost() {
       }
     } catch (error) {
       toast.error("Failed to upload files");
-      setIsDisabled(false);
+      setDisabled(false);
     }
   }
 
   async function handleDeleteFile(fileUrl: string) {
     try {
-      setIsDisabled(true);
-      const res = await callApi<IDeleteFilePayload>(
+      setDisabled(true);
+      const res = await callApi<{ data: IDeleteFilePayload }>(
         "delete", 
         "post/delete/file", 
         {
           data: { fileUrl },
-        }).finally(() => setIsDisabled(false));
+        }).finally(() => setDisabled(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -152,7 +152,7 @@ export function CreatePost() {
       setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
     } catch (error) {
       toast.error("Failed to delete file");
-      setIsDisabled(false);
+      setDisabled(false);
     }
   }
 

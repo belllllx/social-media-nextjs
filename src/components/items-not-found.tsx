@@ -4,7 +4,7 @@ import { FaPeopleGroup } from "react-icons/fa6";
 import { MdNotificationsActive, MdOutlineFeed } from "react-icons/md";
 
 interface ItemsNotFoundProps {
-  title?: "user" | "people" | "notify" | "post";
+  title: "user" | "people" | "notify" | "post" | "like";
 }
 
 export function ItemsNotFound({ title }: ItemsNotFoundProps) {
@@ -22,7 +22,7 @@ export function ItemsNotFound({ title }: ItemsNotFoundProps) {
         </EmptyState.Indicator>
         <VStack textAlign="center">
           {title !== "user" ? (
-            <EmptyState.Title>Your {title} is empty</EmptyState.Title>
+          <EmptyState.Title>{title !== "like" ? "Your" : ""} {title !== "like" ? title : formatString(title)} is empty</EmptyState.Title>
           ) : (
             <EmptyState.Title>{formatString(title)} not found</EmptyState.Title>
           )}

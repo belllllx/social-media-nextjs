@@ -19,6 +19,7 @@ interface CarouselProps {
 export function Carousel({ fileUrls, inDialog }: CarouselProps) {
   return (
     <ChakraCarousel.Root
+      allowMouseDrag
       slideCount={fileUrls.length}
       cursor="pointer"
       width="full"   
@@ -55,6 +56,7 @@ export function Carousel({ fileUrls, inDialog }: CarouselProps) {
                 >
                   <Image asChild>
                     <NextImage
+                      priority
                       src={file}
                       alt={file}
                       fill

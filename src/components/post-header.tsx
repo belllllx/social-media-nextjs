@@ -4,6 +4,7 @@ import React, { useRef, useState } from "react";
 import {
   Avatar,
   Button,
+  CloseButton,
   Dialog,
   HStack,
   IconButton,
@@ -15,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import { IPost, IUser } from "@/utils/types";
 import { BsThreeDots } from "react-icons/bs";
-import { HiMiniXMark } from "react-icons/hi2";
 import { EmojiPicker } from "./emoji-picker";
 import { useForm } from "react-hook-form";
 import {
@@ -30,11 +30,7 @@ interface PostHeaderProps {
   activeUser: IUser | null;
 }
 
-export function PostHeader({ 
-  children, 
-  post, 
-  activeUser 
-}: PostHeaderProps) {
+export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [openPopover, setOpenPopover] = useState(false);
@@ -107,13 +103,6 @@ export function PostHeader({
                               <Dialog.Title textAlign="center" width="full">
                                 Edit post
                               </Dialog.Title>
-                              <IconButton
-                                onClick={() => setOpenDialog(false)}
-                                variant="subtle"
-                                rounded="full"
-                              >
-                                <HiMiniXMark />
-                              </IconButton>
                             </Dialog.Header>
                             <Dialog.Body>
                               <Stack gapY="4">
@@ -155,6 +144,9 @@ export function PostHeader({
                                 </form>
                               </Stack>
                             </Dialog.Body>
+                            <Dialog.CloseTrigger asChild rounded="full">
+                              <CloseButton size="sm" />
+                            </Dialog.CloseTrigger>
                           </Dialog.Content>
                         </Dialog.Positioner>
                       </Portal>
