@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { INotify } from "@/utils/types";
+import { ICommonResponse, INotify } from "@/utils/types";
 import {
   InfiniteData,
   useMutation,
@@ -19,7 +19,7 @@ export function useReadNotify() {
         return Promise.reject(res);
       }
 
-      return res.data as INotify;
+      return res;
     },
     onMutate: async (notifyId: string) => {
       await queryClient.cancelQueries({ queryKey: ["notifies"] });
@@ -53,7 +53,9 @@ export function useReadNotify() {
         InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
       >(["notifies"], context);
     },
-    onSuccess(notifyData) {
+    onSuccess(res) {
+      const notifyData = res.data as INotify;
+
       queryClient.setQueryData<
         InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
       >(["notifies"], (oldNotifies) => {

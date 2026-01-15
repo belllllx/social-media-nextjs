@@ -5,15 +5,20 @@ import { PostFiles } from "./post-files";
 
 interface PostBodyProps {
   post: IPost;
+  isSharePost?: boolean;
 }
 
-export function PostBody({ post }: PostBodyProps) {
+export function PostBody({ post, isSharePost }: PostBodyProps) {
   return (
     <>
       {post.message && <Box>{post.message}</Box>}
-      {post.filesUrl && post.filesUrl.length ? (
-        <PostFiles fileUrls={post.filesUrl} />
-      ) : null}
+      {!isSharePost && (
+        <>
+          {post.filesUrl && post.filesUrl.length ? (
+            <PostFiles fileUrls={post.filesUrl} />
+          ) : null }
+        </>
+      )}
     </>
   );
 }

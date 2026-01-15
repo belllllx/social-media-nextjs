@@ -23,6 +23,7 @@ import { Spinner } from "./spinner";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { ItemsNotFound } from "./items-not-found";
 import { useInView } from "react-intersection-observer";
+import { Error } from "./error";
 
 export function SearchPeople() {
   const { ref, inView } = useInView();
@@ -49,6 +50,9 @@ export function SearchPeople() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
+    error,
+    refetch,
   } = useUsers(values, 10, user?.id);
 
   useEffect(() => {
@@ -93,7 +97,9 @@ export function SearchPeople() {
                 >
                   Search result:
                 </Popover.Title>
-                {isLoading ? (
+                {isError ? (
+                  <Error error={error} refetch={refetch} />
+                ) : isLoading ? (
                   <Flex
                     width="full"
                     height="full"

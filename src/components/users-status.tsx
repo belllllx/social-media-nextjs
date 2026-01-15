@@ -13,6 +13,7 @@ import { useUsersSocket } from "@/hooks/use-users-socket";
 import { useQueryClient } from "@tanstack/react-query";
 import { UsersTemp } from "@/utils/types";
 import { setQueryDataUsersStatus } from "@/utils/helpers/set-query-data-users-status";
+import { Error } from "./error";
 
 export function UsersStatus() {
   const queryClient = useQueryClient();
@@ -26,7 +27,10 @@ export function UsersStatus() {
     isFetchingNextPage,
     isLoading,
     isSuccess,
+    isError,
     status,
+    error,
+    refetch,
   } = useUsersSuggest(10, user?.id);
 
   useUsersSocket(queryClient);
@@ -58,6 +62,10 @@ export function UsersStatus() {
 
   if (status === "pending") {
     return <UsersSkeleton amount={8} height="68px" />;
+  }
+
+  if (isError) {
+    return <Error error={error} refetch={refetch} />;
   }
 
   if (isLoading) {

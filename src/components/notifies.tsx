@@ -11,6 +11,7 @@ import { INotify } from "@/utils/types";
 import { Notify } from "./notify";
 import { ItemsNotFound } from "./items-not-found";
 import { NotifiesSkeleton } from "./notifies-skeleton";
+import { Error } from "./error";
 
 interface NotifiesProps {
   onNotifyCount: (notify: INotify[]) => void;
@@ -27,7 +28,10 @@ export function Notifies({ onNotifyCount }: NotifiesProps) {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
     status,
+    error,
+    refetch,
   } = useNotifies(10, user?.id);
 
   useEffect(() => {
@@ -49,6 +53,8 @@ export function Notifies({ onNotifyCount }: NotifiesProps) {
     <Box maxH="400px" overflowY="auto">
       {status === "pending" ? (
         <NotifiesSkeleton amount={4} />
+      ) : isError ? (
+        <Error error={error} refetch={refetch} />
       ) : isLoading ? (
         <Flex
           width="full"

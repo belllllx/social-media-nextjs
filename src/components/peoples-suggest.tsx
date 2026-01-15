@@ -9,6 +9,7 @@ import { Box, Flex } from "@chakra-ui/react";
 import { Spinner } from "./spinner";
 import { ItemsNotFound } from "./items-not-found";
 import { UsersSkeleton } from "./users-skeleton";
+import { Error } from "./error";
 
 export function PeoplesSuggest() {
   const { user: activeUser } = useUserStore((state) => state);
@@ -20,7 +21,10 @@ export function PeoplesSuggest() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
     status,
+    error,
+    refetch,
   } = useUsersSuggest(10, activeUser?.id);
 
   useEffect(() => {
@@ -31,6 +35,10 @@ export function PeoplesSuggest() {
 
   if (status === "pending") {
     return <UsersSkeleton amount={9} />;
+  }
+
+  if(isError){
+    return <Error error={error} refetch={refetch} />
   }
 
   if (isLoading) {

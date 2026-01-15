@@ -10,7 +10,7 @@ export function useUsers(search: string, limit: number, activeUserId?: string) {
         ? `user/find-by-fullname/${activeUserId}?fullname=${search}&cursor=${pageParam}&limit=${limit}`
         : `user/find-by-fullname/${activeUserId}?fullname=${search}&limit=${limit}`;
 
-      await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));  
+      await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));
       const res = await callApi("get", url);
       if (!res.success) {
         return Promise.reject(res);

@@ -31,8 +31,11 @@ export function Post({ post }: PostProps) {
         <PostUserHeader post={post} />
       </PostHeader>
 
-      {post.parentId ? (
-        <SharePost post={post} /> 
+      {post.parentId && post.parent ? (
+        <SharePost 
+          parentPost={post.parent} 
+          post={post}
+        /> 
       ) : (
         <PostBody post={post} />
       )}

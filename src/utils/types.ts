@@ -116,6 +116,7 @@ export interface IPost {
   user: IUser;
   likes: ILike[];
   filesUrl?: string[];
+  parent?: IPost;
 }
 
 export interface ICreatePostPayload {

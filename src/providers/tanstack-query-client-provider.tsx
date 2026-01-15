@@ -21,6 +21,14 @@ const queryClient = new QueryClient({
         }
         return failureCount < 1;
       },
+      throwOnError: (error) => {
+        return (error as unknown as ICommonResponse).status > 499;
+      },
+    },
+    mutations: {
+      throwOnError: (error) => {
+        return (error as unknown as ICommonResponse).status > 499;
+      },
     },
   },
   queryCache: new QueryCache({

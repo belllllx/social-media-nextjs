@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PostsSkeleton } from "./posts-skeleton";
 import { useScroll } from "@/hooks/use-scroll";
 import { ScrollBtn } from "./scroll-btn";
+import { Error } from "./error";
 
 export function Posts() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -33,7 +34,10 @@ export function Posts() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
     status,
+    error,
+    refetch,
   } = usePosts(10);
   const { ref, inView } = useInView();
 
@@ -43,6 +47,10 @@ export function Posts() {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+  if (isError) {
+    return <Error error={error} refetch={refetch} />
+  }
+
   return (
     <Box
       ref={scrollRef}
@@ -51,9 +59,7 @@ export function Posts() {
       pr="2"
       position="relative"
     >
-      {showButton && (
-        <ScrollBtn scrollRef={scrollRef} />
-      )}
+      {showButton && <ScrollBtn scrollRef={scrollRef} />}
 
       {status === "pending" ? (
         <PostsSkeleton amount={3} />

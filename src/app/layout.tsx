@@ -8,6 +8,7 @@ import { TanStackQueryClientProvider } from "@/providers/tanstack-query-client-p
 import { RouterProvider } from "@/providers/router-provider";
 import { SocketIoProvider } from "@/providers/socket-io-provider";
 import { CreateContentStoreProvider } from "@/providers/create-content-store-provider";
+import { TanstackQueryErrorResetBoundary } from "@/providers/tanstack-query-error-reset-boundary";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,21 +36,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TanStackQueryClientProvider>
-          <SocketIoProvider>
-            <AuthUserStoreProvider>
-              <UserStoreProvider>
-                <CreateContentStoreProvider>
-                  <Provider>
-                    <ToastContainer position="top-center" />
-                    <RouterProvider />
-                    {children}
-                  </Provider>
-                </CreateContentStoreProvider>
-              </UserStoreProvider>
-            </AuthUserStoreProvider>
-          </SocketIoProvider>
-        </TanStackQueryClientProvider>
+        <TanstackQueryErrorResetBoundary>
+          <TanStackQueryClientProvider>
+            <SocketIoProvider>
+              <AuthUserStoreProvider>
+                <UserStoreProvider>
+                  <CreateContentStoreProvider>
+                    <Provider>
+                      <ToastContainer position="top-center" />
+                      <RouterProvider />
+                      {children}
+                    </Provider>
+                  </CreateContentStoreProvider>
+                </UserStoreProvider>
+              </AuthUserStoreProvider>
+            </SocketIoProvider>
+          </TanStackQueryClientProvider>
+        </TanstackQueryErrorResetBoundary>
       </body>
     </html>
   );
