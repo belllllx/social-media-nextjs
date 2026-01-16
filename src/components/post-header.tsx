@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Avatar,
   Button,
   CloseButton,
   Dialog,
   HStack,
+  Icon,
   IconButton,
   Popover,
   Portal,
@@ -23,6 +30,13 @@ import {
   CreateContentSchema,
 } from "@/utils/validations/create-content";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
+import { FaPaperclip } from "react-icons/fa6";
+import { MdAddPhotoAlternate } from "react-icons/md";
+import { callApi } from "@/utils/helpers/call-api";
+import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { toast } from "react-toastify";
+import { Carousel } from "./carousel";
 
 interface PostHeaderProps {
   children: React.ReactNode;
@@ -31,10 +45,14 @@ interface PostHeaderProps {
 }
 
 export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
+  const photoRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [openPopover, setOpenPopover] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+  const [filesUrl, setFilesUrl] = useState<string[]>([]);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -47,6 +65,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
     watch,
     handleSubmit,
     register,
+    setValue,
+    reset,
     formState: { isSubmitting },
   } = form;
 
@@ -54,10 +74,87 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   const onSubmit = handleSubmit(async ({ message }) => {});
 
+  const handleUserClick = useNavigateUser(post.user);
+
   function handleClosePopover() {
     setOpenPopover(false);
     setOpenDialog(true);
   }
+
+  function handleOpenDialog(open: boolean) {
+    if (open && post.message) {
+      setValue("message", post.message);
+    }
+
+    setOpenDialog(open);
+
+    if (!open) {
+      reset();
+    }
+  }
+
+  async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
+    try {
+      if (event.target.files) {
+        const formData = new FormData();
+
+        const filesArray = Array.from(event.target.files);
+        filesArray.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        setDisabled(true);
+        const res = await callApi(
+          "post",
+          "post/files/create",
+          formData
+        ).finally(() => setDisabled(false));
+        if (!res.success) {
+          toast.error(formatToastMessages(res.message));
+          return;
+        }
+
+        const files = (res.data as { filesUrl: string[] }).filesUrl;
+        setFilesUrl(files);
+      }
+    } catch (error) {
+      toast.error("Failed to upload files");
+      setDisabled(false);
+    }
+  }
+
+  function handleInputFilesClick(ref: RefObject<HTMLInputElement | null>) {
+    ref.current?.click();
+  }
+
+  function handleSetDisabled(status: boolean) {
+    setDisabled(status);
+  }
+
+  function handleSetFilesUrl(fileUrl: string) {
+    setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
+  }
+
+  useEffect(() => {
+    if (!openDialog) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (!input) {
+        return;
+      }
+
+      const len = post.message?.length ?? 0;
+      input.focus();
+      input.setSelectionRange(len, len);
+    });
+
+    if(post.filesUrl && post.filesUrl.length){
+      setFilesUrl(post.filesUrl);
+    }
+  }, [openDialog]);
 
   return (
     <HStack>
@@ -81,7 +178,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                   <Stack>
                     <Dialog.Root
                       open={openDialog}
-                      onOpenChange={(e) => setOpenDialog(e.open)}
+                      onOpenChange={(e) => handleOpenDialog(e.open)}
                       placement="center"
                       motionPreset="slide-in-bottom"
                     >
@@ -107,40 +204,149 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                             <Dialog.Body>
                               <Stack gapY="4">
                                 <HStack gap="4">
-                                  <Avatar.Root onClick={() => {}} size="xl">
-                                    <Avatar.Fallback name={"belllllx"} />
-                                    <Avatar.Image src="https://bit.ly/sage-adebayo" />
-                                  </Avatar.Root>
+                                  {post.user.profileUrl ? (
+                                    <Avatar.Root
+                                      onClick={handleUserClick}
+                                      size="xl"
+                                      cursor="pointer"
+                                    >
+                                      <Avatar.Fallback
+                                        name={post.user.fullname}
+                                      />
+                                      <Avatar.Image
+                                        src={post.user.profileUrl}
+                                      />
+                                    </Avatar.Root>
+                                  ) : (
+                                    <Avatar.Root
+                                      onClick={handleUserClick}
+                                      size="xl"
+                                      cursor="pointer"
+                                    >
+                                      <Avatar.Fallback
+                                        name={post.user.fullname}
+                                      />
+                                    </Avatar.Root>
+                                  )}
                                   <Text
-                                    onClick={() => {}}
+                                    onClick={handleUserClick}
                                     fontWeight="medium"
                                     fontSize="md"
+                                    cursor="pointer"
                                   >
-                                    {"belllllx"}
+                                    {post.user.fullname}
                                   </Text>
                                 </HStack>
 
                                 <form
                                   onSubmit={onSubmit}
-                                  className="flex justify-between w-full gap-x-2"
+                                  className="w-full flex flex-col gap-y-3"
                                 >
-                                  <Textarea
-                                    value={content}
-                                    {...register("message")}
-                                    ref={(e) => {
-                                      register("message").ref(e);
-                                      inputRef.current = e;
-                                    }}
-                                    variant="flushed"
-                                    border="none"
-                                    resize="none"
-                                    placeholder="Write something..."
+                                  <HStack
+                                    gapX="2"
+                                    justifyContent="space-between"
+                                  >
+                                    <Textarea
+                                      value={content}
+                                      {...register("message")}
+                                      ref={(e) => {
+                                        register("message").ref(e);
+                                        inputRef.current = e;
+                                      }}
+                                      variant="flushed"
+                                      border="none"
+                                      resize="none"
+                                      placeholder="Write something..."
+                                    />
+                                    <EmojiPicker
+                                      inputRef={inputRef}
+                                      useFormReturn={form}
+                                      valueKey="message"
+                                    />
+                                  </HStack>
+
+                                  <Carousel
+                                    fileUrls={filesUrl}
+                                    inDialog={true}
+                                    isDisabled={disabled}
+                                    onSetDisabled={handleSetDisabled}
+                                    onSetFilesUrl={handleSetFilesUrl}
+                                    itemsHeight="300px"
+                                    isShowCloseBtn
                                   />
-                                  <EmojiPicker
-                                    inputRef={inputRef}
-                                    useFormReturn={form}
-                                    valueKey="message"
-                                  />
+
+                                  {!post.parentId && (
+                                    <HStack
+                                      borderWidth="1px"
+                                      borderColor="gray.300"
+                                      rounded="lg"
+                                      alignItems="center"
+                                      justifyContent="space-between"
+                                      p="3"
+                                    >
+                                      <Text>Add to your post</Text>
+                                      <HStack alignItems="center" gapX="2">
+                                        <input
+                                          onChange={handleFilesChange}
+                                          ref={photoRef}
+                                          type="file"
+                                          className="hidden"
+                                          name="photo"
+                                          accept=".jpg,.jpeg,.png,.webp"
+                                          multiple
+                                        />
+                                        <input
+                                          onChange={handleFilesChange}
+                                          ref={videoRef}
+                                          type="file"
+                                          className="hidden"
+                                          name="video"
+                                          accept="video/*"
+                                          multiple
+                                        />
+                                        <button
+                                          onClick={() =>
+                                            handleInputFilesClick(photoRef)
+                                          }
+                                          disabled={disabled || isSubmitting}
+                                          type="button"
+                                          className="disabled:cursor-not-allowed cursor-pointer"
+                                        >
+                                          <Icon
+                                            size="lg"
+                                            color="red.500"
+                                            cursor="pointer"
+                                          >
+                                            <MdAddPhotoAlternate />
+                                          </Icon>
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            handleInputFilesClick(videoRef)
+                                          }
+                                          disabled={disabled || isSubmitting}
+                                          type="button"
+                                          className="disabled:cursor-not-allowed cursor-pointer"
+                                        >
+                                          <Icon
+                                            cursor="pointer"
+                                            size="md"
+                                            color="red.500"
+                                          >
+                                            <FaPaperclip />
+                                          </Icon>
+                                        </button>
+                                      </HStack>
+                                    </HStack>
+                                  )}
+
+                                  <Button
+                                    loading={disabled || isSubmitting}
+                                    disabled={disabled || isSubmitting}
+                                    type="submit"
+                                  >
+                                    Edit
+                                  </Button>
                                 </form>
                               </Stack>
                             </Dialog.Body>
