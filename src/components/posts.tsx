@@ -7,7 +7,7 @@ import { useInView } from "react-intersection-observer";
 import { Spinner } from "./spinner";
 import { ItemsNotFound } from "./items-not-found";
 import { Post } from "./post";
-import { usePostSocket } from "@/hooks/use-post-socket";
+import { usePostCreateSocket } from "@/hooks/use-post-create-socket";
 import { usePostLikeSocket } from "@/hooks/use-post-like-socket";
 import { useSocketIo } from "@/providers/socket-io-provider";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import { PostsSkeleton } from "./posts-skeleton";
 import { useScroll } from "@/hooks/use-scroll";
 import { ScrollBtn } from "./scroll-btn";
 import { Error } from "./error";
+import { usePostUpdateSocket } from "@/hooks/use-post-update-socket";
 
 export function Posts() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -23,8 +24,9 @@ export function Posts() {
 
   const queryClient = useQueryClient();
 
-  usePostSocket();
+  usePostCreateSocket(socket, queryClient);
   usePostLikeSocket(socket, queryClient);
+  usePostUpdateSocket(socket, queryClient);
 
   const showButton = useScroll(scrollRef);
 
@@ -48,7 +50,7 @@ export function Posts() {
   }, [inView, hasNextPage, fetchNextPage]);
 
   if (isError) {
-    return <Error error={error} refetch={refetch} />
+    return <Error error={error} refetch={refetch} />;
   }
 
   return (

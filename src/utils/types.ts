@@ -127,3 +127,9 @@ export interface ICreatePostPayload {
 export interface IDeleteFilePayload {
   fileUrl: string;
 }
+
+export interface IUpdatePostPayload {
+  message?: string,
+  filesUrl: string[];
+  shouldDeleteCurrentFiles?: boolean;
+}

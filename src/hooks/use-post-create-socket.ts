@@ -1,12 +1,16 @@
-import { useSocketIo } from "@/providers/socket-io-provider";
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from "@/providers/socket-io-provider";
 import { IPost } from "@/utils/types";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { Socket } from "socket.io-client";
 
-export function usePostSocket() {
-  const { socket } = useSocketIo();
-  const queryClient = useQueryClient();
-
+export function usePostCreateSocket(
+  socket: Socket<ServerToClientEvents, ClientToServerEvents> | null,
+  queryClient: QueryClient
+) {
   useEffect(() => {
     socket?.on("createPost", (newPost) => {
       queryClient.setQueryData<

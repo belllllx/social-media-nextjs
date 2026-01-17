@@ -21,7 +21,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { IPost, IUser } from "@/utils/types";
+import { IPost, IUpdatePostPayload, IUser } from "@/utils/types";
 import { BsThreeDots } from "react-icons/bs";
 import { EmojiPicker } from "./emoji-picker";
 import { useForm } from "react-hook-form";
@@ -53,6 +53,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const [openDialog, setOpenDialog] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
+  const [shouldDeleteCurrentFiles, setShouldDeleteCurrentFiles] = useState(false);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -72,7 +73,30 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {});
+  const onSubmit = handleSubmit(async ({ message }) => {
+    try {
+      const res = await callApi<IUpdatePostPayload>(
+        "patch",
+        `post/update/${post.id}`,
+        {
+          message: !message ? undefined : message,
+          filesUrl,
+          shouldDeleteCurrentFiles,
+        },
+      );
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
+
+      toast.success(formatToastMessages(res.message));
+      setOpenDialog(false);
+      reset();
+      setFilesUrl([]);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   const handleUserClick = useNavigateUser(post.user);
 
@@ -116,6 +140,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
         const files = (res.data as { filesUrl: string[] }).filesUrl;
         setFilesUrl(files);
+        setShouldDeleteCurrentFiles(true);
       }
     } catch (error) {
       toast.error("Failed to upload files");
@@ -151,8 +176,9 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       input.setSelectionRange(len, len);
     });
 
-    if(post.filesUrl && post.filesUrl.length){
+    if (post.filesUrl && post.filesUrl.length) {
       setFilesUrl(post.filesUrl);
+      setShouldDeleteCurrentFiles(false);
     }
   }, [openDialog]);
 

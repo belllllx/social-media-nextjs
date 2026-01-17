@@ -33,12 +33,9 @@ import { getFileDir } from "@/utils/helpers/get-file-dir";
 import { SocialVideoPlayer } from "@/components/social-video-player";
 import { FaXmark } from "react-icons/fa6";
 import { ICreatePostPayload, IDeleteFilePayload, IPost } from "@/utils/types";
-import { usePostCreate } from "@/hooks/use-post-create";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function CreatePost() {
-  const queryClient = useQueryClient();
-
   const photoRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -89,7 +86,6 @@ export function CreatePost() {
       }
 
       const post = res.data as IPost;
-      usePostCreate(post, queryClient);
 
       toast.success(formatToastMessages(res.message));
       form.reset();

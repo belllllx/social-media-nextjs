@@ -27,6 +27,7 @@ export interface ServerToClientEvents {
   usersActive: (users: (IUser & { active: boolean })[]) => void;
   exception: (error: { success: boolean; message: string }) => void;
   createPost: (post: IPost) => void;
+  updatePost: (post: IPost) => void;
   newLike: (like: ILike) => void;
 }
 
