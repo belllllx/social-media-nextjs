@@ -50,10 +50,13 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [openPopover, setOpenPopover] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [disabled, setDisabled] = useState(false);
+  const [disabledDeletePost, setDisabledDeletePost] = useState(false);
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
-  const [shouldDeleteCurrentFiles, setShouldDeleteCurrentFiles] = useState(false);
+  const [shouldDeleteCurrentFiles, setShouldDeleteCurrentFiles] =
+    useState(false);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -82,7 +85,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
           message: !message ? undefined : message,
           filesUrl,
           shouldDeleteCurrentFiles,
-        },
+        }
       );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -90,7 +93,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       }
 
       toast.success(formatToastMessages(res.message));
-      setOpenDialog(false);
+      setOpenEditDialog(false);
       reset();
       setFilesUrl([]);
     } catch (error) {
@@ -102,19 +105,26 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   function handleClosePopover() {
     setOpenPopover(false);
-    setOpenDialog(true);
+    setOpenEditDialog(true);
   }
 
-  function handleOpenDialog(open: boolean) {
+  function handleOpenEditDialog(open: boolean) {
     if (open && post.message) {
       setValue("message", post.message);
     }
 
-    setOpenDialog(open);
+    setOpenDeleteDialog(false);
+    setOpenEditDialog(open);
 
     if (!open) {
       reset();
     }
+  }
+
+  function handleOpenDeleteDialog(open: boolean) {
+    setOpenPopover(false);
+    setOpenEditDialog(false);
+    setOpenDeleteDialog(open);
   }
 
   async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
@@ -148,6 +158,25 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
     }
   }
 
+  async function handleDeletePost() {
+    try {
+      setDisabledDeletePost(true);
+      const res = await callApi(
+        "delete",
+        `post/delete/${post.id}`,
+      ).finally(() => setDisabledDeletePost(false));
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
+
+      setOpenDeleteDialog(false);
+      toast.success(formatToastMessages(res.message));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   function handleInputFilesClick(ref: RefObject<HTMLInputElement | null>) {
     ref.current?.click();
   }
@@ -161,7 +190,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   }
 
   useEffect(() => {
-    if (!openDialog) {
+    if (!openEditDialog) {
       return;
     }
 
@@ -180,7 +209,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       setFilesUrl(post.filesUrl);
       setShouldDeleteCurrentFiles(false);
     }
-  }, [openDialog]);
+  }, [openEditDialog]);
 
   return (
     <HStack>
@@ -203,8 +232,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                 <Popover.Body>
                   <Stack>
                     <Dialog.Root
-                      open={openDialog}
-                      onOpenChange={(e) => handleOpenDialog(e.open)}
+                      open={openEditDialog}
+                      onOpenChange={(e) => handleOpenEditDialog(e.open)}
                       placement="center"
                       motionPreset="slide-in-bottom"
                     >
@@ -384,13 +413,57 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                       </Portal>
                     </Dialog.Root>
 
-                    <Button
-                      variant="ghost"
-                      justifyContent="start"
-                      type="button"
+                    <Dialog.Root
+                      open={openDeleteDialog}
+                      onOpenChange={(e) => handleOpenDeleteDialog(e.open)}
+                      placement="center"
+                      motionPreset="slide-in-bottom"
                     >
-                      Delete
-                    </Button>
+                      <Dialog.Trigger asChild>
+                        <Button
+                          variant="ghost"
+                          justifyContent="start"
+                          type="button"
+                        >
+                          Delete
+                        </Button>
+                      </Dialog.Trigger>
+                      <Portal>
+                        <Dialog.Backdrop />
+                        <Dialog.Positioner>
+                          <Dialog.Content>
+                            <Dialog.Header>
+                              <Dialog.Title textAlign="center" width="full">
+                                Delete post
+                              </Dialog.Title>
+                            </Dialog.Header>
+                            <Dialog.Body>
+                              <Text
+                                textAlign="center"
+                                textStyle="md"
+                                color="red.600"
+                                fontWeight="semibold"
+                              >
+                                Are you sure to delete a post?
+                              </Text>
+                            </Dialog.Body>
+                            <Dialog.Footer>
+                              <Dialog.ActionTrigger asChild>
+                                <Button variant="outline">Cancel</Button>
+                              </Dialog.ActionTrigger>
+                              <Button
+                                onClick={handleDeletePost}
+                                disabled={disabledDeletePost}
+                                loading={disabledDeletePost}
+                                type="button"
+                              >
+                                Delete
+                              </Button>
+                            </Dialog.Footer>
+                          </Dialog.Content>
+                        </Dialog.Positioner>
+                      </Portal>
+                    </Dialog.Root>
                   </Stack>
                 </Popover.Body>
               </Popover.Content>

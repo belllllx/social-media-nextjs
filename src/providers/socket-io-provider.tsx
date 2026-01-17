@@ -28,6 +28,7 @@ export interface ServerToClientEvents {
   exception: (error: { success: boolean; message: string }) => void;
   createPost: (post: IPost) => void;
   updatePost: (post: IPost) => void;
+  deletePost: (post: IPost) => void;
   newLike: (like: ILike) => void;
 }
 

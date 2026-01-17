@@ -16,6 +16,7 @@ import { useScroll } from "@/hooks/use-scroll";
 import { ScrollBtn } from "./scroll-btn";
 import { Error } from "./error";
 import { usePostUpdateSocket } from "@/hooks/use-post-update-socket";
+import { usePostDeleteSocket } from "@/hooks/use-post-delete-socket";
 
 export function Posts() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -27,6 +28,7 @@ export function Posts() {
   usePostCreateSocket(socket, queryClient);
   usePostLikeSocket(socket, queryClient);
   usePostUpdateSocket(socket, queryClient);
+  usePostDeleteSocket(socket, queryClient);
 
   const showButton = useScroll(scrollRef);
 
