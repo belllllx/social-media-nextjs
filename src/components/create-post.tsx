@@ -32,8 +32,7 @@ import NextImage from "next/image";
 import { getFileDir } from "@/utils/helpers/get-file-dir";
 import { SocialVideoPlayer } from "@/components/social-video-player";
 import { FaXmark } from "react-icons/fa6";
-import { ICreatePostPayload, IDeleteFilePayload, IPost } from "@/utils/types";
-import { useQueryClient } from "@tanstack/react-query";
+import { ICreatePostPayload, IDeleteFilePayload } from "@/utils/types";
 
 export function CreatePost() {
   const photoRef = useRef<HTMLInputElement>(null);
@@ -84,8 +83,6 @@ export function CreatePost() {
         toast.error(formatToastMessages(res.message));
         return;
       }
-
-      const post = res.data as IPost;
 
       toast.success(formatToastMessages(res.message));
       form.reset();
@@ -186,6 +183,7 @@ export function CreatePost() {
             )
           )}
           <Input
+            disabled={disabled || isSubmitting}
             value={content}
             {...register("message")}
             ref={(e) => {

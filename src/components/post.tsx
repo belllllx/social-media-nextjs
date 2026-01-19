@@ -40,7 +40,7 @@ export function Post({ post }: PostProps) {
         <PostBody post={post} />
       )}
 
-      <PostAction post={post} activeUserId={user?.id} />
+      <PostAction post={post} activeUser={user} />
 
       <CommentOverview post={post} />
     </Stack>

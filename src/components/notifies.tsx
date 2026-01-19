@@ -12,16 +12,26 @@ import { Notify } from "./notify";
 import { ItemsNotFound } from "./items-not-found";
 import { NotifiesSkeleton } from "./notifies-skeleton";
 import { Error } from "./error";
+import { useSocketIo } from "@/providers/socket-io-provider";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NotifiesProps {
   onNotifyCount: (notify: INotify[]) => void;
 }
 
 export function Notifies({ onNotifyCount }: NotifiesProps) {
+  const { socket } = useSocketIo();
+  const queryClient = useQueryClient();
+
   const { user } = useUserStore((state) => state);
   const { ref, inView } = useInView();
 
-  useNotifySocket(user?.id);
+  useNotifySocket(
+    socket, 
+    queryClient, 
+    user?.id
+  );
+
   const {
     data: notifies,
     fetchNextPage,

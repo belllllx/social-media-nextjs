@@ -1,13 +1,20 @@
-import { useQueryClient, InfiniteData } from "@tanstack/react-query";
-import { useSocketIo } from "@/providers/socket-io-provider";
+import {
+  InfiniteData,
+  QueryClient,
+} from "@tanstack/react-query";
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from "@/providers/socket-io-provider";
 import { useEffect } from "react";
 import { INotify } from "@/utils/types";
-import { isEqual } from "lodash";
+import { Socket } from "socket.io-client";
 
-export function useNotifySocket(activeUserId?: string) {
-  const { socket } = useSocketIo();
-  const queryClient = useQueryClient();
-
+export function useNotifySocket(
+  socket: Socket<ServerToClientEvents, ClientToServerEvents> | null,
+  queryClient: QueryClient,
+  activeUserId?: string,
+) {
   useEffect(() => {
     socket?.on(`notification:${activeUserId}`, (newNotify) => {
       queryClient.setQueryData<
@@ -20,9 +27,7 @@ export function useNotifySocket(activeUserId?: string) {
         let found = false;
 
         const newNotifyPages = oldNotifies.pages.map((group, pageIndex) => {
-          const index = group.notifies.findIndex((oldNotify) =>
-            isEqual(oldNotify, newNotify)
-          );
+          const index = group.notifies.findIndex((oldNotify) => oldNotify.id === newNotify.id);
 
           // เจอ notify เดิม → แก้ page นี้
           if (index !== -1) {

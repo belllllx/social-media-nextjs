@@ -37,6 +37,8 @@ import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { toast } from "react-toastify";
 import { Carousel } from "./carousel";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNotifyDelete } from "@/hooks/use-notify-delete";
 
 interface PostHeaderProps {
   children: React.ReactNode;
@@ -45,6 +47,8 @@ interface PostHeaderProps {
 }
 
 export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
+  const queryClient = useQueryClient();
+
   const photoRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -160,6 +164,10 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   async function handleDeletePost() {
     try {
+      if(!activeUser){
+        return;
+      }
+
       setDisabledDeletePost(true);
       const res = await callApi(
         "delete",
@@ -170,6 +178,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         return;
       }
 
+      const deletedPost = res.data as IPost;
+      useNotifyDelete(queryClient, deletedPost.id, activeUser.id);
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
@@ -302,6 +312,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     justifyContent="space-between"
                                   >
                                     <Textarea
+                                      disabled={disabled || isSubmitting}
                                       value={content}
                                       {...register("message")}
                                       ref={(e) => {

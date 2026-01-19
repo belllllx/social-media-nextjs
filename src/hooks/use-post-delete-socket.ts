@@ -30,7 +30,7 @@ export function usePostDeleteSocket(
 
             return {
               ...page,
-              posts: page.posts.filter((post) => post.id !== deletePost.id),
+              posts: page.posts.filter((post) => post.id !== deletePost.id && post.parentId !== deletePost.id),
             };
           }),
         };

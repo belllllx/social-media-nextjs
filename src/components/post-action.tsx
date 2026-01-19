@@ -1,18 +1,18 @@
 import React from "react";
 import { Button, HStack, Separator, Stack } from "@chakra-ui/react";
 import { FaRegComment } from "react-icons/fa6";
-import { IoShareSocialOutline } from "react-icons/io5";
 import { PostLikeBtn } from "./post-like-btn";
-import { IPost } from "@/utils/types";
+import { IPost, IUser } from "@/utils/types";
+import { PostShareBtn } from "./post-share-btn";
 
 interface PostActionProps {
   post: IPost;
-  activeUserId?: string;
+  activeUser: IUser | null;
 }
 
 export function PostAction({
   post,
-  activeUserId,
+  activeUser,
 }: PostActionProps) {
   return (
     <Stack>
@@ -24,7 +24,7 @@ export function PostAction({
       >
         <PostLikeBtn 
           post={post} 
-          activeUserId={activeUserId}
+          activeUserId={activeUser?.id}
         />
         <Button
           type="button"
@@ -32,12 +32,7 @@ export function PostAction({
         >
           <FaRegComment /> Comment
         </Button>
-        <Button
-          type="button"
-          variant="plain"
-        >
-          <IoShareSocialOutline /> Share
-        </Button>
+        <PostShareBtn post={post} activeUser={activeUser} />
       </HStack>
       <Separator />
     </Stack>
