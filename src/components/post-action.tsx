@@ -1,9 +1,9 @@
 import React from "react";
-import { Button, HStack, Separator, Stack } from "@chakra-ui/react";
-import { FaRegComment } from "react-icons/fa6";
+import { HStack, Separator, Stack } from "@chakra-ui/react";
 import { PostLikeBtn } from "./post-like-btn";
 import { IPost, IUser } from "@/utils/types";
 import { PostShareBtn } from "./post-share-btn";
+import { PostCommentBtn } from "./post-comment-btn";
 
 interface PostActionProps {
   post: IPost;
@@ -26,12 +26,7 @@ export function PostAction({
           post={post} 
           activeUserId={activeUser?.id}
         />
-        <Button
-          type="button"
-          variant="plain"
-        >
-          <FaRegComment /> Comment
-        </Button>
+        <PostCommentBtn postId={post.id} />
         <PostShareBtn post={post} activeUser={activeUser} />
       </HStack>
       <Separator />

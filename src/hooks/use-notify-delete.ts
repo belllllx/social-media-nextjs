@@ -31,8 +31,7 @@ export function useNotifyDelete(
           ...page,
           notifies: page.notifies.filter(
             (notify) =>
-              notify.postId !== deletedPostId &&
-              notify.receiverId !== activeUserId,
+              notify.postId !== deletedPostId
           ),
         };
       }),

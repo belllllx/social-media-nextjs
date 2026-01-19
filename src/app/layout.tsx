@@ -7,8 +7,8 @@ import { UserStoreProvider } from "@/providers/user-store-provider";
 import { TanStackQueryClientProvider } from "@/providers/tanstack-query-client-provider";
 import { RouterProvider } from "@/providers/router-provider";
 import { SocketIoProvider } from "@/providers/socket-io-provider";
-import { CreateContentStoreProvider } from "@/providers/create-content-store-provider";
 import { TanstackQueryErrorResetBoundary } from "@/providers/tanstack-query-error-reset-boundary";
+import { ActionStoreProvider } from "@/providers/action-store-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,13 +41,13 @@ export default function RootLayout({
             <SocketIoProvider>
               <AuthUserStoreProvider>
                 <UserStoreProvider>
-                  <CreateContentStoreProvider>
+                  <ActionStoreProvider>
                     <Provider>
                       <ToastContainer position="top-center" />
                       <RouterProvider />
                       {children}
                     </Provider>
-                  </CreateContentStoreProvider>
+                  </ActionStoreProvider>
                 </UserStoreProvider>
               </AuthUserStoreProvider>
             </SocketIoProvider>

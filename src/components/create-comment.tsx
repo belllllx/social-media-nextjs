@@ -17,7 +17,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { ChangeEvent, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { EmojiPicker } from "./emoji-picker";
 import { FiPaperclip } from "react-icons/fi";
@@ -26,6 +26,7 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { toast } from "react-toastify";
 import { FaXmark } from "react-icons/fa6";
 import NextImage from "next/image";
+import { useActionStore } from "@/providers/action-store-provider";
 
 interface CreateCommentProps {
   post: IPost;
@@ -39,6 +40,7 @@ export function CreateComment({ post }: CreateCommentProps) {
   const [fileUrl, setFileUrl] = useState("");
 
   const { user } = useUserStore((state) => state);
+  const { focusPostId, setFocusPostId } = useActionStore((state) => state);
 
   const handleUserClick = useNavigateUser(user);
 
@@ -110,6 +112,13 @@ export function CreateComment({ post }: CreateCommentProps) {
       setDisabled(false);
     }
   }
+
+  useEffect(() => {
+    if(focusPostId === post.id){
+      inputRef.current?.focus();
+      setFocusPostId(null);
+    }
+  }, [focusPostId]);
 
   return (
     <Stack gapY="3">
