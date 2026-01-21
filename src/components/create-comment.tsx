@@ -2,7 +2,11 @@
 
 import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { useUserStore } from "@/providers/user-store-provider";
-import { IDeleteFilePayload, IPost } from "@/utils/types";
+import {
+  ICreateCommentPayload,
+  IDeleteFilePayload,
+  IPost,
+} from "@/utils/types";
 import {
   createContentSchema,
   CreateContentSchema,
@@ -56,11 +60,37 @@ export function CreateComment({ post }: CreateCommentProps) {
     handleSubmit,
     register,
     formState: { isSubmitting },
+    reset,
   } = form;
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {});
+  const onSubmit = handleSubmit(async ({ message }) => {
+    if (!user || (!message && !fileUrl)) {
+      return;
+    }
+
+    try {
+      const res = await callApi<ICreateCommentPayload>(
+        "post",
+        `comment/create/${user.id}/${post.id}`,
+        {
+          message: !message ? undefined : message,
+          fileUrl: !fileUrl ? undefined : fileUrl,
+        },
+      );
+
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
+
+      reset();
+      setFileUrl("");
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
     try {
@@ -68,13 +98,13 @@ export function CreateComment({ post }: CreateCommentProps) {
       if (file) {
         const formData = new FormData();
 
-        formData.append("files", file);
+        formData.append("file", file);
 
         setDisabled(true);
         const res = await callApi(
           "post",
           "comment/file/create",
-          formData
+          formData,
         ).finally(() => setDisabled(false));
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
@@ -98,7 +128,7 @@ export function CreateComment({ post }: CreateCommentProps) {
         "comment/delete/file",
         {
           data: { fileUrl },
-        }
+        },
       ).finally(() => setDisabled(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -114,7 +144,7 @@ export function CreateComment({ post }: CreateCommentProps) {
   }
 
   useEffect(() => {
-    if(focusPostId === post.id){
+    if (focusPostId === post.id) {
       inputRef.current?.focus();
       setFocusPostId(null);
     }
@@ -136,6 +166,7 @@ export function CreateComment({ post }: CreateCommentProps) {
 
         <form onSubmit={onSubmit} className="w-full">
           <Input
+            disabled={disabled || isSubmitting}
             value={content}
             {...register("message")}
             ref={(e) => {
@@ -154,7 +185,7 @@ export function CreateComment({ post }: CreateCommentProps) {
           valueKey="message"
         />
         <IconButton
-          disabled={disabled}
+          disabled={disabled || isSubmitting}
           onClick={() => photoRef.current?.click()}
           rounded="full"
           variant="surface"
@@ -197,11 +228,7 @@ export function CreateComment({ post }: CreateCommentProps) {
             <FaXmark />
           </IconButton>
           <Image asChild>
-            <NextImage 
-              src={fileUrl} 
-              alt={fileUrl} 
-              fill 
-            />
+            <NextImage src={fileUrl} alt={fileUrl} fill />
           </Image>
         </Box>
       )}

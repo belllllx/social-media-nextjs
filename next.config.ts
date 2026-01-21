@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
         hostname: "social-media-belllllx.s3.ap-southeast-7.amazonaws.com",
         pathname: "/post-video/**"
       },
+      {
+        protocol: "https",
+        hostname: "social-media-belllllx.s3.ap-southeast-7.amazonaws.com",
+        pathname: "/comment-image/**"
+      },
     ],
   }
 };

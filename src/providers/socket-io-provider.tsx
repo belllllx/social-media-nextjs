@@ -1,6 +1,6 @@
 "use client";
 
-import { ICommonResponse, ILike, INotify, IPost, IUser } from "@/utils/types";
+import { IComment, ICommonResponse, ILike, INotify, IPost, IUser } from "@/utils/types";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
@@ -30,6 +30,10 @@ export interface ServerToClientEvents {
   updatePost: (post: IPost) => void;
   deletePost: (post: IPost) => void;
   newLike: (like: ILike) => void;
+  createComment: (comment: IComment) => void;
+  updateComment: (comment: IComment) => void;
+  deleteComment: (comment: IComment) => void;
+  newLikeComment: (like: ILike) => void;
 }
 
 export interface ClientToServerEvents {

@@ -5,6 +5,7 @@ export function useNotifyDelete(
   queryClient: QueryClient,
   deletedPostId: string,
   activeUserId: string,
+  deletedCommentId?: string,
 ) {
   queryClient.setQueryData<
     InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
@@ -31,7 +32,7 @@ export function useNotifyDelete(
           ...page,
           notifies: page.notifies.filter(
             (notify) =>
-              notify.postId !== deletedPostId
+              notify.postId !== deletedPostId || notify.commentId !== deletedCommentId,
           ),
         };
       }),

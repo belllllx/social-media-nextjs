@@ -10,6 +10,7 @@ import { PostBody } from "./post-body";
 import { PostHeader } from "./post-header";
 import { SharePost } from "./share-post";
 import { CommentOverview } from "./comment-overview";
+import { Comments } from "./comments";
 
 interface PostProps {
   post: IPost;
@@ -41,6 +42,8 @@ export function Post({ post }: PostProps) {
       )}
 
       <PostAction post={post} activeUser={user} />
+
+      <Comments post={post} activeUser={user} />
 
       <CommentOverview post={post} />
     </Stack>
