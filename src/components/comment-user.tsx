@@ -41,6 +41,7 @@ import { useNotifyDelete } from "@/hooks/use-notify-delete";
 import { useQueryClient } from "@tanstack/react-query";
 import { CommentFile } from "./comment-file";
 import { CommentAction } from "./comment-action";
+import { useActionStore } from "@/providers/action-store-provider";
 
 interface CommentUserHeaderProps {
   comment: IComment;
@@ -53,6 +54,8 @@ export function CommentUser({
   post,
   activeUser,
 }: CommentUserHeaderProps) {
+  const { showReplyOnCommentId } = useActionStore((state) => state);
+
   const queryClient = useQueryClient();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -383,13 +386,15 @@ export function CommentUser({
 
               <CommentAction comment={comment} activeUser={activeUser} />
 
-              {comment.parent && comment.parentId && (
-                <CommentUser
-                  comment={comment.parent}
-                  post={post}
-                  activeUser={activeUser}
-                />
-              )}
+              {showReplyOnCommentId.includes(comment.id) &&
+                comment.parent &&
+                comment.parentId && (
+                  <CommentUser
+                    comment={comment.parent}
+                    post={post}
+                    activeUser={activeUser}
+                  />
+                )}
             </Stack>
           ) : (
             <>

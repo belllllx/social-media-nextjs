@@ -133,6 +133,7 @@ export interface IComment {
   fileUrl?: string;
   likes: ILike[];
   parent?: IComment;
+  replysCount: number;
 }
 
 export interface ICreatePostPayload {

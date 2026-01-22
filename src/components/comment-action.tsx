@@ -26,6 +26,7 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { toast } from "react-toastify";
 import { FaXmark } from "react-icons/fa6";
 import NextImage from "next/image";
+import { ToggleViewReplys } from "./toggle-view-replys";
 
 interface CommentActionProps {
   comment: IComment;
@@ -151,12 +152,7 @@ export function CommentAction({ comment, activeUser }: CommentActionProps) {
         >
           Reply
         </Text>
-        <Text
-          cursor="pointer"
-          textStyle="sm"
-        >
-          View replys
-        </Text>
+        <ToggleViewReplys comment={comment} />
       </HStack>
 
       {openReply && (

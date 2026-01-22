@@ -11,6 +11,7 @@ import { PostHeader } from "./post-header";
 import { SharePost } from "./share-post";
 import { CommentOverview } from "./comment-overview";
 import { Comments } from "./comments";
+import { ToggleViewComments } from "./toggle-view-comments";
 
 interface PostProps {
   post: IPost;
@@ -21,28 +22,28 @@ export function Post({ post }: PostProps) {
 
   return (
     <Stack
-      gapY="0"
+      gapY="3"
       borderRadius="lg"
       width="full"
       backgroundColor="white"
       p="4"
       mb="4"
     >
-      <Stack gapY="3">
-        <PostHeader post={post} activeUser={user}>
-          <PostUserHeader post={post} />
-        </PostHeader>
+      <PostHeader post={post} activeUser={user}>
+        <PostUserHeader post={post} />
+      </PostHeader>
 
-        {post.parentId && post.parent ? (
-          <SharePost parentPost={post.parent} post={post} />
-        ) : (
-          <PostBody post={post} />
-        )}
+      {post.parentId && post.parent ? (
+        <SharePost parentPost={post.parent} post={post} />
+      ) : (
+        <PostBody post={post} />
+      )}
 
-        <PostAction post={post} activeUser={user} />
+      <PostAction post={post} activeUser={user} />
 
-        <Comments post={post} activeUser={user} />
-      </Stack>
+      <ToggleViewComments post={post} />
+
+      <Comments post={post} activeUser={user} />
 
       <CommentOverview post={post} />
     </Stack>
