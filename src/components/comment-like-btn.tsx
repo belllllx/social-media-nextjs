@@ -7,31 +7,35 @@ import {
   CloseButton,
   Dialog,
   HStack,
+  IconButton,
   Portal,
   Text,
 } from "@chakra-ui/react";
 import { BiLike, BiSolidLike } from "react-icons/bi";
-import { IPost } from "@/utils/types";
+import { IComment } from "@/utils/types";
 import { LikeUser } from "./like-user";
 import { ItemsNotFound } from "./items-not-found";
 import { callApi } from "@/utils/helpers/call-api";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 
-interface PostLikeBtnProps {
-  post: IPost;
+interface CommentLikeBtnProps {
+  comment: IComment;
   activeUserId?: string;
 }
 
-export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
+export function CommentLikeBtn({ 
+  comment,
+  activeUserId,
+ }: CommentLikeBtnProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handlePostLike() {
+  async function handleCommentLike() {
     try {
       setIsLoading(true);
       const res = await callApi(
         "post",
-        `post/like/${activeUserId}/${post.id}`
+        `comment/like/${activeUserId}/${comment.id}`
       ).finally(() => setIsLoading(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -47,23 +51,24 @@ export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
   return (
     <Dialog.Root placement="center" motionPreset="scale">
       <HStack gapX="1">
-        <Button
-          onClick={handlePostLike}
+        <IconButton
+          onClick={handleCommentLike}
           disabled={isLoading}
           type="button"
           variant="plain"
           p="0"
           justifyContent="flex-end"
+          size="md"
         >
-          {post.likes.some((like) => like.userId === activeUserId) ? (
-            <BiSolidLike />
+          {comment.likes.some((like) => like.userId === activeUserId) ? (
+            <BiSolidLike/>
           ) : (
-            <BiLike />
+            <BiLike/>
           )}
-        </Button>
+        </IconButton>
         <Dialog.Trigger asChild>
-          <Text cursor="pointer">
-            {post.likes.length > 0 ? post.likes.length : ""} Like
+          <Text cursor="pointer" textStyle="sm">
+            {comment.likes.length > 0 ? comment.likes.length : ""} Like
           </Text>
         </Dialog.Trigger>
       </HStack>
@@ -73,15 +78,15 @@ export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
           <Dialog.Content>
             <Dialog.Header>
               <Dialog.Title textAlign="center" width="full">
-                Post like
+                Comment like
               </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <Box overflowY="auto" flex="1" width="full">
-                {!post.likes.length ? (
+                {!comment.likes.length ? (
                   <ItemsNotFound title="like" />
                 ) : (
-                  post.likes.map((like) => (
+                  comment.likes.map((like) => (
                     <LikeUser key={like.userId} like={like} />
                   ))
                 )}

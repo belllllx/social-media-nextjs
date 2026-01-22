@@ -7,7 +7,7 @@ import { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Socket } from "socket.io-client";
 
-export function usePostCommentCreateSocket(
+export function useCommentCountCreateSocket(
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null,
   queryClient: QueryClient,
 ) {

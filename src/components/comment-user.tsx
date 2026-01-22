@@ -1,7 +1,13 @@
 "use client";
 
 import { formatDate } from "@/utils/helpers/format-date";
-import { IComment, IDeleteFilePayload, IPost, IUser } from "@/utils/types";
+import {
+  IComment,
+  IDeleteFilePayload,
+  IPost,
+  IUpdateCommentPayload,
+  IUser,
+} from "@/utils/types";
 import {
   Avatar,
   Box,
@@ -16,7 +22,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React, { ChangeEvent, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { EmojiPicker } from "./emoji-picker";
 import { FiPaperclip } from "react-icons/fi";
@@ -42,7 +48,7 @@ interface CommentUserHeaderProps {
   activeUser: IUser | null;
 }
 
-export function CommentUserHeader({
+export function CommentUser({
   comment,
   post,
   activeUser,
@@ -52,6 +58,7 @@ export function CommentUserHeader({
   const inputRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
+  const [shouldDeleteCurrentFile, setShouldDeleteCurrentFile] = useState(false);
   const [disabledDeleteComment, setDisabledDeleteComment] = useState(false);
   const [openPopover, setOpenPopover] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -71,14 +78,43 @@ export function CommentUserHeader({
     handleSubmit,
     register,
     formState: { isSubmitting },
+    setValue,
     reset,
   } = form;
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {});
+  const onSubmit = handleSubmit(async ({ message }) => {
+    if (!message && !fileUrl) {
+      return;
+    }
 
-  async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
+    try {
+      const res = await callApi<IUpdateCommentPayload>(
+        "patch",
+        `comment/update/${comment.id}`,
+        {
+          message: !message ? "" : message,
+          fileUrl: !fileUrl ? undefined : fileUrl,
+          shouldDeleteCurrentFile,
+        },
+      );
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
+
+      toast.success(formatToastMessages(res.message));
+      setOpenEditComment(false);
+      reset();
+      setFileUrl("");
+      setShouldDeleteCurrentFile(false);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     try {
       const file = event.target.files?.[0];
       if (file) {
@@ -99,6 +135,7 @@ export function CommentUserHeader({
 
         const files = (res.data as { fileUrl: string }).fileUrl;
         setFileUrl(files);
+        setShouldDeleteCurrentFile(true);
       }
     } catch (error) {
       toast.error("Failed to upload file");
@@ -135,8 +172,20 @@ export function CommentUserHeader({
   }
 
   function handleOpenEditComment() {
+    if (comment.message) {
+      setValue("message", comment.message);
+    }
+
     setOpenPopover(false);
     setOpenEditComment(true);
+  }
+
+  function handleCloseEditComment() {
+    if (!content && !fileUrl) {
+      return;
+    }
+
+    setOpenEditComment(false);
   }
 
   async function handleDeleteComment() {
@@ -156,7 +205,9 @@ export function CommentUserHeader({
       }
 
       const deletedComment = res.data as IComment;
+
       useNotifyDelete(queryClient, post.id, activeUser.id, deletedComment.id);
+
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
@@ -164,8 +215,31 @@ export function CommentUserHeader({
     }
   }
 
+  useEffect(() => {
+    if (!openEditComment) {
+      reset();
+      setFileUrl("");
+      setShouldDeleteCurrentFile(false);
+      return;
+    }
+
+    const input = inputRef.current;
+    if (!input) {
+      return;
+    }
+
+    const len = comment.message?.length ?? 0;
+    input.focus();
+    input.setSelectionRange(len, len);
+
+    if (comment.fileUrl) {
+      setFileUrl(comment.fileUrl);
+      setShouldDeleteCurrentFile(false);
+    }
+  }, [openEditComment]);
+
   return (
-    <Stack gapY="3">
+    <Stack gapY="1">
       <HStack gapX="3" alignItems="flex-start" mb="2">
         {comment.user.profileUrl ? (
           <Avatar.Root size="lg">
@@ -180,16 +254,18 @@ export function CommentUserHeader({
 
         <>
           {!openEditComment ? (
-            <>
-              <Stack gapY="3">
+            <Stack gapY="0" width="full">
+              <HStack gapX="3" alignItems="flex-start">
                 <Stack gapY="2">
                   <Stack
-                    backgroundColor={comment.message ? "gray.100" : "transparent"}
+                    backgroundColor={
+                      comment.message ? "gray.100" : "transparent"
+                    }
                     gapY={comment.message ? "0" : "2"}
                     rounded="2xl"
                     p={comment.message ? "2" : "0"}
                   >
-                    <HStack alignItems="center" justifyContent="space-between">
+                    <HStack alignItems="center" gapX="2">
                       <Text fontWeight="semibold">{comment.user.fullname}</Text>
                       <Text color="fg.muted" textStyle="sm">
                         {formatDate(comment.createdAt)}
@@ -207,105 +283,114 @@ export function CommentUserHeader({
                   {comment.message && comment.fileUrl && (
                     <CommentFile comment={comment} />
                   )}
-
-                  <CommentAction />
                 </Stack>
 
-                <div>reply</div>
-              </Stack>
+                {comment.userId === activeUser?.id && (
+                  <Popover.Root
+                    open={openPopover}
+                    onOpenChange={(e) => setOpenPopover(e.open)}
+                    positioning={{ placement: "right-start" }}
+                  >
+                    <Popover.Trigger asChild>
+                      <IconButton rounded="full" variant="ghost">
+                        <BsThreeDotsVertical />
+                      </IconButton>
+                    </Popover.Trigger>
+                    <Portal>
+                      <Popover.Positioner>
+                        <Popover.Content width="150px">
+                          <Popover.Arrow />
+                          <Popover.Body>
+                            <Stack>
+                              <Button
+                                onClick={handleOpenEditComment}
+                                variant="ghost"
+                                justifyContent="start"
+                                type="button"
+                              >
+                                Edit
+                              </Button>
 
-              {comment.userId === activeUser?.id && (
-                <Popover.Root
-                  open={openPopover}
-                  onOpenChange={(e) => setOpenPopover(e.open)}
-                  positioning={{ placement: "right-start" }}
-                >
-                  <Popover.Trigger asChild>
-                    <IconButton rounded="full" variant="ghost">
-                      <BsThreeDotsVertical />
-                    </IconButton>
-                  </Popover.Trigger>
-                  <Portal>
-                    <Popover.Positioner>
-                      <Popover.Content width="150px">
-                        <Popover.Arrow />
-                        <Popover.Body>
-                          <Stack>
-                            <Button
-                              onClick={handleOpenEditComment}
-                              variant="ghost"
-                              justifyContent="start"
-                              type="button"
-                            >
-                              Edit
-                            </Button>
-
-                            <Dialog.Root
-                              open={openDeleteDialog}
-                              onOpenChange={(e) =>
-                                handleOpenDeleteDialog(e.open)
-                              }
-                              placement="center"
-                              motionPreset="slide-in-bottom"
-                            >
-                              <Dialog.Trigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  justifyContent="start"
-                                  type="button"
-                                >
-                                  Delete
-                                </Button>
-                              </Dialog.Trigger>
-                              <Portal>
-                                <Dialog.Backdrop />
-                                <Dialog.Positioner>
-                                  <Dialog.Content>
-                                    <Dialog.Header>
-                                      <Dialog.Title
-                                        textAlign="center"
-                                        width="full"
-                                      >
-                                        Delete comment
-                                      </Dialog.Title>
-                                    </Dialog.Header>
-                                    <Dialog.Body>
-                                      <Text
-                                        textAlign="center"
-                                        textStyle="md"
-                                        color="red.600"
-                                        fontWeight="semibold"
-                                      >
-                                        Are you sure to delete a comment?
-                                      </Text>
-                                    </Dialog.Body>
-                                    <Dialog.Footer>
-                                      <Dialog.ActionTrigger asChild>
-                                        <Button variant="outline">
-                                          Cancel
+                              <Dialog.Root
+                                open={openDeleteDialog}
+                                onOpenChange={(e) =>
+                                  handleOpenDeleteDialog(e.open)
+                                }
+                                placement="center"
+                                motionPreset="slide-in-bottom"
+                              >
+                                <Dialog.Trigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    justifyContent="start"
+                                    type="button"
+                                  >
+                                    Delete
+                                  </Button>
+                                </Dialog.Trigger>
+                                <Portal>
+                                  <Dialog.Backdrop />
+                                  <Dialog.Positioner>
+                                    <Dialog.Content>
+                                      <Dialog.Header>
+                                        <Dialog.Title
+                                          textAlign="center"
+                                          width="full"
+                                        >
+                                          Delete comment
+                                        </Dialog.Title>
+                                      </Dialog.Header>
+                                      <Dialog.Body>
+                                        <Text
+                                          textAlign="center"
+                                          textStyle="md"
+                                          color="red.600"
+                                          fontWeight="semibold"
+                                        >
+                                          Are you sure to delete a comment?
+                                        </Text>
+                                      </Dialog.Body>
+                                      <Dialog.Footer>
+                                        <Dialog.ActionTrigger asChild>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                          >
+                                            Cancel
+                                          </Button>
+                                        </Dialog.ActionTrigger>
+                                        <Button
+                                          onClick={handleDeleteComment}
+                                          disabled={disabledDeleteComment}
+                                          loading={disabledDeleteComment}
+                                          type="button"
+                                        >
+                                          Delete
                                         </Button>
-                                      </Dialog.ActionTrigger>
-                                      <Button
-                                        onClick={handleDeleteComment}
-                                        disabled={disabledDeleteComment}
-                                        loading={disabledDeleteComment}
-                                        type="button"
-                                      >
-                                        Delete
-                                      </Button>
-                                    </Dialog.Footer>
-                                  </Dialog.Content>
-                                </Dialog.Positioner>
-                              </Portal>
-                            </Dialog.Root>
-                          </Stack>
-                        </Popover.Body>
-                      </Popover.Content>
-                    </Popover.Positioner>
-                  </Portal>
-                </Popover.Root>
+                                      </Dialog.Footer>
+                                    </Dialog.Content>
+                                  </Dialog.Positioner>
+                                </Portal>
+                              </Dialog.Root>
+                            </Stack>
+                          </Popover.Body>
+                        </Popover.Content>
+                      </Popover.Positioner>
+                    </Portal>
+                  </Popover.Root>
+                )}
+              </HStack>
+
+              <CommentAction comment={comment} activeUser={activeUser} />
+
+              {comment.parent && comment.parentId && (
+                <CommentUser
+                  comment={comment.parent}
+                  post={post}
+                  activeUser={activeUser}
+                />
               )}
-            </>
+            </Stack>
           ) : (
             <>
               <form onSubmit={onSubmit} className="w-full">
@@ -338,7 +423,7 @@ export function CommentUserHeader({
                 <FiPaperclip />
               </IconButton>
               <input
-                onChange={handleFilesChange}
+                onChange={handleFileChange}
                 ref={photoRef}
                 type="file"
                 className="hidden"
@@ -346,7 +431,7 @@ export function CommentUserHeader({
                 accept=".jpg,.jpeg,.png,.webp"
               />
               <Text
-                onClick={() => setOpenEditComment(false)}
+                onClick={handleCloseEditComment}
                 cursor="pointer"
                 color="fg.muted"
                 py="2"
@@ -361,6 +446,7 @@ export function CommentUserHeader({
 
       {fileUrl && (
         <Box
+          mb="3"
           width="200px"
           height="200px"
           backgroundColor="grey.500"

@@ -21,29 +21,28 @@ export function Post({ post }: PostProps) {
 
   return (
     <Stack
-      gapY="3"
+      gapY="0"
       borderRadius="lg"
       width="full"
       backgroundColor="white"
       p="4"
       mb="4"
     >
-      <PostHeader post={post} activeUser={user}>
-        <PostUserHeader post={post} />
-      </PostHeader>
+      <Stack gapY="3">
+        <PostHeader post={post} activeUser={user}>
+          <PostUserHeader post={post} />
+        </PostHeader>
 
-      {post.parentId && post.parent ? (
-        <SharePost 
-          parentPost={post.parent} 
-          post={post}
-        /> 
-      ) : (
-        <PostBody post={post} />
-      )}
+        {post.parentId && post.parent ? (
+          <SharePost parentPost={post.parent} post={post} />
+        ) : (
+          <PostBody post={post} />
+        )}
 
-      <PostAction post={post} activeUser={user} />
+        <PostAction post={post} activeUser={user} />
 
-      <Comments post={post} activeUser={user} />
+        <Comments post={post} activeUser={user} />
+      </Stack>
 
       <CommentOverview post={post} />
     </Stack>

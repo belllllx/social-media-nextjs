@@ -131,6 +131,8 @@ export interface IComment {
   parentId?: string;
   user: IUser;
   fileUrl?: string;
+  likes: ILike[];
+  parent?: IComment;
 }
 
 export interface ICreatePostPayload {
@@ -151,4 +153,10 @@ export interface IUpdatePostPayload {
 export interface ICreateCommentPayload {
   message?: string;
   fileUrl?: string;
+}
+
+export interface IUpdateCommentPayload {
+  message?: string,
+  fileUrl?: string;
+  shouldDeleteCurrentFile?: boolean;
 }

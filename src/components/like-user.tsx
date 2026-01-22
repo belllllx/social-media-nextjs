@@ -3,11 +3,11 @@ import { ILike } from "@/utils/types";
 import { Avatar, Flex, Stack, Text } from "@chakra-ui/react";
 import React from "react";
 
-interface PostLikeUserProps {
+interface LikeUserProps {
   like: ILike;
 }
 
-export function PostLikeUser({ like }: PostLikeUserProps) {
+export function LikeUser({ like }: LikeUserProps) {
   const handleUserClick = useNavigateUser(like.user);
 
   return (

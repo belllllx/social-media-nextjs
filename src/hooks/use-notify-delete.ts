@@ -32,7 +32,7 @@ export function useNotifyDelete(
           ...page,
           notifies: page.notifies.filter(
             (notify) =>
-              notify.postId !== deletedPostId || notify.commentId !== deletedCommentId,
+              notify.postId !== deletedPostId && notify.commentId !== deletedCommentId,
           ),
         };
       }),

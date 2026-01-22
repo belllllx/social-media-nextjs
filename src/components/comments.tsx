@@ -7,6 +7,7 @@ import { IPost, IUser } from "@/utils/types";
 import { useComments } from "@/hooks/use-comments";
 import { Error } from "./error";
 import { Spinner } from "./spinner";
+import { useActionStore } from "@/providers/action-store-provider";
 
 interface CommentsProps {
   post: IPost;
@@ -14,6 +15,8 @@ interface CommentsProps {
 }
 
 export function Comments({ post, activeUser }: CommentsProps) {
+  const { showCommentOnPostId } = useActionStore((state) => state);
+
   const {
     data: comments,
     fetchNextPage,
@@ -32,47 +35,53 @@ export function Comments({ post, activeUser }: CommentsProps) {
   }
 
   return (
-    <Box>
-      {status === "pending" ? (
-        <div>skeleton...</div>
-      ) : isLoading ? (
-        <Flex
-          width="full"
-          height="full"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Spinner size="lg" />
-        </Flex>
-      ) : (
-        comments &&
-        comments.pages.map((group, i) => (
-          <Fragment key={i}>
-            {group.comments.map((comment) => (
-              <Stack key={comment.id} gapY="4">
-                <Comment
-                  comment={comment}
-                  post={post}
-                  activeUser={activeUser}
-                />
-              </Stack>
-            ))}
-          </Fragment>
-        ))
-      )}
+    <>
+      {showCommentOnPostId && showCommentOnPostId === post.id && (
+        <Box>
+          {status === "pending" ? (
+            <div>skeleton...</div>
+          ) : isLoading ? (
+            <Flex
+              width="full"
+              height="full"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Spinner size="lg" />
+            </Flex>
+          ) : (
+            comments &&
+            comments.pages.map((group, i) => (
+              <Fragment key={i}>
+                {group.comments.map((comment) => (
+                  <Stack key={comment.id} gapY="4">
+                    <Comment
+                      comment={comment}
+                      post={post}
+                      activeUser={activeUser}
+                    />
+                  </Stack>
+                ))}
+              </Fragment>
+            ))
+          )}
 
-      {hasNextPage && (
-        <Button
-          onClick={() => fetchNextPage()}
-          disabled={!hasNextPage || isFetching}
-          type="button"
-          variant="ghost"
-        >
-          Load more comments
-        </Button>
-      )}
+          {hasNextPage && (
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={!hasNextPage || isFetching}
+              type="button"
+              variant="plain"
+              fontWeight="semibold"
+              px="0"
+            >
+              Load more comments
+            </Button>
+          )}
 
-      {isFetchingNextPage && <Spinner />}
-    </Box>
+          {isFetchingNextPage && <Spinner />}
+        </Box>
+      )}
+    </>
   );
 }

@@ -86,7 +86,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         "patch",
         `post/update/${post.id}`,
         {
-          message: !message ? undefined : message,
+          message: !message ? "" : message,
           filesUrl,
           shouldDeleteCurrentFiles,
         }
@@ -100,6 +100,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       setOpenEditDialog(false);
       reset();
       setFilesUrl([]);
+      setShouldDeleteCurrentFiles(false);
     } catch (error) {
       console.log(error);
     }
