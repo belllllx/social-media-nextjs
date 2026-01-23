@@ -20,6 +20,44 @@ export function useCommentCreateSocket(
           return undefined;
         }
 
+        // ถ้าเป็น reply comment
+        if (newComment.parent && newComment.parentId) {
+          return {
+            ...oldComments,
+            pages: oldComments.pages.map((page) => {
+              // ไม่ใช่ page ที่ reply comment ข้าม
+              if (
+                !page.comments.some(
+                  (comment) => comment.id === newComment.parentId,
+                )
+              ) {
+                return page;
+              }
+
+              return {
+                ...page,
+                comments: page.comments.map((comment) => {
+                  // ไม่ใช่ comment ที่ reply ข้าม
+                  if (comment.id !== newComment.parentId) {
+                    return comment;
+                  }
+
+                  const copyReplies = [...comment.replies];
+                  copyReplies.unshift(newComment);
+
+                  const updateCommentReply: IComment = {
+                    ...comment,
+                    replies: copyReplies,
+                  };
+
+                  return updateCommentReply;
+                }),
+              };
+            }),
+          };
+        }
+
+        // เป็น comment ปกติ
         const firstPage = oldComments.pages[0];
 
         const newFirstPage = {

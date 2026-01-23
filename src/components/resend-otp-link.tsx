@@ -31,7 +31,6 @@ export function ResendOtpLink() {
       {"Don't"} have an otp? &nbsp;
       <Button
         onClick={handleResendOtp}
-        loading={isLoading}
         disabled={isLoading}
         variant="plain"
         padding="0"

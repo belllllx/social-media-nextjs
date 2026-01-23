@@ -12,13 +12,25 @@ import { SharePost } from "./share-post";
 import { CommentOverview } from "./comment-overview";
 import { Comments } from "./comments";
 import { ToggleViewComments } from "./toggle-view-comments";
+import { Socket } from "socket.io-client";
+import { ClientToServerEvents, ServerToClientEvents } from "@/providers/socket-io-provider";
+import { QueryClient } from "@tanstack/react-query";
+import { useCommentLikeSocket } from "@/hooks/use-comment-like-socket";
 
 interface PostProps {
   post: IPost;
+  socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
+  queryClient: QueryClient;
 }
 
-export function Post({ post }: PostProps) {
+export function Post({ 
+  post,
+  socket,
+  queryClient,
+}: PostProps) {
   const { user } = useUserStore((state) => state);
+
+  useCommentLikeSocket(post.id, socket, queryClient);
 
   return (
     <Stack

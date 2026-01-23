@@ -11,7 +11,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { EmojiPicker } from "./emoji-picker";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { ICreatePostPayload, IPost, IUser } from "@/utils/types";
@@ -56,41 +56,44 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {
-    try {
-      const url =
-        post.parent && post.parentId
-          ? `post/share/create/${activeUser?.id}/${post.parentId}`
-          : `post/share/create/${activeUser?.id}/${post.id}`;
+  const onSubmit = useCallback(
+    handleSubmit(async ({ message }) => {
+      try {
+        const url =
+          post.parent && post.parentId
+            ? `post/share/create/${activeUser?.id}/${post.parentId}`
+            : `post/share/create/${activeUser?.id}/${post.id}`;
 
-      const res = await callApi<Omit<ICreatePostPayload, "filesUrl">>(
-        "post",
-        url,
-        {
-          message: !message ? undefined : message,
-        },
-      );
+        const res = await callApi<Omit<ICreatePostPayload, "filesUrl">>(
+          "post",
+          url,
+          {
+            message: !message ? undefined : message,
+          },
+        );
 
-      if (!res.success) {
-        toast.error(formatToastMessages(res.message));
-        return;
+        if (!res.success) {
+          toast.error(formatToastMessages(res.message));
+          return;
+        }
+
+        toast.success(formatToastMessages(res.message));
+        setOpenDialog(false);
+        reset();
+      } catch (error) {
+        console.log(error);
       }
+    }),
+    [content, post, activeUser?.id],
+  );
 
-      toast.success(formatToastMessages(res.message));
-      setOpenDialog(false);
-      reset();
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
-  function handleOpenDialog(open: boolean) {
+  const handleOpenDialog = useCallback((open: boolean) => {
     if (!open) {
       reset();
     }
 
     setOpenDialog(open);
-  }
+  }, []);
 
   return (
     <Dialog.Root

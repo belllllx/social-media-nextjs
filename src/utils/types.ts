@@ -134,6 +134,7 @@ export interface IComment {
   likes: ILike[];
   parent?: IComment;
   replysCount: number;
+  replies: IComment[];
 }
 
 export interface ICreatePostPayload {

@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { useAuthUserStore } from "@/providers/auth-user-store-provider";
 import { navigate } from "@/utils/helpers/router";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { useCallback } from "react";
 
 export function ForgotPasswordForm() {
   const { setEmail } = useAuthUserStore((state) => state);
@@ -28,21 +29,24 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const onSubmit = handleSubmit(async (data) => {
-    const res = await callApi<ForgotPasswordSchema>(
-      "post",
-      "email/send",
-      data,
-    );
-    if (!res.success) {
-      toast.error(formatToastMessages(res.message));
-    } else {
-      reset();
-      setEmail(data.email);
-      toast.success(formatToastMessages(res.message));
-      navigate("/verify-otp");
-    }
-  });
+  const onSubmit = useCallback(
+    handleSubmit(async (data) => {
+      const res = await callApi<ForgotPasswordSchema>(
+        "post",
+        "email/send",
+        data,
+      );
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+      } else {
+        reset();
+        setEmail(data.email);
+        toast.success(formatToastMessages(res.message));
+        navigate("/verify-otp");
+      }
+    }),
+    [],
+  );
 
   return (
     <form onSubmit={onSubmit}>
@@ -61,11 +65,7 @@ export function ForgotPasswordForm() {
           </Field.Root>
         </Fieldset.Content>
 
-        <Button 
-          loading={isSubmitting}
-          disabled={isSubmitting} 
-          type="submit"
-        >
+        <Button loading={isSubmitting} disabled={isSubmitting} type="submit">
           Submit
         </Button>
       </Fieldset.Root>

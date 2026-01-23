@@ -92,7 +92,12 @@ export function Posts() {
         posts.pages.map((group, i) => (
           <Fragment key={i}>
             {group.posts.length ? (
-              group.posts.map((post) => <Post key={post.id} post={post} />)
+              group.posts.map((post) => <Post 
+                key={post.id} 
+                post={post} 
+                socket={socket}
+                queryClient={queryClient}
+              />)
             ) : (
               <ItemsNotFound title="post" />
             )}

@@ -36,7 +36,7 @@ export function Comments({ post, activeUser }: CommentsProps) {
 
   return (
     <>
-      {showCommentOnPostId.includes(post.id) && (
+      {showCommentOnPostId.find((showComment) => showComment.postId === post.id)?.open && (
         <Box>
           {status === "pending" ? (
             <div>skeleton...</div>

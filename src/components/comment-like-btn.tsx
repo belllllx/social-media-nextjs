@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Box,
-  Button,
   CloseButton,
   Dialog,
   HStack,
@@ -12,7 +11,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { BiLike, BiSolidLike } from "react-icons/bi";
-import { IComment } from "@/utils/types";
+import { IComment, IPost, IUser } from "@/utils/types";
 import { LikeUser } from "./like-user";
 import { ItemsNotFound } from "./items-not-found";
 import { callApi } from "@/utils/helpers/call-api";
@@ -20,22 +19,28 @@ import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 
 interface CommentLikeBtnProps {
+  post: IPost;
   comment: IComment;
-  activeUserId?: string;
+  activeUser: IUser | null;
 }
 
-export function CommentLikeBtn({ 
+export function CommentLikeBtn({
+  post,
   comment,
-  activeUserId,
- }: CommentLikeBtnProps) {
+  activeUser,
+}: CommentLikeBtnProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleCommentLike() {
+  const handleCommentLike = useCallback(async () => {
+    if (!activeUser) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       const res = await callApi(
         "post",
-        `comment/like/${activeUserId}/${comment.id}`
+        `comment/like/${activeUser?.id}/${post.id}/${comment.id}`,
       ).finally(() => setIsLoading(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -46,7 +51,7 @@ export function CommentLikeBtn({
     } catch (error) {
       console.log(error);
     }
-  }
+  }, [activeUser?.id, post.id, comment.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">
@@ -60,10 +65,10 @@ export function CommentLikeBtn({
           justifyContent="flex-end"
           size="md"
         >
-          {comment.likes.some((like) => like.userId === activeUserId) ? (
-            <BiSolidLike/>
+          {comment.likes.some((like) => like.userId === activeUser?.id) ? (
+            <BiSolidLike />
           ) : (
-            <BiLike/>
+            <BiLike />
           )}
         </IconButton>
         <Dialog.Trigger asChild>

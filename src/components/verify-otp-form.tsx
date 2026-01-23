@@ -7,6 +7,7 @@ import { IOtpBody } from "@/utils/types";
 import { otpSchema, OtpSchema } from "@/utils/validations/auth";
 import { Button, Field, Heading, PinInput, VStack } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -23,18 +24,21 @@ export function VerifyOtpForm() {
     },
   });
 
-  const onSubmit = handleSubmit(async (data) => {
-    const res = await callApi<IOtpBody>("post", "email/verify-otp", {
-      otp: data.otp.join(""),
-    });
-    if (!res.success) {
-      toast.error(formatToastMessages(res.message));
-    } else {
-      reset();
-      toast.success(formatToastMessages(res.message));
-      navigate("/reset-password");
-    }
-  });
+  const onSubmit = useCallback(
+    handleSubmit(async (data) => {
+      const res = await callApi<IOtpBody>("post", "email/verify-otp", {
+        otp: data.otp.join(""),
+      });
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+      } else {
+        reset();
+        toast.success(formatToastMessages(res.message));
+        navigate("/reset-password");
+      }
+    }),
+    [],
+  );
 
   return (
     <>
@@ -77,9 +81,9 @@ export function VerifyOtpForm() {
             />
           </Field.Root>
           <Button
-            loading={isSubmitting} 
-            disabled={isSubmitting} 
-            type="submit" 
+            loading={isSubmitting}
+            disabled={isSubmitting}
+            type="submit"
             width="full"
           >
             Submit

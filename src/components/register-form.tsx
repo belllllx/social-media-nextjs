@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { PasswordInput } from "./ui/password-input";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { useCallback } from "react";
 
 export function RegisterForm() {
   const {
@@ -25,19 +26,18 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = handleSubmit(async (data) => {
-    const res = await callApi<RegisterSchema>(
-      "post",
-      "auth/register", 
-      data,
-    );
-    if(!res.success){
-      toast.error(formatToastMessages(res.message));
-    }else{
-      reset();
-      toast.success(formatToastMessages(res.message));
-    }
-  });
+  const onSubmit = useCallback(
+    handleSubmit(async (data) => {
+      const res = await callApi<RegisterSchema>("post", "auth/register", data);
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+      } else {
+        reset();
+        toast.success(formatToastMessages(res.message));
+      }
+    }),
+    [],
+  );
 
   return (
     <form onSubmit={onSubmit}>
@@ -80,11 +80,7 @@ export function RegisterForm() {
           </Field.Root>
         </Fieldset.Content>
 
-        <Button 
-          loading={isSubmitting}
-          disabled={isSubmitting} 
-          type="submit"
-        >
+        <Button loading={isSubmitting} disabled={isSubmitting} type="submit">
           Submit
         </Button>
       </Fieldset.Root>

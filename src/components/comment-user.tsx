@@ -22,7 +22,13 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { EmojiPicker } from "./emoji-picker";
 import { FiPaperclip } from "react-icons/fi";
@@ -87,66 +93,75 @@ export function CommentUser({
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {
-    if (!message && !fileUrl) {
-      return;
-    }
+  const initialMessage = comment.message ?? "";
+  const initialFileUrl = comment.fileUrl ?? null;
 
-    try {
-      const res = await callApi<IUpdateCommentPayload>(
-        "patch",
-        `comment/update/${comment.id}`,
-        {
-          message: !message ? "" : message,
-          fileUrl: !fileUrl ? undefined : fileUrl,
-          shouldDeleteCurrentFile,
-        },
-      );
-      if (!res.success) {
-        toast.error(formatToastMessages(res.message));
+  const onSubmit = useCallback(
+    handleSubmit(async ({ message }) => {
+      if (!message && !fileUrl) {
         return;
       }
 
-      toast.success(formatToastMessages(res.message));
-      setOpenEditComment(false);
-      reset();
-      setFileUrl("");
-      setShouldDeleteCurrentFile(false);
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    try {
-      const file = event.target.files?.[0];
-      if (file) {
-        const formData = new FormData();
-
-        formData.append("file", file);
-
-        setDisabled(true);
-        const res = await callApi(
-          "post",
-          "comment/file/create",
-          formData,
-        ).finally(() => setDisabled(false));
+      try {
+        const res = await callApi<IUpdateCommentPayload>(
+          "patch",
+          `comment/update/${comment.id}`,
+          {
+            message: !message ? "" : message,
+            fileUrl: !fileUrl ? undefined : fileUrl,
+            shouldDeleteCurrentFile,
+          },
+        );
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
         }
 
-        const files = (res.data as { fileUrl: string }).fileUrl;
-        setFileUrl(files);
-        setShouldDeleteCurrentFile(true);
+        toast.success(formatToastMessages(res.message));
+        setOpenEditComment(false);
+        reset();
+        setFileUrl("");
+        setShouldDeleteCurrentFile(false);
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      toast.error("Failed to upload file");
-      setDisabled(false);
-    }
-  }
+    }),
+    [comment.id, fileUrl, shouldDeleteCurrentFile],
+  );
 
-  async function handleDeleteFile(fileUrl: string) {
+  const handleFileChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      try {
+        const file = event.target.files?.[0];
+        if (file) {
+          const formData = new FormData();
+
+          formData.append("file", file);
+
+          setDisabled(true);
+          const res = await callApi(
+            "post",
+            "comment/file/create",
+            formData,
+          ).finally(() => setDisabled(false));
+          if (!res.success) {
+            toast.error(formatToastMessages(res.message));
+            return;
+          }
+
+          const files = (res.data as { fileUrl: string }).fileUrl;
+          setFileUrl(files);
+          setShouldDeleteCurrentFile(true);
+        }
+      } catch (error) {
+        toast.error("Failed to upload file");
+        setDisabled(false);
+      }
+    },
+    [],
+  );
+
+  const handleDeleteFile = useCallback(async (fileUrl: string) => {
     try {
       setDisabled(true);
       const res = await callApi<{ data: IDeleteFilePayload }>(
@@ -167,31 +182,37 @@ export function CommentUser({
       toast.error("Failed to delete file");
       setDisabled(false);
     }
-  }
+  }, []);
 
-  function handleOpenDeleteDialog(open: boolean) {
+  const handleOpenDeleteDialog = useCallback((open: boolean) => {
     setOpenPopover(false);
     setOpenDeleteDialog(open);
-  }
+  }, []);
 
-  function handleOpenEditComment() {
-    if (comment.message) {
-      setValue("message", comment.message);
-    }
-
+  const handleOpenEditComment = useCallback(() => {
     setOpenPopover(false);
     setOpenEditComment(true);
-  }
+  }, []);
 
-  function handleCloseEditComment() {
+  const handleCloseEditComment = useCallback(() => {
+    const isMessageChanged = content !== initialMessage;
+    const isFileChanged = fileUrl !== initialFileUrl;
+
+    // ถ้าไม่เปลี่ยนอะไรเลย -> ออกได้
+    if (!isMessageChanged && !isFileChanged) {
+      setOpenEditComment(false);
+      return;
+    }
+
+    // ถ้ามีการแก้ แต่ดันลบหมด
     if (!content && !fileUrl) {
       return;
     }
 
     setOpenEditComment(false);
-  }
+  }, [content, fileUrl, initialMessage, initialFileUrl]);
 
-  async function handleDeleteComment() {
+  const handleDeleteComment = useCallback(async () => {
     try {
       if (!activeUser) {
         return;
@@ -216,7 +237,7 @@ export function CommentUser({
     } catch (error) {
       console.log(error);
     }
-  }
+  }, [activeUser, post.id, comment.id, queryClient]);
 
   useEffect(() => {
     if (!openEditComment) {
@@ -224,6 +245,10 @@ export function CommentUser({
       setFileUrl("");
       setShouldDeleteCurrentFile(false);
       return;
+    }
+
+    if (comment.message) {
+      setValue("message", comment.message);
     }
 
     const input = inputRef.current;
@@ -239,7 +264,7 @@ export function CommentUser({
       setFileUrl(comment.fileUrl);
       setShouldDeleteCurrentFile(false);
     }
-  }, [openEditComment]);
+  }, [openEditComment, comment]);
 
   return (
     <Stack gapY="1">
@@ -384,17 +409,23 @@ export function CommentUser({
                 )}
               </HStack>
 
-              <CommentAction comment={comment} activeUser={activeUser} />
+              <CommentAction
+                post={post}
+                comment={comment}
+                activeUser={activeUser}
+              />
 
-              {showReplyOnCommentId.includes(comment.id) &&
-                comment.parent &&
-                comment.parentId && (
+              {showReplyOnCommentId.find((showReply) => showReply.commentId === comment.id)?.open &&
+                comment.replies &&
+                comment.replies.length &&
+                comment.replies.map((reply) => (
                   <CommentUser
-                    comment={comment.parent}
+                    key={reply.id}
+                    comment={reply}
                     post={post}
                     activeUser={activeUser}
                   />
-                )}
+                ))}
             </Stack>
           ) : (
             <>

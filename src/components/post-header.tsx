@@ -3,6 +3,7 @@
 import React, {
   ChangeEvent,
   RefObject,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -80,100 +81,125 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {
-    try {
-      const res = await callApi<IUpdatePostPayload>(
-        "patch",
-        `post/update/${post.id}`,
-        {
-          message: !message ? "" : message,
-          filesUrl,
-          shouldDeleteCurrentFiles,
-        }
-      );
-      if (!res.success) {
-        toast.error(formatToastMessages(res.message));
+  const initialMessage = post.message ?? "";
+  const initialFilesUrl = post.filesUrl ?? [];
+
+  const onSubmit = useCallback(
+    handleSubmit(async ({ message }) => {
+      if (!message && !filesUrl.length) {
         return;
       }
 
-      toast.success(formatToastMessages(res.message));
-      setOpenEditDialog(false);
-      reset();
-      setFilesUrl([]);
-      setShouldDeleteCurrentFiles(false);
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
-  const handleUserClick = useNavigateUser(post.user);
-
-  function handleClosePopover() {
-    setOpenPopover(false);
-    setOpenEditDialog(true);
-  }
-
-  function handleOpenEditDialog(open: boolean) {
-    if (open && post.message) {
-      setValue("message", post.message);
-    }
-
-    setOpenDeleteDialog(false);
-    setOpenEditDialog(open);
-
-    if (!open) {
-      reset();
-    }
-  }
-
-  function handleOpenDeleteDialog(open: boolean) {
-    setOpenPopover(false);
-    setOpenEditDialog(false);
-    setOpenDeleteDialog(open);
-  }
-
-  async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
-    try {
-      if (event.target.files) {
-        const formData = new FormData();
-
-        const filesArray = Array.from(event.target.files);
-        filesArray.forEach((file) => {
-          formData.append("files", file);
-        });
-
-        setDisabled(true);
-        const res = await callApi(
-          "post",
-          "post/files/create",
-          formData
-        ).finally(() => setDisabled(false));
+      try {
+        const res = await callApi<IUpdatePostPayload>(
+          "patch",
+          `post/update/${post.id}`,
+          {
+            message: !message ? "" : message,
+            filesUrl,
+            shouldDeleteCurrentFiles,
+          },
+        );
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
         }
 
-        const files = (res.data as { filesUrl: string[] }).filesUrl;
-        setFilesUrl(files);
-        setShouldDeleteCurrentFiles(true);
+        toast.success(formatToastMessages(res.message));
+        setOpenEditDialog(false);
+        reset();
+        setFilesUrl([]);
+        setShouldDeleteCurrentFiles(false);
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      toast.error("Failed to upload files");
-      setDisabled(false);
-    }
-  }
+    }),
+    [post.id, content, filesUrl, shouldDeleteCurrentFiles],
+  );
 
-  async function handleDeletePost() {
+  const handleUserClick = useNavigateUser(post.user);
+
+  const handleClosePopover = useCallback(() => {
+    setOpenPopover(false);
+    setOpenEditDialog(true);
+  }, []);
+
+  const handleOpenEditDialog = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        const isMessageChanged = content !== initialMessage;
+        const isFilesChanged =
+          filesUrl.length !== initialFilesUrl.length ||
+          filesUrl.some((f, i) => f !== initialFilesUrl[i]);
+
+        // ไม่ได้แก้ไขอะไรเลย → ปิดได้
+        if (!isMessageChanged && !isFilesChanged) {
+          setOpenEditDialog(false);
+          return;
+        }
+
+        // แก้แล้วแต่ลบหมด → ไม่ให้ปิด
+        if (!content && !filesUrl.length) {
+          return;
+        }
+      }
+
+      setOpenDeleteDialog(false);
+      setOpenEditDialog(open);
+    },
+    [content, filesUrl, initialMessage, initialFilesUrl],
+  );
+
+  const handleOpenDeleteDialog = useCallback((open: boolean) => {
+    setOpenPopover(false);
+    setOpenEditDialog(false);
+    setOpenDeleteDialog(open);
+  }, []);
+
+  const handleFilesChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      try {
+        if (event.target.files) {
+          const formData = new FormData();
+
+          const filesArray = Array.from(event.target.files);
+          filesArray.forEach((file) => {
+            formData.append("files", file);
+          });
+
+          setDisabled(true);
+          const res = await callApi(
+            "post",
+            "post/files/create",
+            formData,
+          ).finally(() => setDisabled(false));
+          if (!res.success) {
+            toast.error(formatToastMessages(res.message));
+            return;
+          }
+
+          const files = (res.data as { filesUrl: string[] }).filesUrl;
+          setFilesUrl(files);
+          setShouldDeleteCurrentFiles(true);
+        }
+      } catch (error) {
+        toast.error("Failed to upload files");
+        setDisabled(false);
+      }
+    },
+    [],
+  );
+
+  const handleDeletePost = useCallback(async () => {
     try {
-      if(!activeUser){
+      if (!activeUser) {
         return;
       }
 
       setDisabledDeletePost(true);
-      const res = await callApi(
-        "delete",
-        `post/delete/${post.id}`,
-      ).finally(() => setDisabledDeletePost(false));
+      const res = await callApi("delete", `post/delete/${post.id}`).finally(
+        () => setDisabledDeletePost(false),
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -186,23 +212,33 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
     } catch (error) {
       console.log(error);
     }
-  }
+  }, [activeUser, post.id, queryClient]);
 
-  function handleInputFilesClick(ref: RefObject<HTMLInputElement | null>) {
-    ref.current?.click();
-  }
+  const handleInputFilesClick = useCallback(
+    (ref: RefObject<HTMLInputElement | null>) => {
+      ref.current?.click();
+    },
+    [],
+  );
 
-  function handleSetDisabled(status: boolean) {
+  const handleSetDisabled = useCallback((status: boolean) => {
     setDisabled(status);
-  }
+  }, []);
 
-  function handleSetFilesUrl(fileUrl: string) {
+  const handleSetFilesUrl = useCallback((fileUrl: string) => {
     setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
-  }
+  }, []);
 
   useEffect(() => {
     if (!openEditDialog) {
+      reset();
+      setShouldDeleteCurrentFiles(false);
+      setFilesUrl([]);
       return;
+    }
+
+    if (post.message) {
+      setValue("message", post.message);
     }
 
     requestAnimationFrame(() => {

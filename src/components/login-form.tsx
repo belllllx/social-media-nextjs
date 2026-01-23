@@ -10,6 +10,7 @@ import { PasswordInput } from "./ui/password-input";
 import { navigate } from "@/utils/helpers/router";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 export function LoginForm() {
   const queryClient = useQueryClient();
@@ -27,22 +28,21 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = handleSubmit(async (data) => {
-    const res = await callApi<LoginSchema>(
-      "post",
-      "auth/login", 
-      data,
-    );
-    if (!res.success) {
-      toast.error(formatToastMessages(res.message));
-    } else {
-      reset();
-      toast.success(formatToastMessages(res.message));
+  const onSubmit = useCallback(
+    handleSubmit(async (data) => {
+      const res = await callApi<LoginSchema>("post", "auth/login", data);
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+      } else {
+        reset();
+        toast.success(formatToastMessages(res.message));
 
-      queryClient.clear();
-      navigate("/feed");
-    }
-  });
+        queryClient.clear();
+        navigate("/feed");
+      }
+    }),
+    [queryClient],
+  );
 
   return (
     <form onSubmit={onSubmit}>
@@ -69,11 +69,7 @@ export function LoginForm() {
           </Field.Root>
         </Fieldset.Content>
 
-        <Button
-          loading={isSubmitting}
-          disabled={isSubmitting} 
-          type="submit"
-         >
+        <Button loading={isSubmitting} disabled={isSubmitting} type="submit">
           Submit
         </Button>
       </Fieldset.Root>

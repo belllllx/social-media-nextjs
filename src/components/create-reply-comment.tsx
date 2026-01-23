@@ -1,26 +1,13 @@
 "use client";
 
-import { useNavigateUser } from "@/hooks/use-navigate-user";
-import { useUserStore } from "@/providers/user-store-provider";
 import {
+  IComment,
   ICreateCommentPayload,
   IDeleteFilePayload,
   IPost,
+  IUser,
 } from "@/utils/types";
-import {
-  createContentSchema,
-  CreateContentSchema,
-} from "@/utils/validations/create-content";
-import {
-  Avatar,
-  Box,
-  HStack,
-  IconButton,
-  Image,
-  Input,
-  Stack,
-} from "@chakra-ui/react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Avatar, Box, HStack, IconButton, Input, Text } from "@chakra-ui/react";
 import React, {
   ChangeEvent,
   useCallback,
@@ -28,35 +15,44 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useForm } from "react-hook-form";
 import { EmojiPicker } from "./emoji-picker";
 import { FiPaperclip } from "react-icons/fi";
+import { useForm } from "react-hook-form";
+import {
+  createContentSchema,
+  CreateContentSchema,
+} from "@/utils/validations/create-content";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { callApi } from "@/utils/helpers/call-api";
-import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { toast } from "react-toastify";
+import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { FaXmark } from "react-icons/fa6";
+import { Image } from "@chakra-ui/react";
 import NextImage from "next/image";
 import { useActionStore } from "@/providers/action-store-provider";
 
-interface CreateCommentProps {
+interface CreateReplyCommentProps {
+  isOpenReply: boolean;
+  activeUser: IUser | null;
+  onOpenReply: (open: boolean) => void;
   post: IPost;
+  comment: IComment;
 }
 
-export function CreateComment({ post }: CreateCommentProps) {
+export function CreateReplyComment({
+  isOpenReply,
+  activeUser,
+  onOpenReply,
+  post,
+  comment,
+}: CreateReplyCommentProps) {
+  const { setShowReplyOnCommentId } = useActionStore((state) => state);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
   const [disabled, setDisabled] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
-
-  const { user } = useUserStore((state) => state);
-  const { 
-    focusPostId, 
-    setFocusPostId,
-    setShowCommentOnPostId,
-  } = useActionStore((state) => state);
-
-  const handleUserClick = useNavigateUser(user);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -77,14 +73,14 @@ export function CreateComment({ post }: CreateCommentProps) {
 
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
-      if (!user || (!message && !fileUrl)) {
+      if (!activeUser || (!message && !fileUrl)) {
         return;
       }
 
       try {
         const res = await callApi<ICreateCommentPayload>(
           "post",
-          `comment/create/${user.id}/${post.id}`,
+          `comment/reply/create/${activeUser?.id}/${comment.id}/${post.id}`,
           {
             message: !message ? undefined : message,
             fileUrl: !fileUrl ? undefined : fileUrl,
@@ -96,8 +92,8 @@ export function CreateComment({ post }: CreateCommentProps) {
           return;
         }
 
-        setShowCommentOnPostId({
-          postId: post.id,
+        setShowReplyOnCommentId({
+          commentId: comment.id,
           open: true,
         });
         reset();
@@ -106,10 +102,35 @@ export function CreateComment({ post }: CreateCommentProps) {
         console.log(error);
       }
     }),
-    [user, content, fileUrl, post.id],
+    [],
   );
+  //   if (!activeUser || (!message && !fileUrl)) {
+  //     return;
+  //   }
 
-  const handleFilesChange = useCallback(
+  //   try {
+  //     const res = await callApi<ICreateCommentPayload>(
+  //       "post",
+  //       `comment/reply/create/${activeUser?.id}/${comment.id}/${post.id}`,
+  //       {
+  //         message: !message ? undefined : message,
+  //         fileUrl: !fileUrl ? undefined : fileUrl,
+  //       },
+  //     );
+
+  //     if (!res.success) {
+  //       toast.error(formatToastMessages(res.message));
+  //       return;
+  //     }
+
+  //     reset();
+  //     setFileUrl("");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // });
+
+  const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       try {
         const file = event.target.files?.[0];
@@ -161,70 +182,82 @@ export function CreateComment({ post }: CreateCommentProps) {
       toast.error("Failed to delete file");
       setDisabled(false);
     }
-  }, [fileUrl]);
+  }, []);
 
   useEffect(() => {
-    if (focusPostId === post.id) {
-      inputRef.current?.focus();
-      setFocusPostId(null);
+    if(!isOpenReply){
+      reset();
     }
-  }, [focusPostId]);
+  }, [isOpenReply]);
 
   return (
-    <Stack gapY="3">
-      <HStack gapX="3">
-        {user?.profileUrl ? (
-          <Avatar.Root onClick={handleUserClick} size="md" cursor="pointer">
-            <Avatar.Fallback name={user?.fullname} />
-            <Avatar.Image src={user?.profileUrl} />
-          </Avatar.Root>
-        ) : (
-          <Avatar.Root onClick={handleUserClick} size="md" cursor="pointer">
-            <Avatar.Fallback name={user?.fullname} />
-          </Avatar.Root>
-        )}
-
-        <form onSubmit={onSubmit} className="w-full">
-          <Input
-            disabled={disabled || isSubmitting}
-            value={content}
-            {...register("message")}
-            ref={(e) => {
-              register("message").ref(e);
-              inputRef.current = e;
-            }}
-            size="lg"
-            borderRadius="full"
-            placeholder="Write something..."
-            variant="subtle"
-          />
-        </form>
-        <EmojiPicker
-          inputRef={inputRef}
-          useFormReturn={form}
-          valueKey="message"
-        />
-        <IconButton
-          disabled={disabled || isSubmitting}
-          onClick={() => photoRef.current?.click()}
-          rounded="full"
-          variant="surface"
-          color="red.500"
-        >
-          <FiPaperclip />
-        </IconButton>
-        <input
-          onChange={handleFilesChange}
-          ref={photoRef}
-          type="file"
-          className="hidden"
-          name="photo"
-          accept=".jpg,.jpeg,.png,.webp"
-        />
-      </HStack>
+    <>
+      {isOpenReply && (
+        <HStack gapX="3" alignItems="flex-start" mb="2">
+          <>
+            {activeUser?.profileUrl ? (
+              <Avatar.Root size="lg">
+                <Avatar.Fallback name={activeUser?.fullname} />
+                <Avatar.Image src={activeUser?.profileUrl} />
+              </Avatar.Root>
+            ) : (
+              <Avatar.Root size="lg">
+                <Avatar.Fallback name={activeUser?.fullname} />
+              </Avatar.Root>
+            )}
+            <form onSubmit={onSubmit} className="w-full">
+              <Input
+                disabled={disabled || isSubmitting}
+                value={content}
+                {...register("message")}
+                ref={(e) => {
+                  register("message").ref(e);
+                  inputRef.current = e;
+                }}
+                size="lg"
+                borderRadius="full"
+                placeholder="Write something..."
+                variant="subtle"
+              />
+            </form>
+            <EmojiPicker
+              inputRef={inputRef}
+              useFormReturn={form}
+              valueKey="message"
+            />
+            <IconButton
+              disabled={disabled || isSubmitting}
+              onClick={() => photoRef.current?.click()}
+              rounded="full"
+              variant="surface"
+              color="red.500"
+            >
+              <FiPaperclip />
+            </IconButton>
+            <input
+              onChange={handleFileChange}
+              ref={photoRef}
+              type="file"
+              className="hidden"
+              name="photo"
+              accept=".jpg,.jpeg,.png,.webp"
+            />
+            <Text
+              onClick={() => onOpenReply(false)}
+              cursor="pointer"
+              color="fg.muted"
+              py="2"
+              textStyle="sm"
+            >
+              Cancel
+            </Text>
+          </>
+        </HStack>
+      )}
 
       {fileUrl && (
         <Box
+          mb="3"
           width="200px"
           height="200px"
           backgroundColor="grey.500"
@@ -252,6 +285,6 @@ export function CreateComment({ post }: CreateCommentProps) {
           </Image>
         </Box>
       )}
-    </Stack>
+    </>
   );
 }

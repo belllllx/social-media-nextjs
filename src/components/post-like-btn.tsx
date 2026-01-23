@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Box,
   Button,
@@ -26,12 +26,12 @@ interface PostLikeBtnProps {
 export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handlePostLike() {
+  const handlePostLike = useCallback(async () => {
     try {
       setIsLoading(true);
       const res = await callApi(
         "post",
-        `post/like/${activeUserId}/${post.id}`
+        `post/like/${activeUserId}/${post.id}`,
       ).finally(() => setIsLoading(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -42,7 +42,7 @@ export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
     } catch (error) {
       console.log(error);
     }
-  }
+  }, [activeUserId, post.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">

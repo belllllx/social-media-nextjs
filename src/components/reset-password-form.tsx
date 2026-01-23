@@ -1,7 +1,10 @@
 "use client";
 
 import { callApi } from "@/utils/helpers/call-api";
-import { resetPasswordSchema, ResetPasswordSchema } from "@/utils/validations/auth";
+import {
+  resetPasswordSchema,
+  ResetPasswordSchema,
+} from "@/utils/validations/auth";
 import { Button, Field, Fieldset } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +13,7 @@ import { PasswordInput } from "./ui/password-input";
 import { createAuthUserStore } from "@/stores/auth-user-store";
 import { navigate } from "@/utils/helpers/router";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { useCallback } from "react";
 
 export function ResetPasswordForm() {
   const authUserStore = createAuthUserStore();
@@ -27,21 +31,24 @@ export function ResetPasswordForm() {
     },
   });
 
-  const onSubmit = handleSubmit(async (data) => {
-    const res = await callApi<ResetPasswordSchema>(
-      "patch",
-      "user/reset-password", 
-      data,
-    );
-    if (!res.success) {
-      toast.error(formatToastMessages(res.message));
-    } else {
-      authUserStore.persist.clearStorage();
-      reset();
-      toast.success(formatToastMessages(res.message));
-      navigate("/");
-    }
-  });
+  const onSubmit = useCallback(
+    handleSubmit(async (data) => {
+      const res = await callApi<ResetPasswordSchema>(
+        "patch",
+        "user/reset-password",
+        data,
+      );
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+      } else {
+        authUserStore.persist.clearStorage();
+        reset();
+        toast.success(formatToastMessages(res.message));
+        navigate("/");
+      }
+    }),
+    [authUserStore],
+  );
 
   return (
     <form onSubmit={onSubmit}>
@@ -68,11 +75,7 @@ export function ResetPasswordForm() {
           </Field.Root>
         </Fieldset.Content>
 
-        <Button 
-          loading={isSubmitting}
-          disabled={isSubmitting} 
-          type="submit"
-        >
+        <Button loading={isSubmitting} disabled={isSubmitting} type="submit">
           Submit
         </Button>
       </Fieldset.Root>

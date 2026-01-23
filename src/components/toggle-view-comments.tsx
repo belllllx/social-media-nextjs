@@ -18,11 +18,11 @@ export function ToggleViewComments({ post }: ToggleViewCommentsProps) {
     <>
       {post.commentsCount ? (
         <Text
-          onClick={() => setShowCommentOnPostId(post.id)}
+          onClick={() => setShowCommentOnPostId({ postId: post.id, open: true })}
           fontWeight="semibold"
           cursor="pointer"
         >
-          {!showCommentOnPostId.includes(post.id) ? (
+          {!showCommentOnPostId.find((showComment) => showComment.postId === post.id)?.open ? (
             <>
               View {post.commentsCount} comment
               {post.commentsCount > 1 ? "s" : ""}

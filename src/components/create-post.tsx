@@ -22,7 +22,7 @@ import {
   CreateContentSchema,
 } from "@/utils/validations/create-content";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, RefObject, useRef, useState } from "react";
+import { ChangeEvent, RefObject, useCallback, useRef, useState } from "react";
 import { MdAddPhotoAlternate } from "react-icons/md";
 import { FaPlayCircle } from "react-icons/fa";
 import { callApi } from "@/utils/helpers/call-api";
@@ -64,78 +64,88 @@ export function CreatePost() {
 
   const content = watch("message");
 
-  const onSubmit = handleSubmit(async ({ message }) => {
-    if (!(filesUrl.length || message)) {
-      return;
-    }
-
-    try {
-      setDisabled(true);
-      const res = await callApi<ICreatePostPayload>(
-        "post",
-        `post/create/${user?.id}`,
-        {
-          message: !message ? undefined : message,
-          filesUrl,
-        },
-      ).finally(() => setDisabled(false));
-      if (!res.success) {
-        toast.error(formatToastMessages(res.message));
+  const onSubmit = useCallback(
+    handleSubmit(async ({ message }) => {
+      if (!(filesUrl.length || message)) {
         return;
       }
 
-      toast.success(formatToastMessages(res.message));
-      form.reset();
-      setFilesUrl([]);
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to create post");
-    }
-  });
-
-  function handleInputFilesClick(ref: RefObject<HTMLInputElement | null>) {
-    ref.current?.click();
-  }
-
-  async function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
-    try {
-      if (event.target.files) {
-        const formData = new FormData();
-
-        const filesArray = Array.from(event.target.files);
-        filesArray.forEach((file) => {
-          formData.append("files", file);
-        });
-
+      try {
         setDisabled(true);
-        const res = await callApi(
+        const res = await callApi<ICreatePostPayload>(
           "post",
-          "post/files/create",
-          formData
+          `post/create/${user?.id}`,
+          {
+            message: !message ? undefined : message,
+            filesUrl,
+          },
         ).finally(() => setDisabled(false));
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
         }
 
-        const files = (res.data as { filesUrl: string[] }).filesUrl;
-        setFilesUrl(files);
+        toast.success(formatToastMessages(res.message));
+        form.reset();
+        setFilesUrl([]);
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to create post");
       }
-    } catch (error) {
-      toast.error("Failed to upload files");
-      setDisabled(false);
-    }
-  }
+    }),
+    [content, filesUrl, user?.id],
+  );
 
-  async function handleDeleteFile(fileUrl: string) {
+  const handleInputFilesClick = useCallback(
+    (ref: RefObject<HTMLInputElement | null>) => {
+      ref.current?.click();
+    },
+    [],
+  );
+
+  const handleFilesChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      try {
+        if (event.target.files) {
+          const formData = new FormData();
+
+          const filesArray = Array.from(event.target.files);
+          filesArray.forEach((file) => {
+            formData.append("files", file);
+          });
+
+          setDisabled(true);
+          const res = await callApi(
+            "post",
+            "post/files/create",
+            formData,
+          ).finally(() => setDisabled(false));
+          if (!res.success) {
+            toast.error(formatToastMessages(res.message));
+            return;
+          }
+
+          const files = (res.data as { filesUrl: string[] }).filesUrl;
+          setFilesUrl(files);
+        }
+      } catch (error) {
+        toast.error("Failed to upload files");
+        setDisabled(false);
+      }
+    },
+    [],
+  );
+
+  const handleDeleteFile = useCallback(async (fileUrl: string) => {
     try {
       setDisabled(true);
       const res = await callApi<{ data: IDeleteFilePayload }>(
-        "delete", 
-        "post/delete/file", 
+        "delete",
+        "post/delete/file",
         {
           data: { fileUrl },
-        }).finally(() => setDisabled(false));
+        },
+      ).finally(() => setDisabled(false));
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -147,7 +157,7 @@ export function CreatePost() {
       toast.error("Failed to delete file");
       setDisabled(false);
     }
-  }
+  }, []);
 
   return (
     <Box
