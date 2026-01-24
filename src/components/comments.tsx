@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Flex, Stack } from "@chakra-ui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 import { Comment } from "./comment";
 import { IPost, IUser } from "@/utils/types";
 import { useComments } from "@/hooks/use-comments";
@@ -34,9 +34,15 @@ export function Comments({ post, activeUser }: CommentsProps) {
     return <Error error={error} refetch={refetch} />;
   }
 
+  const showCommentData = useMemo(
+    () =>
+      showCommentOnPostId.find((showComment) => showComment.postId === post.id),
+    [showCommentOnPostId],
+  );
+
   return (
     <>
-      {showCommentOnPostId.find((showComment) => showComment.postId === post.id)?.open && (
+      {showCommentData?.open && (
         <Box>
           {status === "pending" ? (
             <div>skeleton...</div>

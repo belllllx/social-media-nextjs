@@ -26,6 +26,7 @@ import React, {
   ChangeEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -266,6 +267,14 @@ export function CommentUser({
     }
   }, [openEditComment, comment]);
 
+  const showReplyData = useMemo(
+    () =>
+      showReplyOnCommentId.find(
+        (showReply) => showReply.commentId === comment.id,
+      ),
+    [showReplyOnCommentId],
+  );
+
   return (
     <Stack gapY="1">
       <HStack gapX="3" alignItems="flex-start" mb="2">
@@ -415,9 +424,9 @@ export function CommentUser({
                 activeUser={activeUser}
               />
 
-              {showReplyOnCommentId.find((showReply) => showReply.commentId === comment.id)?.open &&
+              {showReplyData?.open &&
                 comment.replies &&
-                comment.replies.length &&
+                comment.replies.length ?
                 comment.replies.map((reply) => (
                   <CommentUser
                     key={reply.id}
@@ -425,7 +434,7 @@ export function CommentUser({
                     post={post}
                     activeUser={activeUser}
                   />
-                ))}
+                )) : null }
             </Stack>
           ) : (
             <>

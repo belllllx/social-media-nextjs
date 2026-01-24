@@ -36,25 +36,39 @@ export function createActionStore(initState: ActionState = defaultInitState) {
     setFocusPostId: (focusPostId) => set({ focusPostId }),
     setShowCommentOnPostId: (showCommentOnPostId) =>
       set((state) => ({
-        showCommentOnPostId: !state.showCommentOnPostId.includes(
-          showCommentOnPostId,
+        showCommentOnPostId: !state.showCommentOnPostId.some(
+          (showComment) => showComment.postId === showCommentOnPostId.postId,
         )
           ? [...state.showCommentOnPostId, showCommentOnPostId]
-          : state.showCommentOnPostId.filter(
-              (showComment) =>
-                showComment.postId !== showCommentOnPostId.postId,
-            ),
+          : [
+              ...state.showCommentOnPostId.map((showComment) => {
+                if (showComment.postId !== showCommentOnPostId.postId) {
+                  return showComment;
+                }
+
+                return {
+                  ...showCommentOnPostId,
+                };
+              }),
+            ],
       })),
     setShowReplyOnCommentId: (showReplyOnCommentId) =>
       set((state) => ({
-        showReplyOnCommentId: !state.showReplyOnCommentId.includes(
-          showReplyOnCommentId,
+        showReplyOnCommentId: !state.showReplyOnCommentId.some(
+          (showReply) => showReply.commentId === showReplyOnCommentId.commentId,
         )
           ? [...state.showReplyOnCommentId, showReplyOnCommentId]
-          : state.showReplyOnCommentId.filter(
-              (showReply) =>
-                showReply.commentId !== showReplyOnCommentId.commentId,
-            ),
+          : [
+              ...state.showReplyOnCommentId.map((showReply) => {
+                if (showReply.commentId !== showReplyOnCommentId.commentId) {
+                  return showReply;
+                }
+
+                return {
+                  ...showReplyOnCommentId,
+                };
+              }),
+            ],
       })),
   }));
 }
