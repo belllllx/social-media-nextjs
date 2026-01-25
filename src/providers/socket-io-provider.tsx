@@ -33,6 +33,7 @@ export interface ServerToClientEvents {
   createComment: (comment: IComment) => void;
   updateComment: (comment: IComment) => void;
   deleteComment: (comment: IComment) => void;
+  deleteReplyComment: (comment: IComment) => void;
   newLikeComment: (like: ILike) => void;
 }
 

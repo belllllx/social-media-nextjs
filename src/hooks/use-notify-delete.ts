@@ -7,6 +7,10 @@ export function useNotifyDelete(
   activeUserId: string,
   deletedCommentId?: string,
 ) {
+  console.log({
+    deletedPostId,
+    deletedCommentId,
+  });
   queryClient.setQueryData<
     InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
   >(["notifies"], (oldNotifies) => {
@@ -21,8 +25,8 @@ export function useNotifyDelete(
         if (
           !page.notifies.some(
             (prevNotify) =>
-              prevNotify.receiverId === activeUserId &&
-              prevNotify.postId === deletedPostId,
+              (prevNotify.receiverId === activeUserId &&
+                prevNotify.postId === deletedPostId)
           )
         ) {
           return page;
@@ -30,9 +34,11 @@ export function useNotifyDelete(
 
         return {
           ...page,
-          notifies: page.notifies.filter(
-            (notify) =>
-              notify.postId !== deletedPostId && notify.commentId !== deletedCommentId,
+          notifies: page.notifies.filter((notify) =>
+            deletedPostId && !deletedCommentId
+              ? notify.postId !== deletedPostId &&
+                notify.commentId !== deletedCommentId
+              : notify.commentId !== deletedCommentId,
           ),
         };
       }),

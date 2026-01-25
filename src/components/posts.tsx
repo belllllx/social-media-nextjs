@@ -22,6 +22,8 @@ import { useCommentCreateSocket } from "@/hooks/use-comment-create-socket";
 import { useCommentDeleteSocket } from "@/hooks/use-comment-delete-socket";
 import { useCommentCountDeleteSocket } from "@/hooks/use-comment-count-delete-socket";
 import { useCommentUpdateSocket } from "@/hooks/use-comment-update-socket";
+import { useReplyCountDeleteSocket } from "@/hooks/use-reply-count-delete-socket";
+import { useReplyDeleteSocket } from "@/hooks/use-reply-delete-socket";
 
 export function Posts() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -40,6 +42,9 @@ export function Posts() {
   useCommentCreateSocket(socket, queryClient);
   useCommentUpdateSocket(socket, queryClient);
   useCommentDeleteSocket(socket, queryClient);
+
+  useReplyCountDeleteSocket(socket, queryClient);
+  useReplyDeleteSocket(socket, queryClient);
 
   const showButton = useScroll(scrollRef);
 
