@@ -23,6 +23,11 @@ export function useCommentCountCreateSocket(
         return {
           ...oldPosts,
           pages: oldPosts.pages.map((page) => {
+            // ถ้าไม่ใช้ post target ข้าม
+            if(!page.posts.some((post) => post.id === newComment.postId)){
+              return page;
+            }
+
             return {
               ...page,
               posts: page.posts.map((post) => {
@@ -58,6 +63,11 @@ export function useCommentCountCreateSocket(
         return {
           ...oldComments,
           pages: oldComments.pages.map((page) => {
+            // ไม่ใช่ page target ข้าม
+            if(!page.comments.some((comment) => comment.id === newComment.parentId)){
+              return page;
+            }
+
             return {
               ...page,
               comments: page.comments.map((comment) => {

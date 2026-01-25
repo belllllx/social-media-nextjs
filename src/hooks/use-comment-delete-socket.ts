@@ -9,7 +9,7 @@ import { Socket } from "socket.io-client";
 
 export function useCommentDeleteSocket(
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null,
-  queryClient: QueryClient
+  queryClient: QueryClient,
 ) {
   useEffect(() => {
     socket?.on("deleteComment", (deleteComment) => {
@@ -23,9 +23,56 @@ export function useCommentDeleteSocket(
         return {
           ...oldComments,
           pages: oldComments.pages.map((page) => {
+            // กรณี comment ปกติ
+            if (!deleteComment.parent && !deleteComment.parentId) {
+              // ถ้าไม่ใช่ page ที่มี comment ที่จะลบให้ข้าม
+              if (
+                !page.comments.some(
+                  (comment) => comment.id === deleteComment.id,
+                )
+              ) {
+                return page;
+              }
+
+              return {
+                ...page,
+                comments: page.comments.filter(
+                  (comment) => comment.id !== deleteComment.id,
+                ),
+              };
+            }
+
+            // กรณี reply
+            // ถ้าไม่ใช่ page ที่มี reply ที่จะลบให้ข้าม
+            if (
+              !page.comments.some((comment) => comment.replies.some((reply) => reply.id === deleteComment.id))
+            ) {
+              return page;
+            }
+
             return {
               ...page,
-              comments: page.comments.filter((comment) => comment.id !== deleteComment.id && comment.parentId !== deleteComment.id),
+              comments: page.comments.map((comment) => {
+                // ถ้าไม่ใช่ comment ที่ reply ข้าม
+                if (
+                  !comment.replies.some(
+                    (reply) => reply.id === deleteComment.id,
+                  )
+                ) {
+                  return comment;
+                }
+
+                const deletedReplyComment: IComment = {
+                  ...comment,
+                  replies: [
+                    ...comment.replies.filter(
+                      (reply) => reply.id !== deleteComment.id,
+                    ),
+                  ],
+                };
+
+                return deletedReplyComment;
+              }),
             };
           }),
         };

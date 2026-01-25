@@ -22,21 +22,57 @@ export function useCommentUpdateSocket(
 
         return {
           ...oldComments,
-          pages: oldComments.pages.map((page) => ({
-            ...page,
-            comments: page.comments.map((comment) => {
-              // ไม่ใช้ comment target ข้าม
-              if(comment.id !== updatedComment.id){
-                return comment;
-              }
+          pages: oldComments.pages.map((page) => {
+            // ถ้า page นั้น ไม่มี comment หรือ reply ที่ update ให้ข้าม
+            if(
+              !page.comments.some((comment) => comment.id === updatedComment.id)
+              &&
+              !page.comments.some((comment) => comment.replies.some((reply) => reply.id === updatedComment.id))
+            ){
+              return page;
+            }
 
-              const newUpdateComment: IComment = {
-                ...updatedComment,
-              }
+            // page target
+            return {
+              ...page,
+              comments: page.comments.map((comment) => {
+                // กรณีเป็น reply
+                if (updatedComment.parent && updatedComment.parentId) {
+                  // ไม่ใช่ comment ที่ reply ข้าม
+                  if (
+                    !comment.replies.some(
+                      (reply) => reply.id === updatedComment.id,
+                    )
+                  ) {
+                    return comment;
+                  }
 
-              return newUpdateComment;
-            }),
-          })),
+                  const updatedReplyComment: IComment = {
+                    ...comment,
+                    replies: [
+                      ...comment.replies.map((reply) =>
+                        reply.id === updatedComment.id ? updatedComment : reply,
+                      ),
+                    ],
+                  };
+
+                  return updatedReplyComment;
+                }
+
+                // กรณีเป็น comment ปกติ
+                // ไม่ใช้ comment target ข้าม
+                if (comment.id !== updatedComment.id) {
+                  return comment;
+                }
+
+                const newUpdateComment: IComment = {
+                  ...updatedComment,
+                };
+
+                return newUpdateComment;
+              }),
+            };
+          }),
         };
       });
     });

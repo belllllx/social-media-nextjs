@@ -25,16 +25,59 @@ export function useCommentLikeSocket(
         return {
           ...oldComments,
           pages: oldComments.pages.map((page) => {
-            // ไม่ใข่ page target ข้าม
-            if(!page.comments.some((prevComment) => prevComment.id === like.commentId)){
+            // ถ้าไม่ใข่ page ที่กด like comment และ reply ข้าม
+            if (
+              !page.comments.some(
+                (prevComment) => prevComment.id === like.commentId,
+              ) &&
+              !page.comments.some((prevComment) =>
+                prevComment.replies.some(
+                  (reply) => reply.id === like.commentId,
+                ),
+              )
+            ) {
               return page;
             }
 
             return {
               ...page,
               comments: page.comments.map((comment) => {
-                // ไม่ใข่ post target ข้าม
-                if(comment.id !== like.commentId){
+                // กรณี reply
+                // ถ้าเป็น comment ของ reply ที่ like
+                if (
+                  comment.replies.some((reply) => reply.id === like.commentId)
+                ) {
+                  const updateReplyCommentLike: IComment = {
+                    ...comment,
+                    replies: comment.replies.map((reply) => {
+                      // ถ้าไม่ใช่ reply ที่ like ข้าม
+                      if (reply.id !== like.commentId) {
+                        return reply;
+                      }
+
+                      const copyReply: IComment = {
+                        ...reply,
+                        likes: [...reply.likes],
+                      };
+                      const index = copyReply.likes.findIndex(
+                        (prevLike) => prevLike.id === like.id,
+                      );
+                      if (index !== -1) {
+                        copyReply.likes.splice(index, 1);
+                      } else {
+                        copyReply.likes.unshift(like);
+                      }
+
+                      return copyReply;
+                    }),
+                  };
+
+                  return updateReplyCommentLike;
+                }
+
+                // กรณี comment ปกติ
+                // ไม่ใข่ comment target ข้าม
+                if (comment.id !== like.commentId) {
                   return comment;
                 }
 
@@ -42,9 +85,9 @@ export function useCommentLikeSocket(
                 const copyComment = {
                   ...comment,
                   likes: [...comment.likes],
-                }
+                };
                 const index = copyComment.likes.findIndex((prevLike) =>
-                  isEqual(prevLike, like)
+                  isEqual(prevLike, like),
                 );
                 if (index !== -1) {
                   copyComment.likes.splice(index, 1);
