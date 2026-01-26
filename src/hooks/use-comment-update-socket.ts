@@ -24,11 +24,14 @@ export function useCommentUpdateSocket(
           ...oldComments,
           pages: oldComments.pages.map((page) => {
             // ถ้า page นั้น ไม่มี comment หรือ reply ที่ update ให้ข้าม
-            if(
-              !page.comments.some((comment) => comment.id === updatedComment.id)
-              &&
-              !page.comments.some((comment) => comment.replies.some((reply) => reply.id === updatedComment.id))
-            ){
+            if (
+              !page.comments.some(
+                (comment) => comment.id === updatedComment.id,
+              ) &&
+              !page.comments.some((comment) =>
+                comment.replies.some((reply) => reply.id === updatedComment.id),
+              )
+            ) {
               return page;
             }
 

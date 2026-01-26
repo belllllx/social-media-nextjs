@@ -24,6 +24,7 @@ import {
 } from "@chakra-ui/react";
 import React, {
   ChangeEvent,
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -49,6 +50,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CommentFile } from "./comment-file";
 import { CommentAction } from "./comment-action";
 import { useActionStore } from "@/providers/action-store-provider";
+import { TagUser } from "./tag-user";
 
 interface CommentUserHeaderProps {
   comment: IComment;
@@ -308,13 +310,30 @@ export function CommentUser({
                         {formatDate(comment.createdAt)}
                       </Text>
                     </HStack>
-                    {comment.message && (
-                      <Text wordBreak="break-word">{comment.message}</Text>
-                    )}
 
-                    {!comment.message && comment.fileUrl && (
+                    {!comment.replyToUser && !comment.replyToUserId && comment.message ? (
+                      <Text wordBreak="break-word">
+                        {comment.message}
+                      </Text>
+                    ) : null}
+
+                    {comment.replyToUser && comment.replyToUserId && comment.message ? (
+                      <HStack gapX="2">
+                        <TagUser comment={comment} />
+                        <Text wordBreak="break-word">{comment.message}</Text>
+                      </HStack>
+                    ) : null}
+
+                    {!comment.replyToUser && !comment.replyToUserId && !comment.message && comment.fileUrl ? (
                       <CommentFile comment={comment} />
-                    )}
+                    ) : null}
+
+                    {comment.replyToUser && comment.replyToUserId && !comment.message && comment.fileUrl ? (
+                      <>
+                        <TagUser comment={comment} />
+                        <CommentFile comment={comment} />
+                      </>
+                    ) : null}
                   </Stack>
 
                   {comment.message && comment.fileUrl && (

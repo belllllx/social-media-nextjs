@@ -9,6 +9,7 @@ interface ScrollBtnProps {
 export function ScrollBtn({ scrollRef }: ScrollBtnProps) {
   return (
     <Box
+      zIndex="999"
       position="fixed"
       bottom="6"
       right="6"

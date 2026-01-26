@@ -7,10 +7,6 @@ export function useNotifyDelete(
   activeUserId: string,
   deletedCommentId?: string,
 ) {
-  console.log({
-    deletedPostId,
-    deletedCommentId,
-  });
   queryClient.setQueryData<
     InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
   >(["notifies"], (oldNotifies) => {

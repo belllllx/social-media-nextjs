@@ -80,10 +80,11 @@ export function CreateReplyComment({
       try {
         const res = await callApi<ICreateCommentPayload>(
           "post",
-          `comment/reply/create/${activeUser?.id}/${comment.id}/${post.id}`,
+          `comment/reply/create/${activeUser?.id}/${comment.parentId ?? comment.id}/${post.id}`,
           {
             message: !message ? undefined : message,
             fileUrl: !fileUrl ? undefined : fileUrl,
+            replyToUserId: !comment.parentId ? undefined : comment.userId,
           },
         );
 
@@ -102,33 +103,8 @@ export function CreateReplyComment({
         console.log(error);
       }
     }),
-    [],
+    [activeUser, content, fileUrl, comment, post.id],
   );
-  //   if (!activeUser || (!message && !fileUrl)) {
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await callApi<ICreateCommentPayload>(
-  //       "post",
-  //       `comment/reply/create/${activeUser?.id}/${comment.id}/${post.id}`,
-  //       {
-  //         message: !message ? undefined : message,
-  //         fileUrl: !fileUrl ? undefined : fileUrl,
-  //       },
-  //     );
-
-  //     if (!res.success) {
-  //       toast.error(formatToastMessages(res.message));
-  //       return;
-  //     }
-
-  //     reset();
-  //     setFileUrl("");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // });
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +161,7 @@ export function CreateReplyComment({
   }, []);
 
   useEffect(() => {
-    if(!isOpenReply){
+    if (!isOpenReply) {
       reset();
     }
   }, [isOpenReply]);

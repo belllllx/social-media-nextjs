@@ -135,6 +135,8 @@ export interface IComment {
   parent?: IComment;
   replysCount: number;
   replies: IComment[];
+  replyToUserId: string | null;
+  replyToUser: IUser | null;
 }
 
 export interface ICreatePostPayload {
@@ -155,6 +157,7 @@ export interface IUpdatePostPayload {
 export interface ICreateCommentPayload {
   message?: string;
   fileUrl?: string;
+  replyToUserId?: string;
 }
 
 export interface IUpdateCommentPayload {
