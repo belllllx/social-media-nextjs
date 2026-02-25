@@ -92,9 +92,9 @@ export interface IFollower {
   followingId: string;
 }
 
-export type UsersTemp = (IUser & {
+export type OnlineUsers = (IUser & {
   active: boolean;
-})[];
+});
 
 export interface ILike {
   id: number;
@@ -158,6 +158,7 @@ export interface ICreateCommentPayload {
   message?: string;
   fileUrl?: string;
   replyToUserId?: string;
+  isTagUser?: boolean;
 }
 
 export interface IUpdateCommentPayload {

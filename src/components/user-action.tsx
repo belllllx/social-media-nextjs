@@ -7,8 +7,11 @@ import { useUserStore } from "@/providers/user-store-provider";
 import { navigate } from "@/utils/helpers/router";
 import { callApi } from "@/utils/helpers/call-api";
 import { useCallback, useState } from "react";
+import { useSocketIo } from "@/providers/socket-io-provider";
 
 export function UserAction() {
+  const { socket } = useSocketIo();
+
   const { user, clearUser } = useUserStore((state) => state);
 
   const [disabled, setDisabled] = useState(false);
@@ -20,6 +23,8 @@ export function UserAction() {
   }, [navigate]);
 
   const handleLogout = useCallback(async () => {
+    socket?.disconnect();
+
     setDisabled(true);
     const data = await callApi("post", "auth/logout");
     setDisabled(false);
@@ -27,7 +32,7 @@ export function UserAction() {
       navigate("/");
       setTimeout(() => clearUser(), 500);
     }
-  }, [clearUser, navigate]);
+  }, [socket, clearUser, navigate]);
 
   return (
     <Popover.Root positioning={{ placement: "bottom-end" }}>

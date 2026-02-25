@@ -1,12 +1,11 @@
 "use client";
 
 import { useNavigateUser } from "@/hooks/use-navigate-user";
-import { IFollower, IUser } from "@/utils/types";
+import { IUser } from "@/utils/types";
 import { Avatar, Circle, Flex, Float, Stack, Text } from "@chakra-ui/react";
 
 interface UserStatusProps {
   user: IUser & {
-    followers: IFollower[];
     active?: boolean;
   };
 }

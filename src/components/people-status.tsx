@@ -19,7 +19,7 @@ export function PeopleStatus() {
         textStyle="lg" 
         fontWeight="medium"
       >
-        People status
+        Online users
       </Text>
       <Separator width="full" />
       <Box overflowY="auto" flex="1" width="full">

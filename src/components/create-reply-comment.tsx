@@ -2,6 +2,7 @@
 
 import {
   IComment,
+  ICommonResponse,
   ICreateCommentPayload,
   IDeleteFilePayload,
   IPost,
@@ -78,15 +79,26 @@ export function CreateReplyComment({
       }
 
       try {
-        const res = await callApi<ICreateCommentPayload>(
-          "post",
-          `comment/reply/create/${activeUser?.id}/${comment.parentId ?? comment.id}/${post.id}`,
-          {
-            message: !message ? undefined : message,
-            fileUrl: !fileUrl ? undefined : fileUrl,
-            replyToUserId: !comment.parentId ? undefined : comment.userId,
-          },
-        );
+        const res: ICommonResponse = comment.parentId
+          ?
+          await callApi<ICreateCommentPayload>(
+            "post",
+            `comment/tag/create/${activeUser?.id}/${comment.parentId}/${comment.id}/${post.id}`,
+            {
+              message: !message ? undefined : message,
+              fileUrl: !fileUrl ? undefined : fileUrl,
+              replyToUserId: comment.userId,
+            },
+          )
+          :
+          await callApi<ICreateCommentPayload>(
+            "post",
+            `comment/reply/create/${activeUser?.id}/${comment.id}/${post.id}`,
+            {
+              message: !message ? undefined : message,
+              fileUrl: !fileUrl ? undefined : fileUrl,
+            },
+          );
 
         if (!res.success) {
           toast.error(formatToastMessages(res.message));

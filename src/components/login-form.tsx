@@ -11,8 +11,11 @@ import { navigate } from "@/utils/helpers/router";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
+import { useSocketIo } from "@/providers/socket-io-provider";
 
 export function LoginForm() {
+  const { socket } = useSocketIo();
+
   const queryClient = useQueryClient();
 
   const {
@@ -38,10 +41,11 @@ export function LoginForm() {
         toast.success(formatToastMessages(res.message));
 
         queryClient.clear();
+        socket?.disconnect().connect();
         navigate("/feed");
       }
     }),
-    [queryClient],
+    [queryClient, socket],
   );
 
   return (

@@ -1,38 +1,18 @@
-import { InfiniteData, QueryClient } from "@tanstack/react-query";
-import { IFollower, IUser, UsersTemp } from "../types";
+import { QueryClient } from "@tanstack/react-query";
+import { OnlineUsers } from "../types";
 
-export function setQueryDataUsersStatus(queryClient: QueryClient, users: UsersTemp) {
-  queryClient.setQueryData<
-    InfiniteData<{
-      users: (IUser & { followers: IFollower[]; active?: boolean })[];
-      nextCursor: string | null;
-    }>
-  >(["usersSuggest"], (oldUsersSuggest) => {
-    if (!oldUsersSuggest) {
+export function setQueryDataUsersStatus(queryClient: QueryClient, users: OnlineUsers[]) {
+  queryClient.setQueryData<OnlineUsers[]>(["onlineUsers"], (oldOnlineUsers) => {
+    if (!oldOnlineUsers) {
       return undefined;
     }
 
-    return {
-      ...oldUsersSuggest,
-      pages: oldUsersSuggest.pages.map((group) => ({
-        ...group,
-        users: group.users.map(
-          (
-            oldUserSuggest: IUser & {
-              followers: IFollower[];
-              active?: boolean;
-            }
-          ) => {
-            const matchedUser = users.find(
-              (user) => user.id === oldUserSuggest.id
-            );
-            return {
-              ...oldUserSuggest,
-              active: matchedUser ? matchedUser.active : false,
-            };
-          }
-        ),
-      })),
-    };
+    return oldOnlineUsers.map((oldOnlineUser) => {
+      if(users.includes(oldOnlineUser)){
+        const index = users.indexOf(oldOnlineUser);
+        return index !== -1 ? users[index] : oldOnlineUser;
+      }
+      return oldOnlineUser;
+    });
   });
 }
