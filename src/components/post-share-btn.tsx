@@ -14,7 +14,7 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import { EmojiPicker } from "./emoji-picker";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
-import { ICreatePostPayload, IPost, IUser } from "@/utils/types";
+import { IPost, IUser } from "@/utils/types";
 import { useForm } from "react-hook-form";
 import {
   createContentSchema,
@@ -23,9 +23,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { SharePost } from "./share-post";
-import { callApi } from "@/utils/helpers/call-api";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSharePostCreate } from "@/hooks/use-share-post-create";
 
 interface PostShareBtnProps {
   post: IPost;
@@ -33,6 +34,8 @@ interface PostShareBtnProps {
 }
 
 export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
+  const queryClient = useQueryClient();
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleUserClick = useNavigateUser(post.user);
@@ -56,21 +59,22 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
 
   const content = watch("message");
 
+  const sharePostCreateMutation = useSharePostCreate(queryClient);
+
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
-      try {
-        const url =
-          post.parent && post.parentId
-            ? `post/share/create/${activeUser?.id}/${post.parentId}`
-            : `post/share/create/${activeUser?.id}/${post.id}`;
+      if (!activeUser) {
+        return;
+      }
 
-        const res = await callApi<Omit<ICreatePostPayload, "filesUrl">>(
-          "post",
-          url,
-          {
+      try {
+        const res = await sharePostCreateMutation.mutateAsync({
+          user: activeUser,
+          post,
+          payload: {
             message: !message ? undefined : message,
           },
-        );
+        });
 
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
@@ -84,7 +88,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
         console.log(error);
       }
     }),
-    [content, post, activeUser?.id],
+    [sharePostCreateMutation, content, post, activeUser?.id],
   );
 
   const handleOpenDialog = useCallback((open: boolean) => {

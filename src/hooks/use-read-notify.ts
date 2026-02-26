@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { ICommonResponse, INotify } from "@/utils/types";
+import { INotify } from "@/utils/types";
 import {
   InfiniteData,
   useMutation,
@@ -48,12 +48,12 @@ export function useReadNotify() {
 
       return prevNoifies;
     },
-    onError(error, notifyId, context) {
+    onError: (error, notifyId, context) => {
       queryClient.setQueryData<
         InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
       >(["notifies"], context);
     },
-    onSuccess(res) {
+    onSuccess: (res) => {
       const notifyData = res.data as INotify;
 
       queryClient.setQueryData<

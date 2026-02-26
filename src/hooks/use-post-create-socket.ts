@@ -16,7 +16,7 @@ export function usePostCreateSocket(
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"], (oldPosts) => {
-        if (!oldPosts || !oldPosts.pages.length) {
+        if (!oldPosts) {
           return undefined;
         }
         const firstPage = oldPosts.pages[0];

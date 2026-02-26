@@ -11,28 +11,40 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { BiLike, BiSolidLike } from "react-icons/bi";
-import { IPost } from "@/utils/types";
+import { IPost, IUser } from "@/utils/types";
 import { LikeUser } from "./like-user";
 import { ItemsNotFound } from "./items-not-found";
-import { callApi } from "@/utils/helpers/call-api";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { QueryClient } from "@tanstack/react-query";
+import { usePostLike } from "@/hooks/use-post-like";
 
 interface PostLikeBtnProps {
   post: IPost;
-  activeUserId?: string;
+  activeUser: IUser | null;
+  queryClient: QueryClient;
 }
 
-export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
+export function PostLikeBtn({
+  post,
+  activeUser,
+  queryClient,
+}: PostLikeBtnProps) {
+  const postLikeMutation = usePostLike(queryClient);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePostLike = useCallback(async () => {
+    if (!activeUser) {
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const res = await callApi(
-        "post",
-        `post/like/${activeUserId}/${post.id}`,
-      ).finally(() => setIsLoading(false));
+      const res = await postLikeMutation.mutateAsync({
+        user: activeUser,
+        postId: post.id,
+      });
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -41,8 +53,10 @@ export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
       toast.success(formatToastMessages(res.message));
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [activeUserId, post.id]);
+  }, [postLikeMutation, activeUser, post.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">
@@ -55,7 +69,7 @@ export function PostLikeBtn({ post, activeUserId }: PostLikeBtnProps) {
           p="0"
           justifyContent="flex-end"
         >
-          {post.likes.some((like) => like.userId === activeUserId) ? (
+          {post.likes.some((like) => like.userId === activeUser?.id) ? (
             <BiSolidLike />
           ) : (
             <BiLike />

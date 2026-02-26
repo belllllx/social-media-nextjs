@@ -51,7 +51,11 @@ export function Post({
         <PostBody post={post} />
       )}
 
-      <PostAction post={post} activeUser={user} />
+      <PostAction 
+        post={post} 
+        activeUser={user}
+        queryClient={queryClient}
+       />
 
       <ToggleViewComments post={post} />
 

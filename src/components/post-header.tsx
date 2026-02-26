@@ -22,7 +22,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { IPost, IUpdatePostPayload, IUser } from "@/utils/types";
+import { IPost, IUser } from "@/utils/types";
 import { BsThreeDots } from "react-icons/bs";
 import { EmojiPicker } from "./emoji-picker";
 import { useForm } from "react-hook-form";
@@ -40,6 +40,8 @@ import { toast } from "react-toastify";
 import { Carousel } from "./carousel";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotifyDelete } from "@/hooks/use-notify-delete";
+import { usePostUpdate } from "@/hooks/use-post-update";
+import { usePostDelete } from "@/hooks/use-post-delete";
 
 interface PostHeaderProps {
   children: React.ReactNode;
@@ -84,6 +86,9 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const initialMessage = post.message ?? "";
   const initialFilesUrl = post.filesUrl ?? [];
 
+  const updatePostMutation = usePostUpdate(queryClient);
+  const deletePostMutation = usePostDelete(queryClient);
+
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
       if (!message && !filesUrl.length) {
@@ -91,15 +96,15 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       }
 
       try {
-        const res = await callApi<IUpdatePostPayload>(
-          "patch",
-          `post/update/${post.id}`,
-          {
+        const res = await updatePostMutation.mutateAsync({
+          currentPost: post,
+          payload: {
             message: !message ? "" : message,
             filesUrl,
             shouldDeleteCurrentFiles,
           },
-        );
+        });
+
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
@@ -114,7 +119,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         console.log(error);
       }
     }),
-    [post.id, content, filesUrl, shouldDeleteCurrentFiles],
+    [updatePostMutation, post, content, filesUrl, shouldDeleteCurrentFiles],
   );
 
   const handleUserClick = useNavigateUser(post.user);
@@ -197,9 +202,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       }
 
       setDisabledDeletePost(true);
-      const res = await callApi("delete", `post/delete/${post.id}`).finally(
-        () => setDisabledDeletePost(false),
-      );
+
+      const res = await deletePostMutation.mutateAsync(post.id);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -211,8 +215,10 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       toast.success(formatToastMessages(res.message));
     } catch (error) {
       console.log(error);
+    } finally {
+      setDisabledDeletePost(false);
     }
-  }, [activeUser, post.id, queryClient]);
+  }, [deletePostMutation, activeUser, post.id, queryClient]);
 
   const handleInputFilesClick = useCallback(
     (ref: RefObject<HTMLInputElement | null>) => {

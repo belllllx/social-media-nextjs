@@ -32,9 +32,13 @@ import NextImage from "next/image";
 import { getFileDir } from "@/utils/helpers/get-file-dir";
 import { SocialVideoPlayer } from "@/components/social-video-player";
 import { FaXmark } from "react-icons/fa6";
-import { ICreatePostPayload, IDeleteFilePayload } from "@/utils/types";
+import { IDeleteFilePayload } from "@/utils/types";
+import { usePostCreate } from "@/hooks/use-post-create";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CreatePost() {
+  const queryClient = useQueryClient();
+
   const photoRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +51,8 @@ export function CreatePost() {
   const handleUserClick = useNavigateUser(user);
 
   const loadingComponent = useLoadingComponent(isLoading);
+
+  const createPostMutation = usePostCreate(queryClient);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -66,20 +72,19 @@ export function CreatePost() {
 
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
-      if (!(filesUrl.length || message)) {
+      if (!(filesUrl.length || message) || !user) {
         return;
       }
 
       try {
         setDisabled(true);
-        const res = await callApi<ICreatePostPayload>(
-          "post",
-          `post/create/${user?.id}`,
-          {
+        const res = await createPostMutation.mutateAsync({
+          user,
+          payload: {
             message: !message ? undefined : message,
             filesUrl,
           },
-        ).finally(() => setDisabled(false));
+        });
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
@@ -91,9 +96,11 @@ export function CreatePost() {
       } catch (error) {
         console.log(error);
         toast.error("Failed to create post");
+      } finally {
+        setDisabled(false);
       }
     }),
-    [content, filesUrl, user?.id],
+    [createPostMutation, content, filesUrl, user?.id],
   );
 
   const handleInputFilesClick = useCallback(
