@@ -441,6 +441,7 @@ export function CommentUser({
                 post={post}
                 comment={comment}
                 activeUser={activeUser}
+                queryClient={queryClient}
               />
 
               {showReplyData?.open &&

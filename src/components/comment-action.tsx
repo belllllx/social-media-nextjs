@@ -6,17 +6,20 @@ import { CommentLikeBtn } from "./comment-like-btn";
 import { IComment, IPost, IUser } from "@/utils/types";
 import { ToggleViewReplys } from "./toggle-view-replys";
 import { CreateReplyComment } from "./create-reply-comment";
+import { QueryClient } from "@tanstack/react-query";
 
 interface CommentActionProps {
   post: IPost;
   comment: IComment;
   activeUser: IUser | null;
+  queryClient: QueryClient;
 }
 
 export function CommentAction({
   post,
   comment,
   activeUser,
+  queryClient,
 }: CommentActionProps) {
   const [openReply, setOpenReply] = useState(false);
 
@@ -48,6 +51,7 @@ export function CommentAction({
         isOpenReply={openReply}
         onOpenReply={handleOpenReply}
         post={post}
+        queryClient={queryClient}
       />
     </Stack>
   );

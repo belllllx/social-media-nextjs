@@ -3,7 +3,6 @@
 import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { useUserStore } from "@/providers/user-store-provider";
 import {
-  ICreateCommentPayload,
   IDeleteFilePayload,
   IPost,
 } from "@/utils/types";
@@ -37,12 +36,15 @@ import { toast } from "react-toastify";
 import { FaXmark } from "react-icons/fa6";
 import NextImage from "next/image";
 import { useActionStore } from "@/providers/action-store-provider";
+import { QueryClient } from "@tanstack/react-query";
+import { useCommentCreate } from "@/hooks/use-comment-create";
 
 interface CreateCommentProps {
   post: IPost;
+  queryClient: QueryClient;
 }
 
-export function CreateComment({ post }: CreateCommentProps) {
+export function CreateComment({ post, queryClient }: CreateCommentProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
 
@@ -50,8 +52,8 @@ export function CreateComment({ post }: CreateCommentProps) {
   const [fileUrl, setFileUrl] = useState("");
 
   const { user } = useUserStore((state) => state);
-  const { 
-    focusPostId, 
+  const {
+    focusPostId,
     setFocusPostId,
     setShowCommentOnPostId,
   } = useActionStore((state) => state);
@@ -75,21 +77,23 @@ export function CreateComment({ post }: CreateCommentProps) {
 
   const content = watch("message");
 
+  const createCommentMutation = useCommentCreate(queryClient);
+
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
-      if (!user || (!message && !fileUrl)) {
+      if (!user || (!message && !fileUrl) || !message) {
         return;
       }
 
       try {
-        const res = await callApi<ICreateCommentPayload>(
-          "post",
-          `comment/create/${user.id}/${post.id}`,
-          {
-            message: !message ? undefined : message,
+        const res = await createCommentMutation.mutateAsync({
+          user,
+          postId: post.id,
+          payload: {
+            message,
             fileUrl: !fileUrl ? undefined : fileUrl,
           },
-        );
+        });
 
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
@@ -106,7 +110,7 @@ export function CreateComment({ post }: CreateCommentProps) {
         console.log(error);
       }
     }),
-    [user, content, fileUrl, post.id],
+    [createCommentMutation, user, content, fileUrl, post.id],
   );
 
   const handleFilesChange = useCallback(

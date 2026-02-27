@@ -3,7 +3,6 @@
 import {
   IComment,
   ICommonResponse,
-  ICreateCommentPayload,
   IDeleteFilePayload,
   IPost,
   IUser,
@@ -31,6 +30,8 @@ import { FaXmark } from "react-icons/fa6";
 import { Image } from "@chakra-ui/react";
 import NextImage from "next/image";
 import { useActionStore } from "@/providers/action-store-provider";
+import { QueryClient } from "@tanstack/react-query";
+import { useCommentCreate } from "@/hooks/use-comment-create";
 
 interface CreateReplyCommentProps {
   isOpenReply: boolean;
@@ -38,6 +39,7 @@ interface CreateReplyCommentProps {
   onOpenReply: (open: boolean) => void;
   post: IPost;
   comment: IComment;
+  queryClient: QueryClient;
 }
 
 export function CreateReplyComment({
@@ -46,6 +48,7 @@ export function CreateReplyComment({
   onOpenReply,
   post,
   comment,
+  queryClient,
 }: CreateReplyCommentProps) {
   const { setShowReplyOnCommentId } = useActionStore((state) => state);
 
@@ -72,33 +75,37 @@ export function CreateReplyComment({
 
   const content = watch("message");
 
+  const createCommentMutation = useCommentCreate(queryClient);
+
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
-      if (!activeUser || (!message && !fileUrl)) {
+      if (!activeUser || (!message && !fileUrl) || !message) {
         return;
       }
 
       try {
         const res: ICommonResponse = comment.parentId
           ?
-          await callApi<ICreateCommentPayload>(
-            "post",
-            `comment/tag/create/${activeUser?.id}/${comment.parentId}/${comment.id}/${post.id}`,
-            {
-              message: !message ? undefined : message,
+          await createCommentMutation.mutateAsync({
+            user: activeUser,
+            postId: post.id,
+            comment,
+            payload: {
+              message,
               fileUrl: !fileUrl ? undefined : fileUrl,
               replyToUserId: comment.userId,
             },
-          )
+          })
           :
-          await callApi<ICreateCommentPayload>(
-            "post",
-            `comment/reply/create/${activeUser?.id}/${comment.id}/${post.id}`,
-            {
-              message: !message ? undefined : message,
+          await createCommentMutation.mutateAsync({
+            user: activeUser,
+            postId: post.id,
+            comment,
+            payload: {
+              message,
               fileUrl: !fileUrl ? undefined : fileUrl,
             },
-          );
+          });
 
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
@@ -115,7 +122,7 @@ export function CreateReplyComment({
         console.log(error);
       }
     }),
-    [activeUser, content, fileUrl, comment, post.id],
+    [createCommentMutation, activeUser, content, fileUrl, comment, post.id],
   );
 
   const handleFileChange = useCallback(

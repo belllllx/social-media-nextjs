@@ -61,7 +61,7 @@ export function Post({
 
       <Comments post={post} activeUser={user} />
 
-      <CommentOverview post={post} />
+      <CommentOverview post={post} queryClient={queryClient} />
     </Stack>
   );
 }

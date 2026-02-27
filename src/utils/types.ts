@@ -155,10 +155,9 @@ export interface IUpdatePostPayload {
 }
 
 export interface ICreateCommentPayload {
-  message?: string;
+  message: string;
   fileUrl?: string;
   replyToUserId?: string;
-  isTagUser?: boolean;
 }
 
 export interface IUpdateCommentPayload {
