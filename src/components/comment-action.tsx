@@ -34,6 +34,7 @@ export function CommentAction({
           post={post} 
           comment={comment} 
           activeUser={activeUser} 
+          queryClient={queryClient}
         />
         <Text
           onClick={() => handleOpenReply(true)}

@@ -5,7 +5,6 @@ import {
   IComment,
   IDeleteFilePayload,
   IPost,
-  IUpdateCommentPayload,
   IUser,
 } from "@/utils/types";
 import {
@@ -24,7 +23,6 @@ import {
 } from "@chakra-ui/react";
 import React, {
   ChangeEvent,
-  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -46,26 +44,28 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { FaXmark } from "react-icons/fa6";
 import NextImage from "next/image";
 import { useNotifyDelete } from "@/hooks/use-notify-delete";
-import { useQueryClient } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { CommentFile } from "./comment-file";
 import { CommentAction } from "./comment-action";
 import { useActionStore } from "@/providers/action-store-provider";
 import { TagUser } from "./tag-user";
+import { useCommentUpdate } from "@/hooks/use-comment-update";
+import { useCommentDelete } from "@/hooks/use-comment-delete";
 
-interface CommentUserHeaderProps {
+interface CommentUserProps {
   comment: IComment;
   post: IPost;
   activeUser: IUser | null;
+  queryClient: QueryClient;
 }
 
 export function CommentUser({
   comment,
   post,
   activeUser,
-}: CommentUserHeaderProps) {
+  queryClient,
+}: CommentUserProps) {
   const { showReplyOnCommentId } = useActionStore((state) => state);
-
-  const queryClient = useQueryClient();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -99,6 +99,9 @@ export function CommentUser({
   const initialMessage = comment.message ?? "";
   const initialFileUrl = comment.fileUrl ?? null;
 
+  const updateCommentMutation = useCommentUpdate(queryClient);
+  const deleteCommentMutation = useCommentDelete(queryClient);
+
   const onSubmit = useCallback(
     handleSubmit(async ({ message }) => {
       if (!message && !fileUrl) {
@@ -106,15 +109,15 @@ export function CommentUser({
       }
 
       try {
-        const res = await callApi<IUpdateCommentPayload>(
-          "patch",
-          `comment/update/${comment.id}`,
-          {
+        const res = await updateCommentMutation.mutateAsync({
+          postId: post.id,
+          comment,
+          payload: {
             message: !message ? "" : message,
             fileUrl: !fileUrl ? undefined : fileUrl,
             shouldDeleteCurrentFile,
           },
-        );
+        });
         if (!res.success) {
           toast.error(formatToastMessages(res.message));
           return;
@@ -129,7 +132,7 @@ export function CommentUser({
         console.log(error);
       }
     }),
-    [comment.id, fileUrl, shouldDeleteCurrentFile],
+    [updateCommentMutation, post, comment, fileUrl, shouldDeleteCurrentFile],
   );
 
   const handleFileChange = useCallback(
@@ -222,25 +225,25 @@ export function CommentUser({
       }
 
       setDisabledDeleteComment(true);
-      const res = await callApi(
-        "delete",
-        `comment/delete/${post.id}/${comment.id}`,
-      ).finally(() => setDisabledDeleteComment(false));
+      const res = await deleteCommentMutation.mutateAsync({
+        postId: post.id,
+        comment,
+      });
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
       }
 
-      const deletedComment = res.data as IComment;
-
-      useNotifyDelete(queryClient, post.id, activeUser.id, deletedComment.id);
+      useNotifyDelete(queryClient);
 
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
       console.log(error);
+    } finally {
+      setDisabledDeleteComment(false);
     }
-  }, [activeUser, post.id, comment.id, queryClient]);
+  }, [deleteCommentMutation, activeUser, post.id, comment, queryClient]);
 
   useEffect(() => {
     if (!openEditComment) {
@@ -291,173 +294,152 @@ export function CommentUser({
           </Avatar.Root>
         )}
 
-        <>
+        <Stack gapY="0" width="full">
           {!openEditComment ? (
-            <Stack gapY="0" width="full">
-              <HStack gapX="3" alignItems="flex-start">
-                <Stack gapY="2">
-                  <Stack
-                    backgroundColor={
-                      comment.message ? "gray.100" : "transparent"
-                    }
-                    gapY={comment.message ? "0" : "2"}
-                    rounded="2xl"
-                    p={comment.message ? "2" : "0"}
-                  >
-                    <HStack alignItems="center" gapX="2">
-                      <Text fontWeight="semibold">{comment.user.fullname}</Text>
-                      <Text color="fg.muted" textStyle="sm">
-                        {formatDate(comment.createdAt)}
-                      </Text>
+            <HStack gapX="3" alignItems="flex-start">
+              <Stack gapY="2">
+                <Stack
+                  backgroundColor={
+                    comment.message ? "gray.100" : "transparent"
+                  }
+                  gapY={comment.message ? "0" : "2"}
+                  rounded="2xl"
+                  p={comment.message ? "2" : "0"}
+                >
+                  <HStack alignItems="center" gapX="2">
+                    <Text fontWeight="semibold">{comment.user.fullname}</Text>
+                    <Text color="fg.muted" textStyle="sm">
+                      {formatDate(comment.createdAt)}
+                    </Text>
+                  </HStack>
+
+                  {!comment.replyToUser && !comment.replyToUserId && comment.message ? (
+                    <Text wordBreak="break-word">
+                      {comment.message}
+                    </Text>
+                  ) : null}
+
+                  {comment.replyToUser && comment.replyToUserId && comment.message ? (
+                    <HStack gapX="2">
+                      <TagUser comment={comment} />
+                      <Text wordBreak="break-word">{comment.message}</Text>
                     </HStack>
+                  ) : null}
 
-                    {!comment.replyToUser && !comment.replyToUserId && comment.message ? (
-                      <Text wordBreak="break-word">
-                        {comment.message}
-                      </Text>
-                    ) : null}
-
-                    {comment.replyToUser && comment.replyToUserId && comment.message ? (
-                      <HStack gapX="2">
-                        <TagUser comment={comment} />
-                        <Text wordBreak="break-word">{comment.message}</Text>
-                      </HStack>
-                    ) : null}
-
-                    {!comment.replyToUser && !comment.replyToUserId && !comment.message && comment.fileUrl ? (
-                      <CommentFile comment={comment} />
-                    ) : null}
-
-                    {comment.replyToUser && comment.replyToUserId && !comment.message && comment.fileUrl ? (
-                      <>
-                        <TagUser comment={comment} />
-                        <CommentFile comment={comment} />
-                      </>
-                    ) : null}
-                  </Stack>
-
-                  {comment.message && comment.fileUrl && (
+                  {!comment.replyToUser && !comment.replyToUserId && !comment.message && comment.fileUrl ? (
                     <CommentFile comment={comment} />
-                  )}
+                  ) : null}
+
+                  {comment.replyToUser && comment.replyToUserId && !comment.message && comment.fileUrl ? (
+                    <>
+                      <TagUser comment={comment} />
+                      <CommentFile comment={comment} />
+                    </>
+                  ) : null}
                 </Stack>
 
-                {comment.userId === activeUser?.id && (
-                  <Popover.Root
-                    open={openPopover}
-                    onOpenChange={(e) => setOpenPopover(e.open)}
-                    positioning={{ placement: "right-start" }}
-                  >
-                    <Popover.Trigger asChild>
-                      <IconButton rounded="full" variant="ghost">
-                        <BsThreeDotsVertical />
-                      </IconButton>
-                    </Popover.Trigger>
-                    <Portal>
-                      <Popover.Positioner>
-                        <Popover.Content width="150px">
-                          <Popover.Arrow />
-                          <Popover.Body>
-                            <Stack>
-                              <Button
-                                onClick={handleOpenEditComment}
-                                variant="ghost"
-                                justifyContent="start"
-                                type="button"
-                              >
-                                Edit
-                              </Button>
-
-                              <Dialog.Root
-                                open={openDeleteDialog}
-                                onOpenChange={(e) =>
-                                  handleOpenDeleteDialog(e.open)
-                                }
-                                placement="center"
-                                motionPreset="slide-in-bottom"
-                              >
-                                <Dialog.Trigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    justifyContent="start"
-                                    type="button"
-                                  >
-                                    Delete
-                                  </Button>
-                                </Dialog.Trigger>
-                                <Portal>
-                                  <Dialog.Backdrop />
-                                  <Dialog.Positioner>
-                                    <Dialog.Content>
-                                      <Dialog.Header>
-                                        <Dialog.Title
-                                          textAlign="center"
-                                          width="full"
-                                        >
-                                          Delete comment
-                                        </Dialog.Title>
-                                      </Dialog.Header>
-                                      <Dialog.Body>
-                                        <Text
-                                          textAlign="center"
-                                          textStyle="md"
-                                          color="red.600"
-                                          fontWeight="semibold"
-                                        >
-                                          Are you sure to delete a comment?
-                                        </Text>
-                                      </Dialog.Body>
-                                      <Dialog.Footer>
-                                        <Dialog.ActionTrigger asChild>
-                                          <Button
-                                            type="button"
-                                            variant="outline"
-                                          >
-                                            Cancel
-                                          </Button>
-                                        </Dialog.ActionTrigger>
-                                        <Button
-                                          onClick={handleDeleteComment}
-                                          disabled={disabledDeleteComment}
-                                          loading={disabledDeleteComment}
-                                          type="button"
-                                        >
-                                          Delete
-                                        </Button>
-                                      </Dialog.Footer>
-                                    </Dialog.Content>
-                                  </Dialog.Positioner>
-                                </Portal>
-                              </Dialog.Root>
-                            </Stack>
-                          </Popover.Body>
-                        </Popover.Content>
-                      </Popover.Positioner>
-                    </Portal>
-                  </Popover.Root>
+                {comment.message && comment.fileUrl && (
+                  <CommentFile comment={comment} />
                 )}
-              </HStack>
+              </Stack>
 
-              <CommentAction
-                post={post}
-                comment={comment}
-                activeUser={activeUser}
-                queryClient={queryClient}
-              />
+              {comment.userId === activeUser?.id && (
+                <Popover.Root
+                  open={openPopover}
+                  onOpenChange={(e) => setOpenPopover(e.open)}
+                  positioning={{ placement: "right-start" }}
+                >
+                  <Popover.Trigger asChild>
+                    <IconButton rounded="full" variant="ghost">
+                      <BsThreeDotsVertical />
+                    </IconButton>
+                  </Popover.Trigger>
+                  <Portal>
+                    <Popover.Positioner>
+                      <Popover.Content width="150px">
+                        <Popover.Arrow />
+                        <Popover.Body>
+                          <Stack>
+                            <Button
+                              onClick={handleOpenEditComment}
+                              variant="ghost"
+                              justifyContent="start"
+                              type="button"
+                            >
+                              Edit
+                            </Button>
 
-              {showReplyData?.open &&
-                comment.replies &&
-                comment.replies.length ?
-                comment.replies.map((reply) => (
-                  <CommentUser
-                    key={reply.id}
-                    comment={reply}
-                    post={post}
-                    activeUser={activeUser}
-                  />
-                )) : null }
-            </Stack>
+                            <Dialog.Root
+                              open={openDeleteDialog}
+                              onOpenChange={(e) =>
+                                handleOpenDeleteDialog(e.open)
+                              }
+                              placement="center"
+                              motionPreset="slide-in-bottom"
+                            >
+                              <Dialog.Trigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  justifyContent="start"
+                                  type="button"
+                                >
+                                  Delete
+                                </Button>
+                              </Dialog.Trigger>
+                              <Portal>
+                                <Dialog.Backdrop />
+                                <Dialog.Positioner>
+                                  <Dialog.Content>
+                                    <Dialog.Header>
+                                      <Dialog.Title
+                                        textAlign="center"
+                                        width="full"
+                                      >
+                                        Delete comment
+                                      </Dialog.Title>
+                                    </Dialog.Header>
+                                    <Dialog.Body>
+                                      <Text
+                                        textAlign="center"
+                                        textStyle="md"
+                                        color="red.600"
+                                        fontWeight="semibold"
+                                      >
+                                        Are you sure to delete a comment?
+                                      </Text>
+                                    </Dialog.Body>
+                                    <Dialog.Footer>
+                                      <Dialog.ActionTrigger asChild>
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </Dialog.ActionTrigger>
+                                      <Button
+                                        onClick={handleDeleteComment}
+                                        disabled={disabledDeleteComment}
+                                        loading={disabledDeleteComment}
+                                        type="button"
+                                      >
+                                        Delete
+                                      </Button>
+                                    </Dialog.Footer>
+                                  </Dialog.Content>
+                                </Dialog.Positioner>
+                              </Portal>
+                            </Dialog.Root>
+                          </Stack>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover.Positioner>
+                  </Portal>
+                </Popover.Root>
+              )}
+            </HStack>
           ) : (
-            <>
+            <HStack>
               <form onSubmit={onSubmit} className="w-full">
                 <Input
                   disabled={disabled || isSubmitting}
@@ -504,9 +486,29 @@ export function CommentUser({
               >
                 Cancel
               </Text>
-            </>
+            </HStack>
           )}
-        </>
+
+          <CommentAction
+            post={post}
+            comment={comment}
+            activeUser={activeUser}
+            queryClient={queryClient}
+          />
+
+          {showReplyData?.open &&
+            comment.replies &&
+            comment.replies.length ?
+            comment.replies.map((reply) => (
+              <CommentUser
+                key={reply.id}
+                comment={reply}
+                post={post}
+                activeUser={activeUser}
+                queryClient={queryClient}
+              />
+            )) : null}
+        </Stack>
       </HStack>
 
       {fileUrl && (

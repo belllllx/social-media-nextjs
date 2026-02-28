@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { IComment, ICommonResponse, ICreateCommentPayload, IUser } from "@/utils/types";
+import { IComment, ICommonResponse, ICreateCommentPayload, IPost, IUser } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
@@ -152,6 +152,39 @@ export function useCommentCreate(queryClient: QueryClient) {
           ...firstPage,
           comments: [newComment, ...firstPage.comments],
         };
+
+        queryClient.setQueryData<
+          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+        >(["posts"], (oldPosts) => {
+          if(!oldPosts){
+            return undefined;
+          }
+
+          return {
+            ...oldPosts,
+            pages: oldPosts.pages.map((page) => {
+              // ไม่ใช่เพจ target ข้าม
+              if(!page.posts.some((post) => post.id === postId)){
+                return page;
+              }
+
+              return {
+                ...page,
+                posts: page.posts.map((post) => {
+                  // ไม่ใข่ post target ข้าม
+                  if(post.id !== postId){
+                    return post;
+                  }
+
+                  return {
+                    ...post,
+                    commentsCount: post.commentsCount + 1,
+                  }
+                }),
+              }
+            }),
+          }
+        });
 
         return {
           ...oldComments,

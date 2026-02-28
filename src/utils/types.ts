@@ -161,7 +161,7 @@ export interface ICreateCommentPayload {
 }
 
 export interface IUpdateCommentPayload {
-  message?: string,
+  message: string,
   fileUrl?: string;
   shouldDeleteCurrentFile?: boolean;
 }

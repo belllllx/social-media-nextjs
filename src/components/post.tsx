@@ -59,7 +59,11 @@ export function Post({
 
       <ToggleViewComments post={post} />
 
-      <Comments post={post} activeUser={user} />
+      <Comments 
+        post={post} 
+        activeUser={user} 
+        queryClient={queryClient}
+      />
 
       <CommentOverview post={post} queryClient={queryClient} />
     </Stack>

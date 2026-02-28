@@ -8,13 +8,19 @@ import { useComments } from "@/hooks/use-comments";
 import { Error } from "./error";
 import { Spinner } from "./spinner";
 import { useActionStore } from "@/providers/action-store-provider";
+import { QueryClient } from "@tanstack/react-query";
 
 interface CommentsProps {
   post: IPost;
   activeUser: IUser | null;
+  queryClient: QueryClient;
 }
 
-export function Comments({ post, activeUser }: CommentsProps) {
+export function Comments({ 
+  post,
+  activeUser,
+  queryClient,
+}: CommentsProps) {
   const { showCommentOnPostId } = useActionStore((state) => state);
 
   const {
@@ -65,6 +71,7 @@ export function Comments({ post, activeUser }: CommentsProps) {
                       comment={comment}
                       post={post}
                       activeUser={activeUser}
+                      queryClient={queryClient}
                     />
                   </Stack>
                 ))}

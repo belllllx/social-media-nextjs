@@ -208,9 +208,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         toast.error(formatToastMessages(res.message));
         return;
       }
-
-      const deletedPost = res.data as IPost;
-      useNotifyDelete(queryClient, deletedPost.id, activeUser.id);
+      
+      useNotifyDelete(queryClient);
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {

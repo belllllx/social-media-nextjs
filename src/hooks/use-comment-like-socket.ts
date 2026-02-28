@@ -43,7 +43,7 @@ export function useCommentLikeSocket(
               ...page,
               comments: page.comments.map((comment) => {
                 // กรณี reply
-                // ถ้าเป็น comment ของ reply ที่ like
+                // ถ้าเป็น like reply of comment
                 if (
                   comment.replies.some((reply) => reply.id === like.commentId)
                 ) {

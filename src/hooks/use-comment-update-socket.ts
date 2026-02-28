@@ -33,7 +33,7 @@ export function useCommentUpdateSocket(
               )
             ) {
               return page;
-            }
+            } 
 
             // page target
             return {

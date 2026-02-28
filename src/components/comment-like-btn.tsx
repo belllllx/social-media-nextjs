@@ -14,21 +14,26 @@ import { BiLike, BiSolidLike } from "react-icons/bi";
 import { IComment, IPost, IUser } from "@/utils/types";
 import { LikeUser } from "./like-user";
 import { ItemsNotFound } from "./items-not-found";
-import { callApi } from "@/utils/helpers/call-api";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { QueryClient } from "@tanstack/react-query";
+import { useCommentLike } from "@/hooks/use-comment-like";
 
 interface CommentLikeBtnProps {
   post: IPost;
   comment: IComment;
   activeUser: IUser | null;
+  queryClient: QueryClient;
 }
 
 export function CommentLikeBtn({
   post,
   comment,
   activeUser,
+  queryClient,
 }: CommentLikeBtnProps) {
+  const commentLikeMutation = useCommentLike(queryClient);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCommentLike = useCallback(async () => {
@@ -38,10 +43,11 @@ export function CommentLikeBtn({
 
     try {
       setIsLoading(true);
-      const res = await callApi(
-        "post",
-        `comment/like/${activeUser?.id}/${post.id}/${comment.id}`,
-      ).finally(() => setIsLoading(false));
+      const res = await commentLikeMutation.mutateAsync({
+        commentId: comment.id,
+        postId: post.id,
+        user: activeUser,
+      });
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -50,8 +56,10 @@ export function CommentLikeBtn({
       toast.success(formatToastMessages(res.message));
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [activeUser?.id, post.id, comment.id]);
+  }, [commentLikeMutation, activeUser, post.id, comment.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">
