@@ -25,7 +25,7 @@ export function usePostLikeSocket(
           ...oldPosts,
           pages: oldPosts.pages.map((page) => {
             // ไม่ใข่ page target ข้าม
-            if(!page.posts.some((prevPost) => prevPost.id === like.postId)){
+            if (!page.posts.some((prevPost) => prevPost.id === like.postId)) {
               return page;
             }
 
@@ -33,7 +33,7 @@ export function usePostLikeSocket(
               ...page,
               posts: page.posts.map((post) => {
                 // ไม่ใข่ post target ข้าม
-                if(post.id !== like.postId){
+                if (post.id !== like.postId) {
                   return post;
                 }
 
@@ -56,6 +56,27 @@ export function usePostLikeSocket(
             };
           }),
         };
+      });
+
+      queryClient.setQueryData<IPost>(["post", like.postId], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        const copyPost = {
+          ...oldPost,
+          likes: [...oldPost.likes],
+        }
+        const index = copyPost.likes.findIndex((prevLike) =>
+          isEqual(prevLike, like)
+        );
+        if (index !== -1) {
+          copyPost.likes.splice(index, 1);
+        } else {
+          copyPost.likes.unshift(like);
+        }
+
+        return copyPost;
       });
     });
 

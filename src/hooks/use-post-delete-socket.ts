@@ -2,6 +2,7 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "@/providers/socket-io-provider";
+import { replace } from "@/utils/helpers/router";
 import { IPost } from "@/utils/types";
 import { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -35,6 +36,9 @@ export function usePostDeleteSocket(
           }),
         };
       });
+
+      queryClient.removeQueries({ queryKey: ["post", deletePost.id] });
+      replace("/feed");
     });
 
     return () => {

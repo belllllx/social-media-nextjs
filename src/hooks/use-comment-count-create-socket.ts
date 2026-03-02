@@ -24,7 +24,7 @@ export function useCommentCountCreateSocket(
           ...oldPosts,
           pages: oldPosts.pages.map((page) => {
             // ถ้าไม่ใช้ post target ข้าม
-            if(!page.posts.some((post) => post.id === newComment.postId)){
+            if (!page.posts.some((post) => post.id === newComment.postId)) {
               return page;
             }
 
@@ -37,7 +37,7 @@ export function useCommentCountCreateSocket(
                 }
 
                 // ถ้าเป็น create reply มา ไม่ count
-                if(newComment.parentId){
+                if (newComment.parentId) {
                   return post;
                 }
 
@@ -53,6 +53,24 @@ export function useCommentCountCreateSocket(
         };
       });
 
+      queryClient.setQueryData<IPost>(["post", newComment.postId], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        // ถ้าเป็น create reply มา ไม่ count
+        if (newComment.parentId) {
+          return oldPost;
+        }
+
+        const updatePost = {
+          ...oldPost,
+          commentsCount: oldPost.commentsCount + 1,
+        };
+
+        return updatePost;
+      });
+
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", newComment.postId], (oldComments) => {
@@ -64,7 +82,7 @@ export function useCommentCountCreateSocket(
           ...oldComments,
           pages: oldComments.pages.map((page) => {
             // ไม่ใช่ page target ข้าม
-            if(!page.comments.some((comment) => comment.id === newComment.parentId)){
+            if (!page.comments.some((comment) => comment.id === newComment.parentId)) {
               return page;
             }
 

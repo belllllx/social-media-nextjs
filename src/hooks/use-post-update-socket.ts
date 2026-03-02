@@ -65,6 +65,33 @@ export function usePostUpdateSocket(
           }),
         };
       });
+
+      queryClient.setQueryData<IPost>(["post", updatePost.id], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        if (oldPost.parentId === updatePost.id) {
+          const newUpdateParentPost: IPost = {
+            ...oldPost,
+            parent: {
+              ...updatePost,
+              message: updatePost.message,
+              filesUrl: [...(updatePost.filesUrl ?? [])],
+            },
+          };
+
+          return newUpdateParentPost;
+        }
+
+        const newUpdatePost: IPost = {
+          ...updatePost,
+          message: updatePost.message,
+          filesUrl: [...(updatePost.filesUrl ?? [])],
+        };
+
+        return newUpdatePost;
+      });
     });
 
     return () => {

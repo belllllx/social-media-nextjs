@@ -21,3 +21,11 @@ export function refresh() {
     window.location.reload();
   }
 }
+
+export function replace(path: string) {
+  if(router){
+    router.replace(path);
+  } else {
+    window.location.replace(path);
+  }
+}

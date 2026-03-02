@@ -12,7 +12,10 @@ export function usePostLike(queryClient: QueryClient) {
     ICommonResponse,
     Error,
     MutationType,
-    InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+    {
+      prevPosts?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>,
+      prevPost?: IPost,
+    }
   >({
     mutationFn: async ({
       user,
@@ -29,10 +32,23 @@ export function usePostLike(queryClient: QueryClient) {
       postId
     }) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["post", postId] });
 
       const prevPosts = queryClient.getQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"]);
+
+      const prevPost = queryClient.getQueryData<IPost>(["post", postId]);
+
+      const newLike: ILike = {
+        id: -1,
+        userId: user.id,
+        postId,
+        commentId: null,
+        user,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
 
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
@@ -68,15 +84,6 @@ export function usePostLike(queryClient: QueryClient) {
                 if (index !== -1) {
                   copyPost.likes.splice(index, 1);
                 } else {
-                  const newLike: ILike = {
-                    id: -1,
-                    userId: user.id,
-                    postId,
-                    commentId: null,
-                    user,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                  }
                   copyPost.likes.unshift(newLike);
                 }
 
@@ -87,15 +94,42 @@ export function usePostLike(queryClient: QueryClient) {
         };
       });
 
-      return prevPosts;
+      queryClient.setQueryData<IPost>(["post", postId], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        const copyPost = {
+          ...oldPost,
+          likes: [...oldPost.likes],
+        }
+        const index = copyPost.likes.findIndex((prevLike) =>
+          prevLike.userId === user.id
+        );
+        if (index !== -1) {
+          copyPost.likes.splice(index, 1);
+        } else {
+          copyPost.likes.unshift(newLike);
+        }
+
+        return copyPost;
+      });
+
+      return {
+        prevPosts,
+        prevPost,
+      };
     },
-    onError: (error, variables, context) => {
+    onError: (error, { postId }, context) => {
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context);
+      >(["posts"], context?.prevPosts);
+
+      queryClient.setQueryData<IPost>(["post", postId], context?.prevPost);
     },
-    onSettled: () => {
+    onSettled: (data, error, { postId }, context) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
     },
   });
 }

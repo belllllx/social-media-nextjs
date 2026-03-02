@@ -16,6 +16,8 @@ export function useCommentCreate(queryClient: QueryClient) {
     Error,
     MutationType,
     {
+      prevPosts?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>,
+      prevPost?: IPost,
       prevComments?: InfiniteData<{ comments: IComment[]; nextCursor: string | null }>,
       optimisticId: string,
     }
@@ -59,6 +61,12 @@ export function useCommentCreate(queryClient: QueryClient) {
       await queryClient.cancelQueries({ queryKey: ["comments", postId] });
 
       const optimisticId = uuidv4();
+
+      const prevPosts = queryClient.getQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts"]);
+
+      const prevPost = queryClient.getQueryData<IPost>(["post", postId]);
 
       const prevComments = queryClient.getQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
@@ -156,7 +164,7 @@ export function useCommentCreate(queryClient: QueryClient) {
         queryClient.setQueryData<
           InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
         >(["posts"], (oldPosts) => {
-          if(!oldPosts){
+          if (!oldPosts) {
             return undefined;
           }
 
@@ -164,7 +172,7 @@ export function useCommentCreate(queryClient: QueryClient) {
             ...oldPosts,
             pages: oldPosts.pages.map((page) => {
               // ไม่ใช่เพจ target ข้าม
-              if(!page.posts.some((post) => post.id === postId)){
+              if (!page.posts.some((post) => post.id === postId)) {
                 return page;
               }
 
@@ -172,7 +180,7 @@ export function useCommentCreate(queryClient: QueryClient) {
                 ...page,
                 posts: page.posts.map((post) => {
                   // ไม่ใข่ post target ข้าม
-                  if(post.id !== postId){
+                  if (post.id !== postId) {
                     return post;
                   }
 
@@ -186,6 +194,17 @@ export function useCommentCreate(queryClient: QueryClient) {
           }
         });
 
+        queryClient.setQueryData<IPost>(["post", postId], (oldPost) => {
+          if (!oldPost) {
+            return undefined;
+          }
+
+          return {
+            ...oldPost,
+            commentsCount: oldPost.commentsCount + 1,
+          }
+        });
+
         return {
           ...oldComments,
           pages: [newFirstPage, ...oldComments.pages.slice(1)],
@@ -193,17 +212,29 @@ export function useCommentCreate(queryClient: QueryClient) {
       });
 
       return {
+        prevPosts,
+        prevPost,
         prevComments,
         optimisticId,
       };
     },
     onError: (error, { postId }, context) => {
       queryClient.setQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts"], context?.prevPosts);
+
+      queryClient.setQueryData<IPost>(["post", postId], context?.prevPost);
+
+      queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", postId], context?.prevComments);
     },
-    onSuccess: ({ data }, variables, context) => {
+    onSuccess: ({ data }, { postId }, context) => {
       const createdComment = data as IComment;
+
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", createdComment.postId], (oldComments) => {

@@ -12,7 +12,10 @@ export function usePostUpdate(queryClient: QueryClient) {
     ICommonResponse,
     Error,
     MutateType,
-    InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+    {
+      prevPosts?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      prevPost?: IPost,
+    }
   >({
     mutationFn: async ({
       currentPost,
@@ -25,15 +28,18 @@ export function usePostUpdate(queryClient: QueryClient) {
       );
       return res;
     },
-    onMutate: async ({ 
+    onMutate: async ({
       currentPost,
       payload,
     }) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["post", currentPost.id] });
 
       const prevPosts = queryClient.getQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"]);
+
+      const prevPost = queryClient.getQueryData<IPost>(["post", currentPost.id]);
 
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
@@ -88,12 +94,44 @@ export function usePostUpdate(queryClient: QueryClient) {
         };
       });
 
-      return prevPosts;
+      queryClient.setQueryData<IPost>(["post", currentPost.id], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        if (oldPost.parentId === currentPost.id) {
+          const newUpdateParentPost: IPost = {
+            ...oldPost,
+            parent: {
+              ...currentPost,
+              message: payload.message ?? null,
+              filesUrl: [...(payload.filesUrl ?? [])],
+            },
+          };
+
+          return newUpdateParentPost;
+        }
+
+        const newUpdatePost: IPost = {
+          ...currentPost,
+          message: payload.message ?? null,
+          filesUrl: [...(payload.filesUrl ?? [])],
+        };
+
+        return newUpdatePost;
+      });
+
+      return {
+        prevPosts,
+        prevPost,
+      };
     },
-    onError: (error, variables, context) => {
+    onError: (error, { currentPost }, context) => {
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context);
+      >(["posts"], context?.prevPosts);
+
+      queryClient.setQueryData<IPost>(["post", currentPost.id], context?.prevPost);
     },
     onSuccess: ({ data }) => {
       const updatePost = data as IPost;
@@ -149,6 +187,33 @@ export function usePostUpdate(queryClient: QueryClient) {
             };
           }),
         };
+      });
+
+      queryClient.setQueryData<IPost>(["post", updatePost.id], (oldPost) => {
+        if(!oldPost){
+          return undefined;
+        }
+
+        if (oldPost.parentId === updatePost.id) {
+          const newUpdateParentPost: IPost = {
+            ...oldPost,
+            parent: {
+              ...updatePost,
+              message: updatePost.message,
+              filesUrl: [...(updatePost.filesUrl ?? [])],
+            },
+          };
+
+          return newUpdateParentPost;
+        }
+
+        const newUpdatePost: IPost = {
+          ...updatePost,
+          message: updatePost.message,
+          filesUrl: [...(updatePost.filesUrl ?? [])],
+        };
+
+        return newUpdatePost;
       });
     },
   });

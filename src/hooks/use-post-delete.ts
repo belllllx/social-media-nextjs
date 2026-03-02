@@ -1,4 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
+import { replace } from "@/utils/helpers/router";
 import { ICommonResponse, IPost } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 
@@ -7,7 +8,10 @@ export function usePostDelete(queryClient: QueryClient) {
     ICommonResponse,
     Error,
     string,
-    InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+    {
+      prevPosts?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>,
+      prevPost?: IPost,
+    }
   >({
     mutationFn: async (postId) => {
       const res = await callApi("delete", `post/delete/${postId}`);
@@ -15,10 +19,13 @@ export function usePostDelete(queryClient: QueryClient) {
     },
     onMutate: async (postId) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["post", postId] });
 
       const prevPosts = queryClient.getQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"]);
+
+      const prevPost = queryClient.getQueryData<IPost>(["post", postId]);
 
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
@@ -43,15 +50,24 @@ export function usePostDelete(queryClient: QueryClient) {
         };
       });
 
-      return prevPosts;
+      queryClient.removeQueries({ queryKey: ["post", postId] });
+      replace("/feed");
+
+      return {
+        prevPosts,
+        prevPost,
+      };
     },
-    onError: (error, variables, context) => {
+    onError: (error, postId, context) => {
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context);
+      >(["posts"], context?.prevPosts);
+
+      queryClient.setQueryData<IPost>(["post", postId], context?.prevPost);
     },
-    onSettled: () => {
+    onSettled: (data, error, postId) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
     },
   });
 }

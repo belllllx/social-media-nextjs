@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { Post } from "./post";
 import { PostsSkeleton } from "./posts-skeleton";
-import { usePosts } from "@/hooks/use-posts";
 import { usePostCreateSocket } from "@/hooks/use-post-create-socket";
 import { usePostLikeSocket } from "@/hooks/use-post-like-socket";
 import { usePostUpdateSocket } from "@/hooks/use-post-update-socket";
@@ -17,8 +16,9 @@ import { useCommentUpdateSocket } from "@/hooks/use-comment-update-socket";
 import { useCommentDeleteSocket } from "@/hooks/use-comment-delete-socket";
 import { useReplyCountDeleteSocket } from "@/hooks/use-reply-count-delete-socket";
 import { useReplyDeleteSocket } from "@/hooks/use-reply-delete-socket";
-import { postFilter } from "@/utils/helpers/posts-filter";
 import { Box } from "@chakra-ui/react";
+import { usePost } from "@/hooks/use-post";
+import { Error } from "./error";
 
 interface PostByIdProps {
     id: string;
@@ -43,10 +43,19 @@ export function PostById({ id }: PostByIdProps) {
     useReplyCountDeleteSocket(socket, queryClient);
     useReplyDeleteSocket(socket, queryClient);
 
-    const postPages = usePosts(10);
-    const post = postFilter(id, postPages.data);
+    const {
+        data: post,
+        isError,
+        status,
+        error,
+        refetch,
+    } = usePost(id);
 
-    if (!post) {
+    if (isError) {
+        return <Error error={error} refetch={refetch} />;
+    }
+
+    if (status === "pending") {
         return <PostsSkeleton amount={1} />
     }
 

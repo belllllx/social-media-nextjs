@@ -47,6 +47,19 @@ export function useCommentCountDeleteSocket(
           }),
         };
       });
+
+      queryClient.setQueryData<IPost>(["post", deleteComment.postId], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        const updatePost = {
+          ...oldPost,
+          commentsCount: oldPost.commentsCount - 1,
+        };
+
+        return updatePost;
+      });
     });
 
     return () => {
