@@ -183,6 +183,8 @@ export function CreateReplyComment({
     if (!isOpenReply) {
       reset();
     }
+
+    inputRef.current?.focus();
   }, [isOpenReply]);
 
   return (

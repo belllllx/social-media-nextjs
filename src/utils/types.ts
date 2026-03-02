@@ -129,10 +129,12 @@ export interface IComment {
   postId: string;
   userId: string;
   parentId?: string;
+  replyId?: string;
   user: IUser;
   fileUrl?: string;
   likes: ILike[];
   parent?: IComment;
+  reply?: IComment;
   replysCount: number;
   replies: IComment[];
   replyToUserId: string | null;

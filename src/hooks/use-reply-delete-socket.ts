@@ -23,26 +23,6 @@ export function useReplyDeleteSocket(
         return {
           ...oldComments,
           pages: oldComments.pages.map((page) => {
-            // กรณี comment ปกติ
-            if (!deleteComment.parent && !deleteComment.parentId) {
-              // ถ้าไม่ใช่ page ที่มี comment ที่จะลบให้ข้าม
-              if (
-                !page.comments.some(
-                  (comment) => comment.id === deleteComment.id,
-                )
-              ) {
-                return page;
-              }
-
-              return {
-                ...page,
-                comments: page.comments.filter(
-                  (comment) => comment.id !== deleteComment.id,
-                ),
-              };
-            }
-
-            // กรณี reply
             // ถ้าไม่ใช่ page ที่มี reply ที่จะลบให้ข้าม
             if (
               !page.comments.some((comment) => comment.replies.some((reply) => reply.id === deleteComment.id))
@@ -62,13 +42,14 @@ export function useReplyDeleteSocket(
                   return comment;
                 }
 
+                const newReplies = comment.replies.filter(
+                  (reply) => reply.id !== deleteComment.id && reply.replyId !== deleteComment.id,
+                );
+
                 const deletedReplyComment: IComment = {
                   ...comment,
-                  replies: [
-                    ...comment.replies.filter(
-                      (reply) => reply.id !== deleteComment.id,
-                    ),
-                  ],
+                  replies: newReplies,
+                  replysCount: newReplies.length,
                 };
 
                 return deletedReplyComment;

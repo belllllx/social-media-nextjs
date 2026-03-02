@@ -110,14 +110,14 @@ export function useCommentDelete(queryClient: QueryClient) {
                   return comment;
                 }
 
+                const newReplies = comment.replies.filter(
+                  (reply) => reply.id !== currentComment.id && reply.replyId !== currentComment.id,
+                );
+
                 const deletedReplyComment: IComment = {
                   ...comment,
-                  replies: [
-                    ...comment.replies.filter(
-                      (reply) => reply.id !== currentComment.id,
-                    ),
-                  ],
-                  replysCount: comment.replies.length - 1,
+                  replies: newReplies,
+                  replysCount: newReplies.length,
                 };
 
                 return deletedReplyComment;
