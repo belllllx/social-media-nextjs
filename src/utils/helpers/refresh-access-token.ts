@@ -24,8 +24,9 @@ export async function refreshAccessToken(token: string | undefined | null) {
       return false;
     }
 
-    return data.data as IToken;
-  } catch (error: unknown) {
+    return data.data as unknown as IToken;
+  } catch (error) {
+    console.error("Failed to refresh access token", error);
     return false;
   }
 }

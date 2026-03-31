@@ -56,8 +56,7 @@ export async function middleware(req: NextRequest) {
       return redirect;
     }
   } else if (
-    req.nextUrl.pathname === "/feed" ||
-    req.nextUrl.pathname.startsWith("/profile")
+    req.nextUrl.pathname === "/feed"
   ) {
     const token = req.cookies.get("access_token")?.value;
     const redirect = await checkJwtGuard<IAtPayload>({
@@ -67,7 +66,7 @@ export async function middleware(req: NextRequest) {
       validate: (payload) => payload.authVerified === true,
     });
     if (redirect) {
-      const token = req.cookies.get("refresh_token")?.value!;
+      const token = req.cookies.get("refresh_token")?.value;
       const newToken = await refreshAccessToken(token);
       if (!newToken) {
         return redirect;
@@ -94,7 +93,7 @@ export async function middleware(req: NextRequest) {
       return nextRedirect("/feed", req);
     }
 
-    const rtToken = req.cookies.get("refresh_token")?.value!;
+    const rtToken = req.cookies.get("refresh_token")?.value;
     const newToken = await refreshAccessToken(rtToken);
 
     if (newToken) {
@@ -117,6 +116,5 @@ export const config = {
     "/reset-password",
     "/login-error",
     "/feed",
-    "/profile/:path*",
   ],
 };

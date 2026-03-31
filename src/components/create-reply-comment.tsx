@@ -77,53 +77,52 @@ export function CreateReplyComment({
 
   const createCommentMutation = useCommentCreate(queryClient);
 
-  const onSubmit = useCallback(
-    handleSubmit(async ({ message }) => {
-      if (!activeUser || (!message && !fileUrl) || !message) {
+  const handleCreateReplyComment = useCallback(async ({ message }: { message?: string }) => {
+    if (!activeUser || (!message && !fileUrl) || !message) {
+      return;
+    }
+
+    try {
+      const res: ICommonResponse = comment.parentId
+        ?
+        await createCommentMutation.mutateAsync({
+          user: activeUser,
+          postId: post.id,
+          comment,
+          payload: {
+            message,
+            fileUrl: !fileUrl ? undefined : fileUrl,
+            replyToUserId: comment.userId,
+          },
+        })
+        :
+        await createCommentMutation.mutateAsync({
+          user: activeUser,
+          postId: post.id,
+          comment,
+          payload: {
+            message,
+            fileUrl: !fileUrl ? undefined : fileUrl,
+          },
+        });
+
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
         return;
       }
 
-      try {
-        const res: ICommonResponse = comment.parentId
-          ?
-          await createCommentMutation.mutateAsync({
-            user: activeUser,
-            postId: post.id,
-            comment,
-            payload: {
-              message,
-              fileUrl: !fileUrl ? undefined : fileUrl,
-              replyToUserId: comment.userId,
-            },
-          })
-          :
-          await createCommentMutation.mutateAsync({
-            user: activeUser,
-            postId: post.id,
-            comment,
-            payload: {
-              message,
-              fileUrl: !fileUrl ? undefined : fileUrl,
-            },
-          });
+      setShowReplyOnCommentId({
+        commentId: comment.id,
+        open: true,
+      });
+      reset();
+      setFileUrl("");
+    } catch (error) {
+      console.error("Failed to create reply comment", error);
+    }
+  }, [createCommentMutation, activeUser, fileUrl, comment, post.id, reset, setShowReplyOnCommentId]);
 
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-          return;
-        }
-
-        setShowReplyOnCommentId({
-          commentId: comment.id,
-          open: true,
-        });
-        reset();
-        setFileUrl("");
-      } catch (error) {
-        console.log(error);
-      }
-    }),
-    [createCommentMutation, activeUser, content, fileUrl, comment, post.id],
-  );
+  const onSubmit = handleSubmit(handleCreateReplyComment);
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -151,6 +150,7 @@ export function CreateReplyComment({
       } catch (error) {
         toast.error("Failed to upload file");
         setDisabled(false);
+        console.error("Failed to upload file", error);
       }
     },
     [],
@@ -176,6 +176,7 @@ export function CreateReplyComment({
     } catch (error) {
       toast.error("Failed to delete file");
       setDisabled(false);
+      console.error("Failed to delete file", error);
     }
   }, []);
 
@@ -185,7 +186,7 @@ export function CreateReplyComment({
     }
 
     inputRef.current?.focus();
-  }, [isOpenReply]);
+  }, [reset, isOpenReply]);
 
   return (
     <>
@@ -277,7 +278,7 @@ export function CreateReplyComment({
           >
             <FaXmark />
           </IconButton>
-          <Image asChild>
+          <Image alt="upload-reply-image" asChild>
             <NextImage src={fileUrl} alt={fileUrl} fill />
           </Image>
         </Box>

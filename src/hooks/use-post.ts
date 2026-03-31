@@ -12,7 +12,7 @@ export function usePost(postId: string) {
         return Promise.reject(res);
       }
 
-      return res.data as IPost;
+      return res.data as unknown as IPost;
     },
     enabled: !!postId,
   });

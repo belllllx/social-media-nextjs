@@ -16,7 +16,7 @@ interface CommentsProps {
   queryClient: QueryClient;
 }
 
-export function Comments({ 
+export function Comments({
   post,
   activeUser,
   queryClient,
@@ -36,15 +36,17 @@ export function Comments({
     refetch,
   } = useComments(post.id, 10);
 
+  const showCommentData = useMemo(() => {
+    if(!post){
+      return undefined;
+    }
+
+    return showCommentOnPostId.find((showComment) => showComment.postId === post.id)
+  }, [showCommentOnPostId, post]);
+
   if (isError) {
     return <Error error={error} refetch={refetch} />;
   }
-
-  const showCommentData = useMemo(
-    () =>
-      showCommentOnPostId.find((showComment) => showComment.postId === post.id),
-    [showCommentOnPostId],
-  );
 
   return (
     <>

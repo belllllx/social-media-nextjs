@@ -2,30 +2,30 @@ export interface ICommonResponse {
   status: number;
   success: boolean;
   message: string | string[];
-  data?: Object | string | any[];
+  data?: Record<string, unknown> | string | unknown[];
 }
 
 export type ApiBody<T> = T;
 
-export interface IOtpBody {
+export type IOtpBody = {
   otp: string;
 }
 
-export interface IForgotPasswordPayload {
+export type IForgotPasswordPayload = {
   email: string;
   sendEmailVerified: boolean;
 }
 
-export interface IResetPasswordPayload {
+export type IResetPasswordPayload = {
   email: string;
   otpVerified: boolean;
 }
 
-export interface IErrorTokenPayload {
+export type IErrorTokenPayload = {
   socialAuthVerified: boolean;
 }
 
-export interface IAtPayload {
+export type IAtPayload = {
   id: string;
   authVerified: boolean;
 }
@@ -141,28 +141,28 @@ export interface IComment {
   replyToUser: IUser | null;
 }
 
-export interface ICreatePostPayload {
+export type ICreatePostPayload = {
   message?: string;
   filesUrl: string[];
 }
 
-export interface IDeleteFilePayload {
+export type IDeleteFilePayload = {
   fileUrl: string;
 }
 
-export interface IUpdatePostPayload {
+export type IUpdatePostPayload = {
   message?: string,
   filesUrl: string[];
   shouldDeleteCurrentFiles?: boolean;
 }
 
-export interface ICreateCommentPayload {
+export type ICreateCommentPayload = {
   message: string;
   fileUrl?: string;
   replyToUserId?: string;
 }
 
-export interface IUpdateCommentPayload {
+export type IUpdateCommentPayload = {
   message: string,
   fileUrl?: string;
   shouldDeleteCurrentFile?: boolean;

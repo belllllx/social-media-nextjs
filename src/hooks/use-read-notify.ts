@@ -54,7 +54,7 @@ export function useReadNotify() {
       >(["notifies"], context);
     },
     onSuccess: (res) => {
-      const notifyData = res.data as INotify;
+      const notifyData = res.data as unknown as INotify;
 
       queryClient.setQueryData<
         InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>

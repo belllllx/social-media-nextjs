@@ -127,7 +127,7 @@ export function usePostLike(queryClient: QueryClient) {
 
       queryClient.setQueryData<IPost>(["post", postId], context?.prevPost);
     },
-    onSettled: (data, error, { postId }, context) => {
+    onSettled: (data, error, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
     },

@@ -31,8 +31,11 @@ export function ResetPasswordForm() {
     },
   });
 
-  const onSubmit = useCallback(
-    handleSubmit(async (data) => {
+  const handleResetPassword = useCallback(async (data: {
+    password: string;
+    confirmPassword: string;
+  }) => {
+    try {
       const res = await callApi<ResetPasswordSchema>(
         "patch",
         "user/reset-password",
@@ -46,9 +49,12 @@ export function ResetPasswordForm() {
         toast.success(formatToastMessages(res.message));
         navigate("/");
       }
-    }),
-    [authUserStore],
-  );
+    } catch (error) {
+      console.error("Failed to reset password", error);
+    }
+  }, [authUserStore, reset]);
+
+  const onSubmit = handleSubmit(handleResetPassword);
 
   return (
     <form onSubmit={onSubmit}>

@@ -86,7 +86,7 @@ export function usePostCreate(queryClient: QueryClient) {
       >(["posts"], context?.prevPosts);
     },
     onSuccess: ({ data }, variables, context) => {
-      const createdPost = data as IPost;
+      const createdPost = data as unknown as IPost;
 
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>

@@ -61,8 +61,9 @@ export function Carousel({
     } catch (error) {
       toast.error("Failed to delete file");
       onSetDisabled(false);
+      console.error("Failed to delete file", error);
     }
-  }, [onSetDisabled, onSetFilesUrl]);
+  }, [isShowCloseBtn, onSetDisabled, onSetFilesUrl]);
 
   return (
     <ChakraCarousel.Root
@@ -114,7 +115,7 @@ export function Carousel({
                   rounded="2xl"
                   overflow="hidden"
                 >
-                  <Image asChild>
+                  <Image alt="carousel-image" asChild>
                     <NextImage
                       priority
                       src={file}

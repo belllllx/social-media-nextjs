@@ -18,7 +18,7 @@ export function CommentFile({ comment }: CommentFileProps) {
           overflow="hidden"
           position="relative"
         >
-          <Image asChild>
+          <Image alt="comment-image" asChild>
             <NextImage
               priority
               src={comment.fileUrl}

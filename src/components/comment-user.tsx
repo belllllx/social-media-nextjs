@@ -43,7 +43,7 @@ import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { FaXmark } from "react-icons/fa6";
 import NextImage from "next/image";
-import { useNotifyDelete } from "@/hooks/use-notify-delete";
+import { notifyDelete } from "@/utils/helpers/notify-delete";
 import { QueryClient } from "@tanstack/react-query";
 import { CommentFile } from "./comment-file";
 import { CommentAction } from "./comment-action";
@@ -102,38 +102,37 @@ export function CommentUser({
   const updateCommentMutation = useCommentUpdate(queryClient);
   const deleteCommentMutation = useCommentDelete(queryClient);
 
-  const onSubmit = useCallback(
-    handleSubmit(async ({ message }) => {
-      if (!message && !fileUrl) {
+  const handleUpdateComment = useCallback(async ({ message }: { message?: string }) => {
+    if (!message && !fileUrl) {
+      return;
+    }
+
+    try {
+      const res = await updateCommentMutation.mutateAsync({
+        postId: post.id,
+        comment,
+        payload: {
+          message: !message ? "" : message,
+          fileUrl: !fileUrl ? undefined : fileUrl,
+          shouldDeleteCurrentFile,
+        },
+      });
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
         return;
       }
 
-      try {
-        const res = await updateCommentMutation.mutateAsync({
-          postId: post.id,
-          comment,
-          payload: {
-            message: !message ? "" : message,
-            fileUrl: !fileUrl ? undefined : fileUrl,
-            shouldDeleteCurrentFile,
-          },
-        });
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-          return;
-        }
+      toast.success(formatToastMessages(res.message));
+      setOpenEditComment(false);
+      reset();
+      setFileUrl("");
+      setShouldDeleteCurrentFile(false);
+    } catch (error) {
+      console.error("Failed to update comment", error);
+    }
+  }, [updateCommentMutation, post, comment, fileUrl, shouldDeleteCurrentFile, reset]);
 
-        toast.success(formatToastMessages(res.message));
-        setOpenEditComment(false);
-        reset();
-        setFileUrl("");
-        setShouldDeleteCurrentFile(false);
-      } catch (error) {
-        console.log(error);
-      }
-    }),
-    [updateCommentMutation, post, comment, fileUrl, shouldDeleteCurrentFile],
-  );
+  const onSubmit = handleSubmit(handleUpdateComment);
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +161,7 @@ export function CommentUser({
       } catch (error) {
         toast.error("Failed to upload file");
         setDisabled(false);
+        console.error("Failed to upload file", error);
       }
     },
     [],
@@ -187,6 +187,7 @@ export function CommentUser({
     } catch (error) {
       toast.error("Failed to delete file");
       setDisabled(false);
+      console.error("Failed to delete file", error);
     }
   }, []);
 
@@ -234,12 +235,12 @@ export function CommentUser({
         return;
       }
 
-      useNotifyDelete(queryClient);
+      notifyDelete(queryClient);
 
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
-      console.log(error);
+      console.error("Failed to delete comment", error);
     } finally {
       setDisabledDeleteComment(false);
     }
@@ -270,14 +271,14 @@ export function CommentUser({
       setFileUrl(comment.fileUrl);
       setShouldDeleteCurrentFile(false);
     }
-  }, [openEditComment, comment]);
+  }, [reset, setValue, openEditComment, comment]);
 
   const showReplyData = useMemo(
     () =>
       showReplyOnCommentId.find(
         (showReply) => showReply.commentId === comment.id,
       ),
-    [showReplyOnCommentId],
+    [showReplyOnCommentId, comment.id],
   );
 
   return (
@@ -536,7 +537,7 @@ export function CommentUser({
           >
             <FaXmark />
           </IconButton>
-          <Image asChild>
+          <Image alt="upload-comment-image" asChild>
             <NextImage src={fileUrl} alt={fileUrl} fill />
           </Image>
         </Box>

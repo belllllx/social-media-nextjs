@@ -26,8 +26,13 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = useCallback(
-    handleSubmit(async (data) => {
+  const handleRegister = useCallback(async (data: {
+    fullname: string;
+    username: string;
+    email: string;
+    password: string;
+  }) => {
+    try {
       const res = await callApi<RegisterSchema>("post", "auth/register", data);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -35,9 +40,12 @@ export function RegisterForm() {
         reset();
         toast.success(formatToastMessages(res.message));
       }
-    }),
-    [],
-  );
+    } catch (error) {
+      console.error("Failed to register", error);
+    }
+  }, [reset]);
+
+  const onSubmit = handleSubmit(handleRegister);
 
   return (
     <form onSubmit={onSubmit}>

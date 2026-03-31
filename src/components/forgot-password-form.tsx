@@ -29,8 +29,8 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const onSubmit = useCallback(
-    handleSubmit(async (data) => {
+  const handleSendEmail = useCallback(async (data: { email: string }) => {
+    try {
       const res = await callApi<ForgotPasswordSchema>(
         "post",
         "email/send",
@@ -44,9 +44,12 @@ export function ForgotPasswordForm() {
         toast.success(formatToastMessages(res.message));
         navigate("/verify-otp");
       }
-    }),
-    [],
-  );
+    } catch (error) {
+      console.error("Failed to send email", error);
+    }
+  }, [reset, setEmail]);
+
+  const onSubmit = handleSubmit(handleSendEmail);
 
   return (
     <form onSubmit={onSubmit}>

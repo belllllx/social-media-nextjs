@@ -1,7 +1,6 @@
 "use client";
 
 import { useLoadingComponent } from "@/hooks/use-loading-component";
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { useUserStore } from "@/providers/user-store-provider";
 import {
   Avatar,
@@ -48,8 +47,6 @@ export function CreatePost() {
 
   const { user, isLoading } = useUserStore((state) => state);
 
-  const handleUserClick = useNavigateUser(user);
-
   const loadingComponent = useLoadingComponent(isLoading);
 
   const createPostMutation = usePostCreate(queryClient);
@@ -70,38 +67,37 @@ export function CreatePost() {
 
   const content = watch("message");
 
-  const onSubmit = useCallback(
-    handleSubmit(async ({ message }) => {
-      if (!(filesUrl.length || message) || !user) {
+  const handleCreatePost = useCallback(async ({ message }: { message?: string }) => {
+    if (!(filesUrl.length || message) || !user) {
+      return;
+    }
+
+    try {
+      setDisabled(true);
+      const res = await createPostMutation.mutateAsync({
+        user,
+        payload: {
+          message: !message ? undefined : message,
+          filesUrl,
+        },
+      });
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
         return;
       }
 
-      try {
-        setDisabled(true);
-        const res = await createPostMutation.mutateAsync({
-          user,
-          payload: {
-            message: !message ? undefined : message,
-            filesUrl,
-          },
-        });
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-          return;
-        }
+      toast.success(formatToastMessages(res.message));
+      form.reset();
+      setFilesUrl([]);
+    } catch (error) {
+      toast.error("Failed to create post");
+      console.error("Failed to create post", error);
+    } finally {
+      setDisabled(false);
+    }
+  }, [createPostMutation, filesUrl, form, user]);
 
-        toast.success(formatToastMessages(res.message));
-        form.reset();
-        setFilesUrl([]);
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to create post");
-      } finally {
-        setDisabled(false);
-      }
-    }),
-    [createPostMutation, content, filesUrl, user?.id],
-  );
+  const onSubmit = handleSubmit(handleCreatePost);
 
   const handleInputFilesClick = useCallback(
     (ref: RefObject<HTMLInputElement | null>) => {
@@ -138,6 +134,7 @@ export function CreatePost() {
       } catch (error) {
         toast.error("Failed to upload files");
         setDisabled(false);
+        console.error("Failed to upload files", error);
       }
     },
     [],
@@ -163,6 +160,7 @@ export function CreatePost() {
     } catch (error) {
       toast.error("Failed to delete file");
       setDisabled(false);
+      console.error("Failed to delete file", error);
     }
   }, []);
 
@@ -185,7 +183,7 @@ export function CreatePost() {
             <SkeletonCircle size="12" />
           ) : (
             user && (
-              <Box onClick={handleUserClick} cursor="pointer">
+              <Box>
                 {user.profileUrl ? (
                   <Avatar.Root size="xl">
                     <Avatar.Fallback name={user.fullname} />
@@ -308,7 +306,7 @@ export function CreatePost() {
                 <FaXmark />
               </IconButton>
               {getFileDir(fileUrl) === "image" ? (
-                <Image asChild>
+                <Image alt="upload-post-image" asChild>
                   <NextImage src={fileUrl} alt={fileUrl} fill />
                 </Image>
               ) : (

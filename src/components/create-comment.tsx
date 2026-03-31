@@ -79,39 +79,38 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
 
   const createCommentMutation = useCommentCreate(queryClient);
 
-  const onSubmit = useCallback(
-    handleSubmit(async ({ message }) => {
-      if (!user || (!message && !fileUrl) || !message) {
+  const handleCreateComment = useCallback(async ({ message }: { message?: string }) => {
+    if (!user || (!message && !fileUrl) || !message) {
+      return;
+    }
+
+    try {
+      const res = await createCommentMutation.mutateAsync({
+        user,
+        postId: post.id,
+        payload: {
+          message,
+          fileUrl: !fileUrl ? undefined : fileUrl,
+        },
+      });
+
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
         return;
       }
 
-      try {
-        const res = await createCommentMutation.mutateAsync({
-          user,
-          postId: post.id,
-          payload: {
-            message,
-            fileUrl: !fileUrl ? undefined : fileUrl,
-          },
-        });
+      setShowCommentOnPostId({
+        postId: post.id,
+        open: true,
+      });
+      reset();
+      setFileUrl("");
+    } catch (error) {
+      console.error("Failed to create comment", error);
+    }
+  }, [createCommentMutation, user, fileUrl, post.id, reset, setShowCommentOnPostId]);
 
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-          return;
-        }
-
-        setShowCommentOnPostId({
-          postId: post.id,
-          open: true,
-        });
-        reset();
-        setFileUrl("");
-      } catch (error) {
-        console.log(error);
-      }
-    }),
-    [createCommentMutation, user, content, fileUrl, post.id],
-  );
+  const onSubmit = handleSubmit(handleCreateComment);
 
   const handleFilesChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -139,6 +138,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
       } catch (error) {
         toast.error("Failed to upload file");
         setDisabled(false);
+        console.error("Failed to upload file", error);
       }
     },
     [],
@@ -164,15 +164,16 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
     } catch (error) {
       toast.error("Failed to delete file");
       setDisabled(false);
+      console.error("Failed to delete file", error);
     }
-  }, [fileUrl]);
+  }, []);
 
   useEffect(() => {
     if (focusPostId === post.id) {
       inputRef.current?.focus();
       setFocusPostId(null);
     }
-  }, [focusPostId]);
+  }, [post.id, focusPostId, setFocusPostId]);
 
   return (
     <Stack gapY="3">
@@ -251,7 +252,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
           >
             <FaXmark />
           </IconButton>
-          <Image asChild>
+          <Image alt="upload-comment-image" asChild>
             <NextImage src={fileUrl} alt={fileUrl} fill />
           </Image>
         </Box>

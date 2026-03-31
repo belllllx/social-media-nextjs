@@ -17,7 +17,7 @@ export function ToggleViewReplys({ comment }: ToggleViewReplysProps) {
   const showReplyData = useMemo(
     () =>
       showReplyOnCommentId.find((showReply) => showReply.commentId === comment.id),
-    [showReplyOnCommentId],
+    [showReplyOnCommentId, comment.id],
   );
 
   return (

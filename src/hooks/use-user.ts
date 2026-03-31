@@ -11,7 +11,7 @@ export function useUser() {
         return Promise.reject(res);
       }
 
-      return res.data as IUser;
+      return res.data as unknown as IUser;
     },
     staleTime: Infinity, 
   });

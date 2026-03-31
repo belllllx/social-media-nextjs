@@ -1,6 +1,5 @@
 "use client";
 
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { IUser } from "@/utils/types";
 import { Avatar, Box, HStack, Stack, Text } from "@chakra-ui/react";
 import { useCallback } from "react";
@@ -11,11 +10,8 @@ interface PeopleProps {
 }
 
 export function People({ user, onClosePopover }: PeopleProps) {
-  const handleUserClick = useNavigateUser(user);
-
   const handleClickPeople = useCallback(() => {
     onClosePopover(false);
-    handleUserClick();
   }, [onClosePopover]);
 
   return (
@@ -23,7 +19,6 @@ export function People({ user, onClosePopover }: PeopleProps) {
       py="2"
       px="3"
       borderRadius="sm"
-      cursor="pointer"
       _hover={{
         backgroundColor: "gray.100",
         transitionDuration: "slow",

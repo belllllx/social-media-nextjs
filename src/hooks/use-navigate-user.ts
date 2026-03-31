@@ -5,5 +5,5 @@ import { IUser } from "../utils/types";
 export function useNavigateUser(user?: IUser | null) {
   return useCallback(() => {
     navigate(`/profile/${user?.id}`);
-  }, [navigate, user?.id]);
+  }, [user?.id]);
 }

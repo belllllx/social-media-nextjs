@@ -1,6 +1,5 @@
 import { HStack } from "@chakra-ui/react";
 import { NotifyAction } from "./notify-action";
-import { ChatAction } from "./chat-action";
 import { UserAction } from "./user-action";
 
 export function TopBarActions() {
@@ -14,7 +13,6 @@ export function TopBarActions() {
       }}
     >
       <NotifyAction />
-      <ChatAction />
       <UserAction />
     </HStack>
   );

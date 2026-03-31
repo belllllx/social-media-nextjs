@@ -16,7 +16,7 @@ type GuardOptions<T> = {
   redirectTo?: string;
 };
 
-export async function checkJwtGuard<T extends Record<string, any>>({
+export async function checkJwtGuard<T extends Record<string, unknown>>({
   req,
   token,
   secret,

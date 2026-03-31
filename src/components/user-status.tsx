@@ -1,6 +1,5 @@
 "use client";
 
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { IUser } from "@/utils/types";
 import { Avatar, Circle, Flex, Float, Stack, Text } from "@chakra-ui/react";
 
@@ -11,11 +10,8 @@ interface UserStatusProps {
 }
 
 export function UserStatus({ user }: UserStatusProps) {
-  const handleUserClick = useNavigateUser(user);
-
   return (
     <Flex
-      onClick={handleUserClick}    
       width="full"
       height="80px"
       borderRadius="lg"
@@ -25,7 +21,6 @@ export function UserStatus({ user }: UserStatusProps) {
         backgroundColor: "gray.100",
         transitionDuration: "slow",
       }}
-      cursor="pointer"
       px="2.5"
       mb="2"
     >

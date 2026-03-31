@@ -18,7 +18,6 @@ type Props = {
 export function SocialVideoPlayer({
   src,
   poster,
-  profile = {},
   caption = "",
   className = "",
   preload = "metadata",
@@ -28,7 +27,6 @@ export function SocialVideoPlayer({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [isInView, setIsInView] = useState(false);
   const [progress, setProgress] = useState(0);
 
   // IntersectionObserver auto play / pause when enters viewport
@@ -41,7 +39,6 @@ export function SocialVideoPlayer({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            setIsInView(true);
             // attempt play; keep muted policy in mind (autoplay muted usually allowed)
             v.muted = isMuted;
             v.play().catch(() => {
@@ -49,7 +46,6 @@ export function SocialVideoPlayer({
             });
             setIsPlaying(!v.paused);
           } else {
-            setIsInView(false);
             v.pause();
             setIsPlaying(false);
           }

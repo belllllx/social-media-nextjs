@@ -134,7 +134,7 @@ export function usePostUpdate(queryClient: QueryClient) {
       queryClient.setQueryData<IPost>(["post", currentPost.id], context?.prevPost);
     },
     onSuccess: ({ data }) => {
-      const updatePost = data as IPost;
+      const updatePost = data as unknown as IPost;
 
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>

@@ -3,13 +3,10 @@
 import { useUserStore } from "@/providers/user-store-provider";
 import { Avatar, Flex, Stack, Text } from "@chakra-ui/react";
 import { UsersSkeleton } from "./users-skeleton";
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { useLoadingComponent } from "@/hooks/use-loading-component";
 
 export function ActiveUserCard() {
   const { user, isLoading } = useUserStore((state) => state);
-
-  const handleUserClick = useNavigateUser(user);
 
   const loadingComponent = useLoadingComponent(isLoading);
 
@@ -32,12 +29,10 @@ export function ActiveUserCard() {
     <>
       {user && (
         <Flex
-          onClick={handleUserClick}
           alignItems="center"
           p="4"
           borderRadius="lg"
           backgroundColor="white"
-          cursor="pointer"
           width="full"
           height="80px"
         >

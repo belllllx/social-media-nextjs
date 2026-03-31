@@ -34,6 +34,6 @@ export function useHandleEmojiSelect(
       input.selectionEnd = cursorPosition;
       setFocus(valueKey);
     },
-    [getValues, setValue, setFocus]
+    [getValues, setValue, setFocus, inputRef, valueKey]
   );
 }

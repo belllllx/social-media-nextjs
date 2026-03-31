@@ -11,7 +11,7 @@ export const refreshInstance = axios.create({
   withCredentials: true,
 });
 
-let refreshPromise: Promise<AxiosResponse<ICommonResponse, any>> | null = null;
+let refreshPromise: Promise<AxiosResponse<ICommonResponse, unknown>> | null = null;
 
 axiosInstance.interceptors.response.use(null, async (error) => {
   const originalRequest = error.config;

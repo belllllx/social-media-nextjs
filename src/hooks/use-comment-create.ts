@@ -230,7 +230,7 @@ export function useCommentCreate(queryClient: QueryClient) {
       >(["comments", postId], context?.prevComments);
     },
     onSuccess: ({ data }, { postId }, context) => {
-      const createdComment = data as IComment;
+      const createdComment = data as unknown as IComment;
 
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });

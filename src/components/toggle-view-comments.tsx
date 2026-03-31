@@ -17,7 +17,7 @@ export function ToggleViewComments({ post }: ToggleViewCommentsProps) {
   const showCommentData = useMemo(
     () =>
       showCommentOnPostId.find((showComment) => showComment.postId === post.id),
-    [showCommentOnPostId],
+    [showCommentOnPostId, post.id],
   );
 
   return (

@@ -13,7 +13,6 @@ import {
 } from "@chakra-ui/react";
 import React, { useCallback, useRef, useState } from "react";
 import { EmojiPicker } from "./emoji-picker";
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { IPost, IUser } from "@/utils/types";
 import { useForm } from "react-hook-form";
 import {
@@ -38,8 +37,6 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleUserClick = useNavigateUser(post.user);
-
   const [openDialog, setOpenDialog] = useState(false);
 
   const form = useForm<CreateContentSchema>({
@@ -61,35 +58,34 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
 
   const sharePostCreateMutation = useSharePostCreate(queryClient);
 
-  const onSubmit = useCallback(
-    handleSubmit(async ({ message }) => {
-      if (!activeUser) {
+  const handleCreateSharePost = useCallback(async ({ message }: { message?: string }) => {
+    if (!activeUser) {
+      return;
+    }
+
+    try {
+      const res = await sharePostCreateMutation.mutateAsync({
+        user: activeUser,
+        post,
+        payload: {
+          message: !message ? undefined : message,
+        },
+      });
+
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
         return;
       }
 
-      try {
-        const res = await sharePostCreateMutation.mutateAsync({
-          user: activeUser,
-          post,
-          payload: {
-            message: !message ? undefined : message,
-          },
-        });
+      toast.success(formatToastMessages(res.message));
+      setOpenDialog(false);
+      reset();
+    } catch (error) {
+      console.error("Failed to create share post", error);
+    }
+  }, [sharePostCreateMutation, post, activeUser, reset]);
 
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-          return;
-        }
-
-        toast.success(formatToastMessages(res.message));
-        setOpenDialog(false);
-        reset();
-      } catch (error) {
-        console.log(error);
-      }
-    }),
-    [sharePostCreateMutation, content, post, activeUser?.id],
-  );
+  const onSubmit = handleSubmit(handleCreateSharePost);
 
   const handleOpenDialog = useCallback((open: boolean) => {
     if (!open) {
@@ -97,7 +93,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
     }
 
     setOpenDialog(open);
-  }, []);
+  }, [reset]);
 
   return (
     <Dialog.Root
@@ -125,27 +121,21 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                 <HStack gap="4">
                   {activeUser?.profileUrl ? (
                     <Avatar.Root
-                      onClick={handleUserClick}
                       size="xl"
-                      cursor="pointer"
                     >
                       <Avatar.Fallback name={activeUser?.fullname} />
                       <Avatar.Image src={activeUser?.profileUrl} />
                     </Avatar.Root>
                   ) : (
                     <Avatar.Root
-                      onClick={handleUserClick}
                       size="xl"
-                      cursor="pointer"
                     >
                       <Avatar.Fallback name={activeUser?.fullname} />
                     </Avatar.Root>
                   )}
                   <Text
-                    onClick={handleUserClick}
                     fontWeight="medium"
                     fontSize="md"
-                    cursor="pointer"
                   >
                     {activeUser?.fullname}
                   </Text>

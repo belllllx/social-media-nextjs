@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 
-export function useNotifyDelete(
+export function notifyDelete(
   queryClient: QueryClient,
 ) {
   queryClient.invalidateQueries({ queryKey: ["notifies"] });

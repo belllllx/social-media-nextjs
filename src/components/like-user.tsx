@@ -1,4 +1,3 @@
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { ILike } from "@/utils/types";
 import { Avatar, Flex, Stack, Text } from "@chakra-ui/react";
 import React from "react";
@@ -8,11 +7,8 @@ interface LikeUserProps {
 }
 
 export function LikeUser({ like }: LikeUserProps) {
-  const handleUserClick = useNavigateUser(like.user);
-
   return (
     <Flex
-      onClick={handleUserClick}
       width="full"
       height="80px"
       borderRadius="lg"
@@ -22,7 +18,6 @@ export function LikeUser({ like }: LikeUserProps) {
         backgroundColor: "gray.100",
         transitionDuration: "slow",
       }}
-      cursor="pointer"
       px="2"
       mb="2"
     >

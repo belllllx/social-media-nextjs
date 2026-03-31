@@ -24,7 +24,7 @@ export function NotifyAction() {
         mutation.mutate(notify.id);
       });
     }
-  }, []);
+  }, [mutation, unReadNotify]);
 
   useEffect(() => {
     if (open && unReadNotify.length) {
@@ -32,7 +32,7 @@ export function NotifyAction() {
         mutation.mutate(notify.id);
       });
     }
-  }, [open, unReadNotify]);
+  }, [open, unReadNotify, mutation]);
 
   return (
     <Popover.Root

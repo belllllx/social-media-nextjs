@@ -2,7 +2,6 @@
 
 import { Button, Circle, Icon, Popover, Portal, Text } from "@chakra-ui/react";
 import { IoIosArrowDown, IoIosLogOut } from "react-icons/io";
-import { FaRegUserCircle } from "react-icons/fa";
 import { useUserStore } from "@/providers/user-store-provider";
 import { navigate } from "@/utils/helpers/router";
 import { callApi } from "@/utils/helpers/call-api";
@@ -12,15 +11,9 @@ import { useSocketIo } from "@/providers/socket-io-provider";
 export function UserAction() {
   const { socket } = useSocketIo();
 
-  const { user, clearUser } = useUserStore((state) => state);
+  const { clearUser } = useUserStore((state) => state);
 
   const [disabled, setDisabled] = useState(false);
-
-  const handleProfile = useCallback((id?: string) => {
-    if (id) {
-      navigate(`/profile/${id}`);
-    }
-  }, [navigate]);
 
   const handleLogout = useCallback(async () => {
     socket?.disconnect();
@@ -32,7 +25,7 @@ export function UserAction() {
       navigate("/");
       setTimeout(() => clearUser(), 500);
     }
-  }, [socket, clearUser, navigate]);
+  }, [socket, clearUser]);
 
   return (
     <Popover.Root positioning={{ placement: "bottom-end" }}>
@@ -56,23 +49,9 @@ export function UserAction() {
             <Popover.Arrow />
             <Popover.Body>
               <Popover.Title fontWeight="medium" fontSize="md" marginBottom="2">
-                User settings:
+                Setting:
               </Popover.Title>
 
-              <Button
-                onClick={() => handleProfile(user?.id)}
-                width="full"
-                justifyContent="flex-start"
-                variant="ghost"
-                px="3"
-                py="6"
-                my="1"
-              >
-                <Icon size="md" color="black">
-                  <FaRegUserCircle />
-                </Icon>
-                <Text>Profile</Text>
-              </Button>
               <Button
                 onClick={handleLogout}
                 disabled={disabled}

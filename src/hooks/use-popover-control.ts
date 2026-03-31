@@ -13,7 +13,7 @@ export function usePopoverControl(
     }
     
     setOpenEmojiPicker(open);
-  }, [setOpenEmojiPicker]);
+  }, [setOpenEmojiPicker, inputRef]);
 
   return {
     openEmojiPicker,

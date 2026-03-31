@@ -31,8 +31,11 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = useCallback(
-    handleSubmit(async (data) => {
+  const handleLogin = useCallback(async (data: {
+    username: string;
+    password: string;
+  }) => {
+    try {
       const res = await callApi<LoginSchema>("post", "auth/login", data);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -44,9 +47,12 @@ export function LoginForm() {
         socket?.disconnect().connect();
         navigate("/feed");
       }
-    }),
-    [queryClient, socket],
-  );
+    } catch (error) {
+      console.error("Failed to login", error);
+    }
+  }, [queryClient, socket, reset]);
+
+  const onSubmit = handleSubmit(handleLogin);
 
   return (
     <form onSubmit={onSubmit}>

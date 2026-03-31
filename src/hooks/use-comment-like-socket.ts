@@ -106,5 +106,5 @@ export function useCommentLikeSocket(
     return () => {
       socket?.off("newLikeComment");
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, postId]);
 }

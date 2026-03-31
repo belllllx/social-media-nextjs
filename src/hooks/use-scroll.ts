@@ -17,7 +17,7 @@ export function useScroll(scrollRef: RefObject<HTMLDivElement | null>) {
     return () => {
       el.removeEventListener("scroll", onScroll)
     }
-  }, []);
+  }, [scrollRef]);
 
   return showButton;
 }

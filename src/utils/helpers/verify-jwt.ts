@@ -1,6 +1,6 @@
 import { jwtVerify, JWTPayload } from "jose";
 
-export async function verifyJwt<T extends Record<string, any>>(
+export async function verifyJwt<T extends Record<string, unknown>>(
   token: string,
   secret: Uint8Array
 ): Promise<JWTPayload & T> {

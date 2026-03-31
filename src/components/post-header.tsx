@@ -5,6 +5,7 @@ import React, {
   RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -31,7 +32,6 @@ import {
   CreateContentSchema,
 } from "@/utils/validations/create-content";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { FaPaperclip } from "react-icons/fa6";
 import { MdAddPhotoAlternate } from "react-icons/md";
 import { callApi } from "@/utils/helpers/call-api";
@@ -39,7 +39,7 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { toast } from "react-toastify";
 import { Carousel } from "./carousel";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNotifyDelete } from "@/hooks/use-notify-delete";
+import { notifyDelete } from "@/utils/helpers/notify-delete";
 import { usePostUpdate } from "@/hooks/use-post-update";
 import { usePostDelete } from "@/hooks/use-post-delete";
 
@@ -84,45 +84,45 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const content = watch("message");
 
   const initialMessage = post.message ?? "";
-  const initialFilesUrl = post.filesUrl ?? [];
+  const initialFilesUrl = useMemo(
+    () => post.filesUrl ?? [],
+    [post.filesUrl]
+  );
 
   const updatePostMutation = usePostUpdate(queryClient);
   const deletePostMutation = usePostDelete(queryClient);
 
-  const onSubmit = useCallback(
-    handleSubmit(async ({ message }) => {
-      if (!message && !filesUrl.length) {
+  const handleUpdatePost = useCallback(async ({ message }: { message?: string }) => {
+    if (!message && !filesUrl.length) {
+      return;
+    }
+
+    try {
+      const res = await updatePostMutation.mutateAsync({
+        currentPost: post,
+        payload: {
+          message: !message ? "" : message,
+          filesUrl,
+          shouldDeleteCurrentFiles,
+        },
+      });
+
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
         return;
       }
 
-      try {
-        const res = await updatePostMutation.mutateAsync({
-          currentPost: post,
-          payload: {
-            message: !message ? "" : message,
-            filesUrl,
-            shouldDeleteCurrentFiles,
-          },
-        });
+      toast.success(formatToastMessages(res.message));
+      setOpenEditDialog(false);
+      reset();
+      setFilesUrl([]);
+      setShouldDeleteCurrentFiles(false);
+    } catch (error) {
+      console.error("Failed to update post", error);
+    }
+  }, [updatePostMutation, post, filesUrl, shouldDeleteCurrentFiles, reset]);
 
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-          return;
-        }
-
-        toast.success(formatToastMessages(res.message));
-        setOpenEditDialog(false);
-        reset();
-        setFilesUrl([]);
-        setShouldDeleteCurrentFiles(false);
-      } catch (error) {
-        console.log(error);
-      }
-    }),
-    [updatePostMutation, post, content, filesUrl, shouldDeleteCurrentFiles],
-  );
-
-  const handleUserClick = useNavigateUser(post.user);
+  const onSubmit = handleSubmit(handleUpdatePost);
 
   const handleClosePopover = useCallback(() => {
     setOpenPopover(false);
@@ -190,6 +190,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       } catch (error) {
         toast.error("Failed to upload files");
         setDisabled(false);
+        console.error("Failed to upload files", error);
       }
     },
     [],
@@ -208,12 +209,12 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         toast.error(formatToastMessages(res.message));
         return;
       }
-      
-      useNotifyDelete(queryClient);
+
+      notifyDelete(queryClient);
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
-      console.log(error);
+      console.error("Failed to delete post", error);
     } finally {
       setDisabledDeletePost(false);
     }
@@ -261,7 +262,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       setFilesUrl(post.filesUrl);
       setShouldDeleteCurrentFiles(false);
     }
-  }, [openEditDialog]);
+  }, [post.filesUrl, post.message, reset, setValue, openEditDialog]);
 
   return (
     <HStack>
@@ -313,9 +314,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                 <HStack gap="4">
                                   {post.user.profileUrl ? (
                                     <Avatar.Root
-                                      onClick={handleUserClick}
                                       size="xl"
-                                      cursor="pointer"
                                     >
                                       <Avatar.Fallback
                                         name={post.user.fullname}
@@ -326,9 +325,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     </Avatar.Root>
                                   ) : (
                                     <Avatar.Root
-                                      onClick={handleUserClick}
                                       size="xl"
-                                      cursor="pointer"
                                     >
                                       <Avatar.Fallback
                                         name={post.user.fullname}
@@ -336,10 +333,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     </Avatar.Root>
                                   )}
                                   <Text
-                                    onClick={handleUserClick}
                                     fontWeight="medium"
                                     fontSize="md"
-                                    cursor="pointer"
                                   >
                                     {post.user.fullname}
                                   </Text>

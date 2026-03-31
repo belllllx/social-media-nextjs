@@ -34,7 +34,7 @@ export default function AuthLayout({
           display: "flex"
         }}
       >
-        <Image asChild>
+        <Image alt="auth-logo" asChild>
           <NextImage
             src="/auth-logo.svg"
             width={500}

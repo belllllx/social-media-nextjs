@@ -24,8 +24,8 @@ export function VerifyOtpForm() {
     },
   });
 
-  const onSubmit = useCallback(
-    handleSubmit(async (data) => {
+  const handleVerifyOtp = useCallback(async (data: { otp: string[] }) => {
+    try {
       const res = await callApi<IOtpBody>("post", "email/verify-otp", {
         otp: data.otp.join(""),
       });
@@ -36,9 +36,12 @@ export function VerifyOtpForm() {
         toast.success(formatToastMessages(res.message));
         navigate("/reset-password");
       }
-    }),
-    [],
-  );
+    } catch (error) {
+      console.error("Failed to verify otp", error);
+    }
+  }, [reset]);
+
+  const onSubmit = handleSubmit(handleVerifyOtp);
 
   return (
     <>
