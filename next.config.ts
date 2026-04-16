@@ -9,17 +9,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "social-media-belllllx.s3.ap-southeast-7.amazonaws.com",
+        hostname: "social-media-belllllx.58edcdd48b5a4b1ba836c243e002e57f.r2.cloudflarestorage.com",
         pathname: "/post-image/**"
       },
       {
         protocol: "https",
-        hostname: "social-media-belllllx.s3.ap-southeast-7.amazonaws.com",
+        hostname: "social-media-belllllx.58edcdd48b5a4b1ba836c243e002e57f.r2.cloudflarestorage.com",
         pathname: "/post-video/**"
       },
       {
         protocol: "https",
-        hostname: "social-media-belllllx.s3.ap-southeast-7.amazonaws.com",
+        hostname: "social-media-belllllx.58edcdd48b5a4b1ba836c243e002e57f.r2.cloudflarestorage.com",
         pathname: "/comment-image/**"
       },
     ],
