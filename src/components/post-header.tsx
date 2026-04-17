@@ -42,6 +42,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { notifyDelete } from "@/utils/helpers/notify-delete";
 import { usePostUpdate } from "@/hooks/use-post-update";
 import { usePostDelete } from "@/hooks/use-post-delete";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 interface PostHeaderProps {
   children: React.ReactNode;
@@ -64,6 +65,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
   const [shouldDeleteCurrentFiles, setShouldDeleteCurrentFiles] =
     useState(false);
+
+  const handleUserClick = useNavigateUser(post.user);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -314,6 +317,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                 <HStack gap="4">
                                   {post.user.profileUrl ? (
                                     <Avatar.Root
+                                      onClick={handleUserClick}
+                                      cursor="pointer"
                                       size="xl"
                                     >
                                       <Avatar.Fallback
@@ -325,6 +330,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     </Avatar.Root>
                                   ) : (
                                     <Avatar.Root
+                                      onClick={handleUserClick}
+                                      cursor="pointer"
                                       size="xl"
                                     >
                                       <Avatar.Fallback
@@ -333,6 +340,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     </Avatar.Root>
                                   )}
                                   <Text
+                                    onClick={handleUserClick}
+                                    cursor="pointer"
                                     fontWeight="medium"
                                     fontSize="md"
                                   >

@@ -58,7 +58,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
     setShowCommentOnPostId,
   } = useActionStore((state) => state);
 
-  const handleUserClick = useNavigateUser(user);
+  const handleUserClick = useNavigateUser(user); 
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),

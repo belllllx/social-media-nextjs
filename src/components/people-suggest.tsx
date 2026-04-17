@@ -11,6 +11,7 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { FaUserCheck } from "react-icons/fa";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import isEqual from "lodash/isEqual";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 interface PeopleSuggestProps {
   user: IUser & { followers: IFollower[] };
@@ -20,6 +21,8 @@ interface PeopleSuggestProps {
 export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
   const queryClient = useQueryClient();
   const [disabled, setDisabled] = useState(false);
+
+  const handleUserClick = useNavigateUser(user); 
 
   const handleFollowUser = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -114,6 +117,7 @@ export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
 
   return (
     <Flex
+      onClick={handleUserClick}
       width="full"
       height="80px"
       borderRadius="lg"
@@ -125,6 +129,7 @@ export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
       }}
       px="2"
       mb="2"
+      cursor="pointer"
     >
       {user.profileUrl ? (
         <Avatar.Root size="xl">

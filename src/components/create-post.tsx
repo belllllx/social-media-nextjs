@@ -34,6 +34,7 @@ import { FaXmark } from "react-icons/fa6";
 import { IDeleteFilePayload } from "@/utils/types";
 import { usePostCreate } from "@/hooks/use-post-create";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 export function CreatePost() {
   const queryClient = useQueryClient();
@@ -46,6 +47,8 @@ export function CreatePost() {
   const [disabled, setDisabled] = useState(false);
 
   const { user, isLoading } = useUserStore((state) => state);
+
+  const handleUserClick = useNavigateUser(user); 
 
   const loadingComponent = useLoadingComponent(isLoading);
 
@@ -183,7 +186,7 @@ export function CreatePost() {
             <SkeletonCircle size="12" />
           ) : (
             user && (
-              <Box>
+              <Box onClick={handleUserClick} cursor="pointer">
                 {user.profileUrl ? (
                   <Avatar.Root size="xl">
                     <Avatar.Fallback name={user.fullname} />

@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSharePostCreate } from "@/hooks/use-share-post-create";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 interface PostShareBtnProps {
   post: IPost;
@@ -38,6 +39,8 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [openDialog, setOpenDialog] = useState(false);
+
+  const handleUserClick = useNavigateUser(activeUser); 
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -121,6 +124,8 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                 <HStack gap="4">
                   {activeUser?.profileUrl ? (
                     <Avatar.Root
+                      onClick={handleUserClick}
+                      cursor="pointer"
                       size="xl"
                     >
                       <Avatar.Fallback name={activeUser?.fullname} />
@@ -128,12 +133,16 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                     </Avatar.Root>
                   ) : (
                     <Avatar.Root
+                      onClick={handleUserClick}
+                      cursor="pointer"
                       size="xl"
                     >
                       <Avatar.Fallback name={activeUser?.fullname} />
                     </Avatar.Root>
                   )}
                   <Text
+                    onClick={handleUserClick}
+                    cursor="pointer"
                     fontWeight="medium"
                     fontSize="md"
                   >

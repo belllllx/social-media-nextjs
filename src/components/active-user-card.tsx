@@ -4,9 +4,12 @@ import { useUserStore } from "@/providers/user-store-provider";
 import { Avatar, Flex, Stack, Text } from "@chakra-ui/react";
 import { UsersSkeleton } from "./users-skeleton";
 import { useLoadingComponent } from "@/hooks/use-loading-component";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 export function ActiveUserCard() {
   const { user, isLoading } = useUserStore((state) => state);
+
+  const handleUserClick = useNavigateUser(user); 
 
   const loadingComponent = useLoadingComponent(isLoading);
 
@@ -29,6 +32,8 @@ export function ActiveUserCard() {
     <>
       {user && (
         <Flex
+          onClick={handleUserClick}
+          cursor="pointer"
           alignItems="center"
           p="4"
           borderRadius="lg"

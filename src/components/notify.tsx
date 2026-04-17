@@ -10,7 +10,7 @@ interface NotifyPops {
 export function Notify({ notify }: NotifyPops) {
   return (
     <Link
-      cursor={notify.postId ? "pointer" : "default"}
+      cursor="pointer"
       asChild
       _hover={{
         backgroundColor: "gray.100",
@@ -26,7 +26,7 @@ export function Notify({ notify }: NotifyPops) {
         href={
           notify.postId
             ? `/post/${notify.postId}`
-            : ""
+            : `/profile/${notify.senderId}`
         }
       >
         <HStack alignItems="center" gapX="3" padding="2.5">

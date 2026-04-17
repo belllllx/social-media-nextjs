@@ -51,6 +51,7 @@ import { useActionStore } from "@/providers/action-store-provider";
 import { TagUser } from "./tag-user";
 import { useCommentUpdate } from "@/hooks/use-comment-update";
 import { useCommentDelete } from "@/hooks/use-comment-delete";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 interface CommentUserProps {
   comment: IComment;
@@ -77,6 +78,8 @@ export function CommentUser({
   const [openEditComment, setOpenEditComment] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
+
+  const handleUserClick = useNavigateUser(comment.user);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -285,12 +288,20 @@ export function CommentUser({
     <Stack gapY="1">
       <HStack gapX="3" alignItems="flex-start" mb="2">
         {comment.user.profileUrl ? (
-          <Avatar.Root size="lg">
+          <Avatar.Root 
+            onClick={handleUserClick}
+            cursor="pointer"  
+            size="lg"
+          >
             <Avatar.Fallback name={comment.user.fullname} />
             <Avatar.Image src={comment.user.profileUrl} />
           </Avatar.Root>
         ) : (
-          <Avatar.Root size="lg">
+          <Avatar.Root 
+            onClick={handleUserClick}
+            cursor="pointer"  
+            size="lg"
+          >
             <Avatar.Fallback name={comment.user.fullname} />
           </Avatar.Root>
         )}
@@ -308,7 +319,13 @@ export function CommentUser({
                   p={comment.message ? "2" : "0"}
                 >
                   <HStack alignItems="center" gapX="2">
-                    <Text fontWeight="semibold">{comment.user.fullname}</Text>
+                    <Text 
+                      onClick={handleUserClick}
+                      cursor="pointer" 
+                      fontWeight="semibold"
+                    >
+                      {comment.user.fullname}
+                    </Text>
                     <Text color="fg.muted" textStyle="sm">
                       {formatDate(comment.createdAt)}
                     </Text>

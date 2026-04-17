@@ -7,11 +7,15 @@ import { navigate } from "@/utils/helpers/router";
 import { callApi } from "@/utils/helpers/call-api";
 import { useCallback, useState } from "react";
 import { useSocketIo } from "@/providers/socket-io-provider";
+import { useNavigateUser } from "@/hooks/use-navigate-user";
+import { FaRegUserCircle } from "react-icons/fa";
 
 export function UserAction() {
   const { socket } = useSocketIo();
 
-  const { clearUser } = useUserStore((state) => state);
+  const { user, clearUser } = useUserStore((state) => state);
+
+  const handleUserClick = useNavigateUser(user);
 
   const [disabled, setDisabled] = useState(false);
 
@@ -49,8 +53,22 @@ export function UserAction() {
             <Popover.Arrow />
             <Popover.Body>
               <Popover.Title fontWeight="medium" fontSize="md" marginBottom="2">
-                Setting:
+                Settings:
               </Popover.Title>
+              <Button
+                onClick={handleUserClick}
+                width="full"
+                justifyContent="flex-start"
+                variant="ghost"
+                px="3"
+                py="6"
+                my="1"
+              >
+                <Icon size="md" color="black">
+                  <FaRegUserCircle />
+                </Icon>
+                <Text>Profile</Text>
+              </Button>
 
               <Button
                 onClick={handleLogout}
