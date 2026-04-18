@@ -55,7 +55,8 @@ export function CommentLikeBtn({
 
       toast.success(formatToastMessages(res.message));
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to like comment");
+      console.log("Failed to like comment", error);
     } finally {
       setIsLoading(false);
     }

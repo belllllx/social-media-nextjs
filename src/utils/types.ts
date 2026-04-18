@@ -44,16 +44,17 @@ export enum ProviderType {
 export interface IUser {
   id: string;
   fullname: string;
-  username: string;
+  username: string | null;
   email: string;
-  dateOfBirth: Date;
-  profileUrl: string;
-  profileBackgroundUrl: string;
-  info: string;
+  dateOfBirth: Date | null;
+  profileUrl: string | null;
+  profileBackgroundUrl: string | null;
+  info: string | null;
   role: Role;
   providerType: ProviderType;
   createdAt: Date;
   updatedAt: Date;
+  followings: IFollower[];
 }
 
 enum NotificationType {

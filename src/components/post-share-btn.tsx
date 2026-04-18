@@ -84,6 +84,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
       setOpenDialog(false);
       reset();
     } catch (error) {
+      toast.error("Failed to create share post");
       console.error("Failed to create share post", error);
     }
   }, [sharePostCreateMutation, post, activeUser, reset]);

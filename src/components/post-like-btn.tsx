@@ -52,7 +52,8 @@ export function PostLikeBtn({
 
       toast.success(formatToastMessages(res.message));
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to like post");
+      console.log("Failed to like post", error);
     } finally {
       setIsLoading(false);
     }

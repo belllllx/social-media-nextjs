@@ -121,6 +121,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       setFilesUrl([]);
       setShouldDeleteCurrentFiles(false);
     } catch (error) {
+      toast.error("Failed to update post");
       console.error("Failed to update post", error);
     }
   }, [updatePostMutation, post, filesUrl, shouldDeleteCurrentFiles, reset]);
@@ -180,7 +181,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
             "post",
             "post/files/create",
             formData,
-          ).finally(() => setDisabled(false));
+          );
           if (!res.success) {
             toast.error(formatToastMessages(res.message));
             return;
@@ -192,8 +193,9 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         }
       } catch (error) {
         toast.error("Failed to upload files");
-        setDisabled(false);
         console.error("Failed to upload files", error);
+      } finally {
+        setDisabled(false);
       }
     },
     [],
@@ -217,6 +219,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
+      toast.error("Failed to delete post");
       console.error("Failed to delete post", error);
     } finally {
       setDisabledDeletePost(false);

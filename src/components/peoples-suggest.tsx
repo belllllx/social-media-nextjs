@@ -56,7 +56,7 @@ export function PeoplesSuggest() {
 
   return (
     <>
-      {users &&
+      {users && activeUser &&
         users.pages.map((group, i) => (
           <Fragment key={i}>
             {group.users.length ? (
@@ -64,7 +64,7 @@ export function PeoplesSuggest() {
                 <PeopleSuggest
                   key={user.id}
                   user={user}
-                  activeUserId={activeUser?.id}
+                  activeUserId={activeUser.id}
                 />
               ))
             ) : (

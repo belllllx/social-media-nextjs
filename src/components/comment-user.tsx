@@ -131,6 +131,7 @@ export function CommentUser({
       setFileUrl("");
       setShouldDeleteCurrentFile(false);
     } catch (error) {
+      toast.error("Failed to update comment");
       console.error("Failed to update comment", error);
     }
   }, [updateCommentMutation, post, comment, fileUrl, shouldDeleteCurrentFile, reset]);
@@ -151,7 +152,7 @@ export function CommentUser({
             "post",
             "comment/file/create",
             formData,
-          ).finally(() => setDisabled(false));
+          );
           if (!res.success) {
             toast.error(formatToastMessages(res.message));
             return;
@@ -163,8 +164,9 @@ export function CommentUser({
         }
       } catch (error) {
         toast.error("Failed to upload file");
-        setDisabled(false);
         console.error("Failed to upload file", error);
+      } finally {
+        setDisabled(false);
       }
     },
     [],
@@ -179,7 +181,7 @@ export function CommentUser({
         {
           data: { fileUrl },
         },
-      ).finally(() => setDisabled(false));
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -189,8 +191,9 @@ export function CommentUser({
       setFileUrl("");
     } catch (error) {
       toast.error("Failed to delete file");
-      setDisabled(false);
       console.error("Failed to delete file", error);
+    } finally {
+      setDisabled(false);
     }
   }, []);
 
@@ -243,6 +246,7 @@ export function CommentUser({
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
     } catch (error) {
+      toast.error("Failed to delete comment");
       console.error("Failed to delete comment", error);
     } finally {
       setDisabledDeleteComment(false);

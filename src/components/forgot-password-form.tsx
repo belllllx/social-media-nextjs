@@ -45,6 +45,7 @@ export function ForgotPasswordForm() {
         navigate("/verify-otp");
       }
     } catch (error) {
+      toast.error("Failed to send email");
       console.error("Failed to send email", error);
     }
   }, [reset, setEmail]);

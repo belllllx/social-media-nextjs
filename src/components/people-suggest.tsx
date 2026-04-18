@@ -3,117 +3,21 @@
 import { Avatar, Flex, IconButton, Stack, Text } from "@chakra-ui/react";
 import { FaUserPlus } from "react-icons/fa6";
 import { Spinner } from "./spinner";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { IFollower, IUser } from "@/utils/types";
-import { callApi } from "@/utils/helpers/call-api";
-import { toast } from "react-toastify";
-import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { FaUserCheck } from "react-icons/fa";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
-import isEqual from "lodash/isEqual";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
+import { useFollowUser } from "@/hooks/use-follow-user";
 
 interface PeopleSuggestProps {
   user: IUser & { followers: IFollower[] };
-  activeUserId?: string;
+  activeUserId: string;
 }
 
 export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
-  const queryClient = useQueryClient();
-  const [disabled, setDisabled] = useState(false);
+  const handleUserClick = useNavigateUser(user);
 
-  const handleUserClick = useNavigateUser(user); 
-
-  const handleFollowUser = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-
-      setDisabled(true);
-      try {
-        await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));
-        const res = await callApi(
-          "post",
-          `user/follow/${activeUserId}/${user.id}`
-        ).finally(() => {
-          setDisabled(false);
-        });
-        if (!res.success) {
-          toast.error(formatToastMessages(res.message));
-        } else {
-          toast.success(formatToastMessages(res.message));
-
-          const followerData = res.data as { follower: IFollower };
-
-          queryClient.setQueryData<
-            InfiniteData<{
-              users: (IUser & { followers: IFollower[] })[];
-              nextCursor: string | null;
-            }>
-          >(["usersSuggest"], (oldUsersSuggest) => {
-            if (!oldUsersSuggest) {
-              return undefined;
-            }
-
-            return {
-              ...oldUsersSuggest,
-              pages: oldUsersSuggest.pages.map((group) => {
-                return {
-                  ...group,
-                  users: group.users.map(
-                    (
-                      userSuggest: IUser & {
-                        followers: IFollower[];
-                      }
-                    ) => {
-                      // Ignore user not target
-                      if (userSuggest.id !== followerData.follower.followingId) {
-                        return userSuggest;
-                      }
-
-                      // UnFollow
-                      if (
-                        userSuggest.followers.some((follower) =>
-                          isEqual(follower, followerData.follower)
-                        )
-                      ) {
-                        return {
-                          ...userSuggest,
-                          followers: userSuggest.followers.filter(
-                            (follower) =>
-                              !isEqual(follower, followerData.follower)
-                          ),
-                        };
-                      }
-
-                      // Follow
-                      if (
-                        userSuggest.followers.every(
-                          (follower) => !isEqual(follower, followerData.follower)
-                        )
-                      ) {
-                        return {
-                          ...userSuggest,
-                          followers: [
-                            ...userSuggest.followers,
-                            followerData.follower,
-                          ],
-                        };
-                      }
-
-                      return userSuggest;
-                    }
-                  ),
-                };
-              }),
-            };
-          });
-        }
-      } catch (error) {
-        console.error("Failed to follow or unfollow", error);
-      }
-    },
-    [queryClient, activeUserId, user.id]
-  );
+  const { handleFollowUser, disabled } = useFollowUser();
 
   return (
     <Flex
@@ -148,7 +52,10 @@ export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
         </Text>
       </Stack>
       <IconButton
-        onClick={handleFollowUser}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleFollowUser(activeUserId, user.id);
+        }}
         loading={disabled}
         disabled={disabled}
         spinner={<Spinner size="md" />}

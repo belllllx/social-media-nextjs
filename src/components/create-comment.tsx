@@ -106,6 +106,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
       reset();
       setFileUrl("");
     } catch (error) {
+      toast.error("Failed to create comment");
       console.error("Failed to create comment", error);
     }
   }, [createCommentMutation, user, fileUrl, post.id, reset, setShowCommentOnPostId]);
@@ -126,7 +127,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
             "post",
             "comment/file/create",
             formData,
-          ).finally(() => setDisabled(false));
+          );
           if (!res.success) {
             toast.error(formatToastMessages(res.message));
             return;
@@ -137,8 +138,9 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
         }
       } catch (error) {
         toast.error("Failed to upload file");
-        setDisabled(false);
         console.error("Failed to upload file", error);
+      } finally {
+        setDisabled(false);
       }
     },
     [],
@@ -153,7 +155,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
         {
           data: { fileUrl },
         },
-      ).finally(() => setDisabled(false));
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -163,8 +165,9 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
       setFileUrl("");
     } catch (error) {
       toast.error("Failed to delete file");
-      setDisabled(false);
       console.error("Failed to delete file", error);
+    } finally {
+      setDisabled(false);
     }
   }, []);
 

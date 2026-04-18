@@ -41,6 +41,7 @@ export function RegisterForm() {
         toast.success(formatToastMessages(res.message));
       }
     } catch (error) {
+      toast.error("Failed to register");
       console.error("Failed to register", error);
     }
   }, [reset]);

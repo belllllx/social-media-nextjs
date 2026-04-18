@@ -37,6 +37,7 @@ export function VerifyOtpForm() {
         navigate("/reset-password");
       }
     } catch (error) {
+      toast.error("Failed to verify otp");
       console.error("Failed to verify otp", error);
     }
   }, [reset]);

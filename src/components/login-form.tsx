@@ -48,6 +48,7 @@ export function LoginForm() {
         navigate("/feed");
       }
     } catch (error) {
+      toast.error("Failed to login");
       console.error("Failed to login", error);
     }
   }, [queryClient, socket, reset]);

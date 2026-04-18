@@ -125,7 +125,7 @@ export function CreatePost() {
             "post",
             "post/files/create",
             formData,
-          ).finally(() => setDisabled(false));
+          );
           if (!res.success) {
             toast.error(formatToastMessages(res.message));
             return;
@@ -136,8 +136,9 @@ export function CreatePost() {
         }
       } catch (error) {
         toast.error("Failed to upload files");
-        setDisabled(false);
         console.error("Failed to upload files", error);
+      } finally {
+        setDisabled(false);
       }
     },
     [],
@@ -152,7 +153,7 @@ export function CreatePost() {
         {
           data: { fileUrl },
         },
-      ).finally(() => setDisabled(false));
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -162,8 +163,9 @@ export function CreatePost() {
       setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
     } catch (error) {
       toast.error("Failed to delete file");
-      setDisabled(false);
       console.error("Failed to delete file", error);
+    } finally {
+      setDisabled(false);
     }
   }, []);
 

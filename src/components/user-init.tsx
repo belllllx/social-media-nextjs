@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 export function UserInit() {
     const { socket } = useSocketIo();
-    const { data: user, isPending } = useUser();
+    const { data: user, isLoading } = useUser();
     const { setUser, setLoading } = useUserStore((state) => state);
 
     useEffect(() => {
@@ -17,12 +17,12 @@ export function UserInit() {
     }, [user, setUser]);
 
     useEffect(() => {
-        if (isPending) {
+        if (isLoading) {
             setLoading(true);
             return;
         }
         setLoading(false);
-    }, [isPending, setLoading]);
+    }, [isLoading, setLoading]);
 
     useEffect(() => {
         if (user) {

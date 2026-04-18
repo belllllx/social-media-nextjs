@@ -50,7 +50,7 @@ export function Carousel({
         {
           data: { fileUrl },
         }
-      ).finally(() => onSetDisabled(false));
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -60,8 +60,9 @@ export function Carousel({
       onSetFilesUrl(fileUrl);
     } catch (error) {
       toast.error("Failed to delete file");
-      onSetDisabled(false);
       console.error("Failed to delete file", error);
+    } finally {
+      onSetDisabled(false);
     }
   }, [isShowCloseBtn, onSetDisabled, onSetFilesUrl]);
 

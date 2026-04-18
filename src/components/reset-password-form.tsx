@@ -50,6 +50,7 @@ export function ResetPasswordForm() {
         navigate("/");
       }
     } catch (error) {
+      toast.error("Failed to reset password");
       console.error("Failed to reset password", error);
     }
   }, [authUserStore, reset]);

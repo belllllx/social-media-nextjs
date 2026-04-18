@@ -9,6 +9,7 @@ import { useCallback, useState } from "react";
 import { useSocketIo } from "@/providers/socket-io-provider";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { FaRegUserCircle } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 export function UserAction() {
   const { socket } = useSocketIo();
@@ -20,14 +21,20 @@ export function UserAction() {
   const [disabled, setDisabled] = useState(false);
 
   const handleLogout = useCallback(async () => {
-    socket?.disconnect();
+    try {
+      socket?.disconnect();
 
-    setDisabled(true);
-    const data = await callApi("post", "auth/logout");
-    setDisabled(false);
-    if (data.success || !data.success) {
-      navigate("/");
-      setTimeout(() => clearUser(), 500);
+      setDisabled(true);
+      const data = await callApi("post", "auth/logout");
+      if (data.success || !data.success) {
+        navigate("/");
+        setTimeout(() => clearUser(), 500);
+      }
+    } catch (error) {
+      toast.error("Failed to logout");
+      console.error("Failed to logout", error);
+    } finally {
+      setDisabled(false);
     }
   }, [socket, clearUser]);
 

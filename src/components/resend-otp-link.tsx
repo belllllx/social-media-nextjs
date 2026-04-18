@@ -12,17 +12,23 @@ export function ResendOtpLink() {
   const { email } = useAuthUserStore((state) => state);
 
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleResendOtp = useCallback(async () => {
-    setIsLoading(true);
-    const res = await callApi<ForgotPasswordSchema>("post", "email/send", {
-      email,
-    });
-    setIsLoading(false);
-    if (!res.success) {
-      toast.error(formatToastMessages(res.message));
-    } else {
-      toast.success(formatToastMessages(res.message));
+    try {
+      setIsLoading(true);
+      const res = await callApi<ForgotPasswordSchema>("post", "email/send", {
+        email,
+      });
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+      } else {
+        toast.success(formatToastMessages(res.message));
+      }
+    } catch (error) {
+      toast.error("Failed to resend otp");
+      console.error("Failed to resend otp", error);
+    } finally {
+      setIsLoading(false);
     }
   }, [email]);
 

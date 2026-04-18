@@ -1,6 +1,5 @@
 import { Header } from "@/components/header";
 import { MainLayoutContent } from "@/components/main-layout-content";
-import { UserInit } from "@/components/user-init";
 import { VStack } from "@chakra-ui/react";
 import React from "react";
 
@@ -14,10 +13,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Header />
       <main className="max-h-[calc(100vh-8vh)] h-[calc(100vh-8vh)] w-full bg-gray-100">
         <MainLayoutContent>
-          <div className="max-w-screen 2xl:max-w-[35vw] w-full">
-            <UserInit />
-            {children}
-          </div>
+          {children}
         </MainLayoutContent>
       </main>
     </VStack>

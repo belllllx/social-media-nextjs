@@ -118,6 +118,7 @@ export function CreateReplyComment({
       reset();
       setFileUrl("");
     } catch (error) {
+      toast.error("Failed to create reply comment");
       console.error("Failed to create reply comment", error);
     }
   }, [createCommentMutation, activeUser, fileUrl, comment, post.id, reset, setShowReplyOnCommentId]);
@@ -138,7 +139,7 @@ export function CreateReplyComment({
             "post",
             "comment/file/create",
             formData,
-          ).finally(() => setDisabled(false));
+          );
           if (!res.success) {
             toast.error(formatToastMessages(res.message));
             return;
@@ -149,8 +150,9 @@ export function CreateReplyComment({
         }
       } catch (error) {
         toast.error("Failed to upload file");
-        setDisabled(false);
         console.error("Failed to upload file", error);
+      } finally {
+        setDisabled(false);
       }
     },
     [],
@@ -165,7 +167,7 @@ export function CreateReplyComment({
         {
           data: { fileUrl },
         },
-      ).finally(() => setDisabled(false));
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -175,8 +177,9 @@ export function CreateReplyComment({
       setFileUrl("");
     } catch (error) {
       toast.error("Failed to delete file");
-      setDisabled(false);
       console.error("Failed to delete file", error);
+    } finally {
+      setDisabled(false);
     }
   }, []);
 

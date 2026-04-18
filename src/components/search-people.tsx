@@ -87,7 +87,7 @@ export function SearchPeople() {
         </Popover.Trigger>
         <Portal>
           <Popover.Positioner>
-            <Popover.Content width="auto">
+            <Popover.Content width="auto" zIndex="40">
               <Popover.Arrow />
               <Popover.Body overflowY="auto">
                 <Popover.Title
