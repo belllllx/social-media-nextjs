@@ -3,7 +3,7 @@
 import {
   IComment,
   ICommonResponse,
-  IDeleteFilePayload,
+  DeleteFilePayload,
   IPost,
   IUser,
 } from "@/utils/types";
@@ -161,7 +161,7 @@ export function CreateReplyComment({
   const handleDeleteFile = useCallback(async (fileUrl: string) => {
     try {
       setDisabled(true);
-      const res = await callApi<{ data: IDeleteFilePayload }>(
+      const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
         "comment/delete/file",
         {

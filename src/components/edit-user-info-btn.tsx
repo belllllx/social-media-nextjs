@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react"; 
+import React, { useCallback, useState } from "react"; 
 import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
 import { FaUserEdit } from "react-icons/fa";
 import { EditUserInfoForm } from "./edit-user-info-form";
@@ -8,10 +8,15 @@ import { IUser } from "@/utils/types";
 
 interface EditUserInfoBtnProps {
   activeUser: IUser | null;
+  user: IUser;
 }
 
-export function EditUserInfoBtn({ activeUser }: EditUserInfoBtnProps) {
+export function EditUserInfoBtn({ activeUser, user }: EditUserInfoBtnProps) {
   const [openDialog, setOpenDialog] = useState(false);
+
+  const handleCloseDialog = useCallback(() => {
+    setOpenDialog(false);
+  }, []);
 
   return (
     <Dialog.Root
@@ -36,7 +41,11 @@ export function EditUserInfoBtn({ activeUser }: EditUserInfoBtnProps) {
               </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
-              <EditUserInfoForm activeUser={activeUser} />
+              <EditUserInfoForm 
+                activeUser={activeUser} 
+                user={user} 
+                onCloseDialog={handleCloseDialog}
+              />
             </Dialog.Body>
             <Dialog.CloseTrigger asChild rounded="full">
               <CloseButton size="sm" />

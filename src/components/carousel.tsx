@@ -15,7 +15,7 @@ import NextImage from "next/image";
 import { callApi } from "@/utils/helpers/call-api";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
-import { IDeleteFilePayload } from "@/utils/types";
+import { DeleteFilePayload } from "@/utils/types";
 import { FaXmark } from "react-icons/fa6";
 
 interface CarouselProps {
@@ -44,7 +44,7 @@ export function Carousel({
 
     try {
       onSetDisabled(true);
-      const res = await callApi<{ data: IDeleteFilePayload }>(
+      const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
         "post/delete/file",
         {

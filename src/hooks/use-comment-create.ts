@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { IComment, ICommonResponse, ICreateCommentPayload, IPost, IUser } from "@/utils/types";
+import { IComment, ICommonResponse, CreateCommentPayload, IPost, IUser } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +7,7 @@ interface MutationType {
   user: IUser;
   postId: string;
   comment?: IComment;
-  payload: ICreateCommentPayload;
+  payload: CreateCommentPayload;
 }
 
 export function useCommentCreate(queryClient: QueryClient) {
@@ -30,7 +30,7 @@ export function useCommentCreate(queryClient: QueryClient) {
     }) => {
       const res: ICommonResponse = !comment
         ?
-        await callApi<ICreateCommentPayload>(
+        await callApi<CreateCommentPayload>(
           "post",
           `comment/create/${user.id}/${postId}`,
           payload,
@@ -38,13 +38,13 @@ export function useCommentCreate(queryClient: QueryClient) {
         :
         comment.parentId
           ?
-          await callApi<ICreateCommentPayload>(
+          await callApi<CreateCommentPayload>(
             "post",
             `comment/tag/create/${user.id}/${comment.parentId}/${comment.id}/${postId}`,
             payload,
           )
           :
-          await callApi<ICreateCommentPayload>(
+          await callApi<CreateCommentPayload>(
             "post",
             `comment/reply/create/${user.id}/${comment.id}/${postId}`,
             payload,

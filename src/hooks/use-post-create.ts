@@ -1,11 +1,11 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { ICommonResponse, ICreatePostPayload, IPost, IUser } from "@/utils/types";
+import { ICommonResponse, CreatePostPayload, IPost, IUser } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
 interface MutationType {
   user: IUser;
-  payload: ICreatePostPayload;
+  payload: CreatePostPayload;
 }
 
 export function usePostCreate(queryClient: QueryClient) {
@@ -22,7 +22,7 @@ export function usePostCreate(queryClient: QueryClient) {
       user,
       payload,
     }) => {
-      const res = await callApi<ICreatePostPayload>(
+      const res = await callApi<CreatePostPayload>(
         "post",
         `post/create/${user.id}`,
         payload,

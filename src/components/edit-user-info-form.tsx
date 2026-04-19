@@ -2,10 +2,11 @@
 
 import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
-import { IUser } from "@/utils/types";
+import { EditUserInfoPayload, IUser } from "@/utils/types";
 import { editUserInfoSchema, EditUserInfoSchema } from "@/utils/validations/edit-user-info";
 import { Badge, Button, Field, Fieldset, Input, DatePicker, parseDate, Portal } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { LuCalendar } from "react-icons/lu";
@@ -13,9 +14,17 @@ import { toast } from "react-toastify";
 
 interface EditUserInfoFormProps {
   activeUser: IUser | null;
+  user: IUser;
+  onCloseDialog: () => void;
 }
 
-export function EditUserInfoForm({ activeUser }: EditUserInfoFormProps) {
+export function EditUserInfoForm({
+  activeUser,
+  user,
+  onCloseDialog,
+}: EditUserInfoFormProps) {
+  const queryClient = useQueryClient();
+
   const {
     control,
     register,
@@ -25,30 +34,69 @@ export function EditUserInfoForm({ activeUser }: EditUserInfoFormProps) {
   } = useForm<EditUserInfoSchema>({
     resolver: zodResolver(editUserInfoSchema),
     defaultValues: {
-      fullname: activeUser?.fullname,
-      dateOfBirth: activeUser?.dateOfBirth ?? undefined,
-      info: activeUser?.info ?? "",
-    },
+      fullname: user.fullname,
+      dateOfBirth: user.dateOfBirth
+        ? new Date(user.dateOfBirth).toISOString().split("T")[0]
+        : undefined,
+      info: user.info ?? "",
+    }
   });
 
-  const handleEditUserInfo = useCallback(async (data: {
-    fullname?: string,
-    dateOfBirth?: Date,
-    info?: string,
-  }) => {
+  const handleEditUserInfo = useCallback(async (data: EditUserInfoSchema) => {
+    if (!activeUser) {
+      return;
+    }
+
     try {
-      const res = await callApi<EditUserInfoSchema>("put", "user/edit-info", data);
+      const payload: EditUserInfoPayload = {
+        fullname: data.fullname ? data.fullname : undefined,
+        dateOfBirth:
+          data.dateOfBirth === undefined
+            ? null
+            : new Date(data.dateOfBirth),
+
+        info:
+          data.info === ""
+            ? null
+            : data.info ?? undefined,
+      };
+
+      const res = await callApi<EditUserInfoPayload>("put", `user/edit-info/${activeUser.id}`, payload);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
       } else {
-        reset();
+        const updatedUser = (res.data as unknown as { user: IUser }).user;
+
+        reset({
+          fullname: updatedUser.fullname,
+          dateOfBirth: updatedUser.dateOfBirth
+            ? new Date(updatedUser.dateOfBirth).toISOString().split("T")[0]
+            : undefined,
+          info: updatedUser.info ?? "",
+        });
+
+        onCloseDialog();
+
+        queryClient.setQueryData<IUser>(["user", user.id], (oldUser) => {
+          if (!oldUser) {
+            return undefined;
+          }
+
+          return {
+            ...oldUser,
+            fullname: updatedUser.fullname,
+            dateOfBirth: updatedUser.dateOfBirth,
+            info: updatedUser.info,
+          }
+        });
+
         toast.success(formatToastMessages(res.message));
       }
     } catch (error) {
       toast.error("Failed to edit user info");
       console.error("Failed to edit user info", error);
     }
-  }, [reset]);
+  }, [onCloseDialog, reset, activeUser, queryClient]);
 
   const onSubmit = handleSubmit(handleEditUserInfo);
 
@@ -87,8 +135,7 @@ export function EditUserInfoForm({ activeUser }: EditUserInfoFormProps) {
                     };
 
                     // แปลงให้เป็น YYYY-MM-DD ก่อน
-                    const iso = val.toString();
-                    field.onChange(new Date(iso));
+                    field.onChange(val.toString());
                   }}
                   invalid={!!errors.dateOfBirth}
                 >

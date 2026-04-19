@@ -3,7 +3,7 @@
 import { useNavigateUser } from "@/hooks/use-navigate-user";
 import { useUserStore } from "@/providers/user-store-provider";
 import {
-  IDeleteFilePayload,
+  DeleteFilePayload,
   IPost,
 } from "@/utils/types";
 import {
@@ -149,7 +149,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
   const handleDeleteFile = useCallback(async (fileUrl: string) => {
     try {
       setDisabled(true);
-      const res = await callApi<{ data: IDeleteFilePayload }>(
+      const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
         "comment/delete/file",
         {

@@ -3,18 +3,16 @@
 import React from "react";
 import { Box, HStack, Skeleton, Text } from "@chakra-ui/react";
 import { EditUserProfileImage } from "./edit-user-profile-image";
-import { useUserById } from "@/hooks/use-user-by-id";
 import { ringCss } from "@/utils/helpers/define-style";
 import { toast } from "react-toastify";
-import { ICommonResponse } from "@/utils/types";
+import { ICommonResponse, IUser } from "@/utils/types";
+import { UseQueryResult } from "@tanstack/react-query";
 
 interface EditUserProfileProps {
-  id: string;
+  result: UseQueryResult<IUser, Error>;
 }
 
-export function EditUserProfile({ id }: EditUserProfileProps) {
-  const result = useUserById(id);
-
+export function EditUserProfile({ result }: EditUserProfileProps) {
   const {
     data: user,
     isLoading,
@@ -22,7 +20,7 @@ export function EditUserProfile({ id }: EditUserProfileProps) {
     error,
   } = result;
 
-  if(isError){
+  if (isError) {
     toast.error((error as unknown as ICommonResponse).message);
   }
 
@@ -46,20 +44,20 @@ export function EditUserProfile({ id }: EditUserProfileProps) {
       }}
     >
       <EditUserProfileImage result={result} />
-      <Box 
+      <Box
         width="300px"
         mdDown={{
           textAlign: "center",
         }}
       >
         {isLoading || !user ? (
-          <Skeleton 
-            height="5" 
-            width="full" 
+          <Skeleton
+            height="5"
+            width="full"
             css={ringCss}
             mdDown={{
               height: "3",
-            }} 
+            }}
           />
         ) : (
           <Text

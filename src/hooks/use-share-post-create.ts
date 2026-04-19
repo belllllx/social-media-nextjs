@@ -1,12 +1,12 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { ICommonResponse, ICreatePostPayload, IPost, IUser } from "@/utils/types";
+import { ICommonResponse, CreatePostPayload, IPost, IUser } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
 interface MutationType {
   user: IUser;
   post: IPost;
-  payload: Omit<ICreatePostPayload, "filesUrl">;
+  payload: Omit<CreatePostPayload, "filesUrl">;
 }
 
 export function useSharePostCreate(queryClient: QueryClient) {
@@ -29,7 +29,7 @@ export function useSharePostCreate(queryClient: QueryClient) {
           ? `post/share/create/${user.id}/${post.parentId}`
           : `post/share/create/${user.id}/${post.id}`;
 
-      const res = await callApi<Omit<ICreatePostPayload, "filesUrl">>(
+      const res = await callApi<Omit<CreatePostPayload, "filesUrl">>(
         "post",
         url,
         payload,

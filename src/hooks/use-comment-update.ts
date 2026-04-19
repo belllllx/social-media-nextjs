@@ -1,11 +1,11 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { IComment, ICommonResponse, IUpdateCommentPayload } from "@/utils/types";
+import { IComment, ICommonResponse, UpdateCommentPayload } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 
 interface MutationType {
   postId: string;
   comment: IComment;
-  payload: IUpdateCommentPayload;
+  payload: UpdateCommentPayload;
 }
 
 export function useCommentUpdate(queryClient: QueryClient) {
@@ -16,7 +16,7 @@ export function useCommentUpdate(queryClient: QueryClient) {
     InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
   >({
     mutationFn: async ({ comment, payload }) => {
-      const res = await callApi<IUpdateCommentPayload>(
+      const res = await callApi<UpdateCommentPayload>(
         "patch",
         `comment/update/${comment.id}`,
         payload,

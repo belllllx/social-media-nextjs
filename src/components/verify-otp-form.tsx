@@ -3,7 +3,7 @@
 import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { navigate } from "@/utils/helpers/router";
-import { IOtpBody } from "@/utils/types";
+import { OtpBody } from "@/utils/types";
 import { otpSchema, OtpSchema } from "@/utils/validations/auth";
 import { Button, Field, Heading, PinInput, VStack } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +26,7 @@ export function VerifyOtpForm() {
 
   const handleVerifyOtp = useCallback(async (data: { otp: string[] }) => {
     try {
-      const res = await callApi<IOtpBody>("post", "email/verify-otp", {
+      const res = await callApi<OtpBody>("post", "email/verify-otp", {
         otp: data.otp.join(""),
       });
       if (!res.success) {

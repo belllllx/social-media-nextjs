@@ -9,20 +9,36 @@ import NextImage from "next/image";
 import { EditUserProfile } from "./edit-user-profile";
 import { FaUserCheck, FaUserPlus } from "react-icons/fa6";
 import { useFollowUser } from "@/hooks/use-follow-user";
+import { useUserById } from "@/hooks/use-user-by-id";
+import { toast } from "react-toastify";
+import { ICommonResponse } from "@/utils/types";
 
 interface UserProfileSettingsProps {
   id: string;
 }
 
 export function UserProfileSettings({ id }: UserProfileSettingsProps) {
-  const { user, isLoading } = useUserStore((state) => state);
+  const result = useUserById(id);
+
+  const { user: activeUser } = useUserStore((state) => state);
 
   const { handleFollowUser, disabled } = useFollowUser();
 
   const isFolllowing = useMemo(() =>
-    user && user.followings.some((following) => following.followingId === id),
-    [user, id]
+    activeUser && activeUser.followings.some((following) => following.followingId === id),
+    [activeUser, id]
   );
+
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+  } = result;
+
+  if (isError) {
+    toast.error((error as unknown as ICommonResponse).message);
+  }
 
   return (
     <Box
@@ -33,7 +49,7 @@ export function UserProfileSettings({ id }: UserProfileSettingsProps) {
       overflow="hidden"
       position="relative"
     >
-      <EditUserProfile id={id} />
+      <EditUserProfile result={result} />
       {!user || isLoading ? (
         <Skeleton height="200px" position="relative" />
       ) : (
@@ -54,19 +70,19 @@ export function UserProfileSettings({ id }: UserProfileSettingsProps) {
         justifyContent="flex-end"
         backgroundColor="white"
       >
-        {!user ? (
+        {!user || !activeUser ? (
           <HStack gapX="3">
             <Skeleton width="150px" height="40px" />
             <Skeleton width="150px" height="40px" />
           </HStack>
-        ) : user.id === id ? (
+        ) : activeUser.id === id ? (
           <HStack gapX="3">
-            <EditBackgroundBtn />
-            <EditUserInfoBtn activeUser={user} />
+            <EditBackgroundBtn user={user} />
+            <EditUserInfoBtn activeUser={activeUser} user={user} />
           </HStack>
         ) : (
           <Button
-            onClick={() => handleFollowUser(user.id, id)}
+            onClick={() => handleFollowUser(activeUser.id, id)}
             disabled={disabled}
             loading={disabled}
           >

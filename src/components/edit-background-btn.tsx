@@ -7,7 +7,7 @@ import { TbPhotoOff } from "react-icons/tb";
 import { callApi } from "@/utils/helpers/call-api";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
-import { IDeleteFilePayload, IUser } from "@/utils/types";
+import { DeleteFilePayload, IUser } from "@/utils/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCropImage } from "@/hooks/use-crop-image";
 import { useFileObjectUrl } from "@/hooks/use-file-object-url";
@@ -15,7 +15,11 @@ import { getCroppedImg } from "@/utils/helpers/crop-image";
 import { useUserStore } from "@/providers/user-store-provider";
 import Cropper from "react-easy-crop";
 
-export function EditBackgroundBtn() {
+interface EditBackgroundBtnProps {
+  user: IUser;
+}
+
+export function EditBackgroundBtn({ user }: EditBackgroundBtnProps) {
   const queryClient = useQueryClient();
 
   const photoRef = useRef<HTMLInputElement>(null);
@@ -63,17 +67,20 @@ export function EditBackgroundBtn() {
 
       const formData = new FormData();
       formData.append("file", cropFile);
-      formData.append("activeUserId", activeUser.id);
 
       const res = await callApi(
         "put",
-        "user/background/edit",
+        `user/background/edit/${activeUser.id}`,
         formData,
       );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
-      }
+      } 
+
+      setOpenDialog(false);
+      handleClearCropImage();
+      handleClearImageSrc();
 
       const fileData = (res.data as { fileUrl: string }).fileUrl;
 
@@ -87,13 +94,26 @@ export function EditBackgroundBtn() {
           profileBackgroundUrl: fileData,
         }
       });
+
+      queryClient.setQueryData<IUser>(["user", user.id], (oldUser) => {
+        if (!oldUser) {
+          return undefined;
+        }
+
+        return {
+          ...oldUser,
+          profileBackgroundUrl: fileData,
+        }
+      });
+
+      toast.success(formatToastMessages(res.message));
     } catch (error) {
       toast.error("Failed to edit background");
       console.error("Failed to edit background", error);
     } finally {
       setDisabled(false);
     }
-  }, [imageSrc, croppedAreaPixels, queryClient]);
+  }, [imageSrc, croppedAreaPixels, activeUser, queryClient, user.id, handleClearCropImage, handleClearImageSrc]);
 
   const handleFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -114,13 +134,12 @@ export function EditBackgroundBtn() {
       }
 
       setDisabled(true);
-      const res = await callApi<{ data: IDeleteFilePayload & { activeUserId: string; } }>(
+      const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
-        "user/background/delete/file",
+        `user/background/delete/file/${activeUser.id}`,
         {
           data: {
             fileUrl,
-            activeUserId: activeUser.id,
           },
         },
       )
@@ -128,6 +147,8 @@ export function EditBackgroundBtn() {
         toast.error(formatToastMessages(res.message));
         return;
       }
+
+      setOpenDialog(false);
 
       queryClient.setQueryData<IUser>(["profile"], (oldUser) => {
         if (!oldUser) {
@@ -140,6 +161,19 @@ export function EditBackgroundBtn() {
         }
       });
 
+      queryClient.setQueryData<IUser>(["user", user.id], (oldUser) => {
+        if (!oldUser) {
+          return undefined;
+        }
+
+        return {
+          ...oldUser,
+          profileBackgroundUrl: null,
+        }
+      });
+
+      handleClearCropImage();
+      handleClearImageSrc();
       toast.success(formatToastMessages(res.message));
     } catch (error) {
       toast.error("Failed to delete file");
@@ -147,7 +181,7 @@ export function EditBackgroundBtn() {
     } finally {
       setDisabled(false);
     }
-  }, []);
+  }, [activeUser, queryClient, user.id, handleClearCropImage, handleClearImageSrc]);
 
   return (
     <Dialog.Root
@@ -202,9 +236,9 @@ export function EditBackgroundBtn() {
                   </Box>
                 )}
 
-                {activeUser && activeUser.profileBackgroundUrl && (
+                {user.profileBackgroundUrl && (
                   <Button
-                    onClick={() => handleDeleteFile(activeUser.profileUrl)}
+                    onClick={() => handleDeleteFile(user.profileBackgroundUrl)}
                     disabled={disabled}
                     backgroundColor="red.600"
                     width="full"

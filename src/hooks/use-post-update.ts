@@ -1,10 +1,10 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { ICommonResponse, IPost, IUpdatePostPayload } from "@/utils/types";
+import { ICommonResponse, IPost, UpdatePostPayload } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 
 interface MutateType {
   currentPost: IPost;
-  payload: IUpdatePostPayload;
+  payload: UpdatePostPayload;
 }
 
 export function usePostUpdate(queryClient: QueryClient) {
@@ -21,7 +21,7 @@ export function usePostUpdate(queryClient: QueryClient) {
       currentPost,
       payload
     }) => {
-      const res = await callApi<IUpdatePostPayload>(
+      const res = await callApi<UpdatePostPayload>(
         "patch",
         `post/update/${currentPost.id}`,
         payload,

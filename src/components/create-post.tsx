@@ -31,7 +31,7 @@ import NextImage from "next/image";
 import { getFileDir } from "@/utils/helpers/get-file-dir";
 import { SocialVideoPlayer } from "@/components/social-video-player";
 import { FaXmark } from "react-icons/fa6";
-import { IDeleteFilePayload } from "@/utils/types";
+import { DeleteFilePayload } from "@/utils/types";
 import { usePostCreate } from "@/hooks/use-post-create";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
@@ -147,7 +147,7 @@ export function CreatePost() {
   const handleDeleteFile = useCallback(async (fileUrl: string) => {
     try {
       setDisabled(true);
-      const res = await callApi<{ data: IDeleteFilePayload }>(
+      const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
         "post/delete/file",
         {

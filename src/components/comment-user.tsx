@@ -3,7 +3,7 @@
 import { formatDate } from "@/utils/helpers/format-date";
 import {
   IComment,
-  IDeleteFilePayload,
+  DeleteFilePayload,
   IPost,
   IUser,
 } from "@/utils/types";
@@ -175,7 +175,7 @@ export function CommentUser({
   const handleDeleteFile = useCallback(async (fileUrl: string) => {
     try {
       setDisabled(true);
-      const res = await callApi<{ data: IDeleteFilePayload }>(
+      const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
         "comment/delete/file",
         {

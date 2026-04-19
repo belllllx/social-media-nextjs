@@ -70,7 +70,7 @@ export function EditUserProfileImage({ result }: EditUserProfileImageProps) {
           <Avatar.Fallback name={user.fullname} fontSize="5xl" />
         </Avatar.Root>
       )}
-      <UploadUserProfileImageBtn userId={user.id} />
+      <UploadUserProfileImageBtn user={user} />
     </Box >
   );
 }

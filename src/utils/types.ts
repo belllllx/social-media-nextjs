@@ -7,7 +7,7 @@ export interface ICommonResponse {
 
 export type ApiBody<T> = T;
 
-export type IOtpBody = {
+export type OtpBody = {
   otp: string;
 }
 
@@ -142,29 +142,35 @@ export interface IComment {
   replyToUser: IUser | null;
 }
 
-export type ICreatePostPayload = {
+export type CreatePostPayload = {
   message?: string;
   filesUrl: string[];
 }
 
-export type IDeleteFilePayload = {
+export type DeleteFilePayload = {
   fileUrl: string;
 }
 
-export type IUpdatePostPayload = {
+export type UpdatePostPayload = {
   message?: string,
   filesUrl: string[];
   shouldDeleteCurrentFiles?: boolean;
 }
 
-export type ICreateCommentPayload = {
+export type CreateCommentPayload = {
   message: string;
   fileUrl?: string;
   replyToUserId?: string;
 }
 
-export type IUpdateCommentPayload = {
+export type UpdateCommentPayload = {
   message: string,
   fileUrl?: string;
   shouldDeleteCurrentFile?: boolean;
+}
+
+export type EditUserInfoPayload = {
+  fullname?: string | undefined;
+  dateOfBirth?: Date | null;
+  info?: string | null;
 }
