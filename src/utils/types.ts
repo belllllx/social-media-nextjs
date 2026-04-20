@@ -54,7 +54,8 @@ export interface IUser {
   providerType: ProviderType;
   createdAt: Date;
   updatedAt: Date;
-  followings: IFollower[];
+  followings: ({ following: IUser } & IFollower)[];
+  followers: ({ follower: IUser } & IFollower)[];
 }
 
 enum NotificationType {

@@ -2,7 +2,6 @@ import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { IFollower, IUser } from "@/utils/types";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
-import { isEqual } from "lodash";
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -30,11 +29,16 @@ export function useFollowUser() {
         } else {
           toast.success(formatToastMessages(res.message));
 
-          const followerData = res.data as { follower: IFollower };
+          const followerData = res.data as {
+            follower: {
+              follower: IUser;
+              following: IUser;
+            } & IFollower
+          };
 
           queryClient.setQueryData<
             InfiniteData<{
-              users: (IUser & { followers: IFollower[] })[];
+              users: IUser[];
               nextCursor: string | null;
             }>
           >(["usersSuggest"], (oldUsersSuggest) => {
@@ -44,51 +48,38 @@ export function useFollowUser() {
 
             return {
               ...oldUsersSuggest,
-              pages: oldUsersSuggest.pages.map((group) => {
+              pages: oldUsersSuggest.pages.map((page) => {
                 return {
-                  ...group,
-                  users: group.users.map(
-                    (
-                      userSuggest: IUser & {
-                        followers: IFollower[];
-                      }
-                    ) => {
+                  ...page,
+                  users: page.users.map(
+                    (oldUserSuggest) => {
                       // Ignore user not target
-                      if (userSuggest.id !== followerData.follower.followingId) {
-                        return userSuggest;
+                      if (oldUserSuggest.id !== followerData.follower.followingId) {
+                        return oldUserSuggest;
                       }
 
                       // UnFollow
                       if (
-                        userSuggest.followers.some((follower) =>
-                          isEqual(follower, followerData.follower)
+                        oldUserSuggest.followers.some((follower) =>
+                          follower.followerId === followerData.follower.followerId
                         )
                       ) {
                         return {
-                          ...userSuggest,
-                          followers: userSuggest.followers.filter(
+                          ...oldUserSuggest,
+                          followers: oldUserSuggest.followers.filter(
                             (follower) =>
-                              !isEqual(follower, followerData.follower)
+                              follower.followerId !== followerData.follower.followerId
                           ),
                         };
                       }
 
                       // Follow
-                      if (
-                        userSuggest.followers.every(
-                          (follower) => !isEqual(follower, followerData.follower)
-                        )
-                      ) {
-                        return {
-                          ...userSuggest,
-                          followers: [
-                            ...userSuggest.followers,
-                            followerData.follower,
-                          ],
-                        };
-                      }
-
-                      return userSuggest;
+                      return {
+                        ...oldUserSuggest,
+                        followers: [
+                          followerData.follower, ...oldUserSuggest.followers
+                        ],
+                      };
                     }
                   ),
                 };
@@ -103,14 +94,71 @@ export function useFollowUser() {
 
             const updateFollowingUser: IUser = {
               ...oldUser,
-              followings: oldUser.followings.some((following) => isEqual(following, followerData.follower))
+              followings: oldUser.followings.some((following) => following.followingId === followerData.follower.followingId)
                 ?
-                oldUser.followings.filter((following) => !isEqual(following, followerData.follower))
+                oldUser.followings.filter((following) => following.followingId !== followerData.follower.followingId)
                 :
-                [...oldUser.followings, followerData.follower],
+                [followerData.follower, ...oldUser.followings],
             }
 
             return updateFollowingUser;
+          });
+
+          queryClient.setQueryData<IUser>(["user", targetUserId], (oldUser) => {
+            if (!oldUser) {
+              return undefined;
+            }
+
+            return {
+              ...oldUser,
+              followers: oldUser.followers.some(
+                (follower) => follower.followerId === activeUserId
+              )
+                ?
+                oldUser.followers.filter((follower) => follower.followerId !== activeUserId)
+                :
+                [followerData.follower, ...oldUser.followers],
+            }
+          });
+
+          queryClient.setQueryData<IUser>(["user", activeUserId], (oldUser) => {
+            if (!oldUser) {
+              return undefined;
+            }
+
+            return {
+              ...oldUser,
+              followers: oldUser.followers.map((follower) => {
+                // แก้เฉพาะคนที่เรากำลังกด follow or unfollow
+                if (
+                  follower.followingId === activeUserId
+                  &&
+                  follower.followerId === targetUserId
+                ) {
+                  const { follower: f } = follower;
+
+                  return {
+                    ...follower,
+                    follower: {
+                      ...f,
+                      followers:
+                        f.followers.some((follower) => follower.followerId === activeUserId)
+                          ?
+                          f.followers.filter((follower) => follower.followerId !== activeUserId)
+                          :
+                          [followerData.follower, ...f.followers],
+                    },
+                  }
+                }
+
+                return follower;
+              }),
+              followings: oldUser.followings.some((following) => following.followingId === targetUserId)
+                ?
+                oldUser.followings.filter((following) => following.followingId !== targetUserId)
+                :
+                [followerData.follower, ...oldUser.followings],
+            }
           });
         }
       } catch (error) {

@@ -4,9 +4,8 @@ import React from "react";
 import { Avatar, Box, SkeletonCircle } from "@chakra-ui/react";
 import { UploadUserProfileImageBtn } from "./upload-user-profile-image-btn";
 import { UseQueryResult } from "@tanstack/react-query";
-import { ICommonResponse, IUser } from "@/utils/types";
+import { IUser } from "@/utils/types";
 import { ringCss } from "@/utils/helpers/define-style";
-import { toast } from "react-toastify";
 
 interface EditUserProfileImageProps {
   result: UseQueryResult<IUser, Error>;
@@ -16,8 +15,6 @@ export function EditUserProfileImage({ result }: EditUserProfileImageProps) {
   const {
     data: user,
     isLoading,
-    isError,
-    error,
   } = result;
 
   if (isLoading || !user) {
@@ -36,10 +33,6 @@ export function EditUserProfileImage({ result }: EditUserProfileImageProps) {
         <SkeletonCircle width="full" height="full" />
       </Box>
     );
-  }
-
-  if (isError) {
-    toast.error((error as unknown as ICommonResponse).message);
   }
 
   return (

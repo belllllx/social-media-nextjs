@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { IFollower, IUser } from "@/utils/types";
+import { IUser } from "@/utils/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 export function useUsersSuggest(limit: number, activeUserId?: string) {
@@ -17,7 +17,7 @@ export function useUsersSuggest(limit: number, activeUserId?: string) {
       }
 
       return res.data as {
-        users: (IUser & { followers: IFollower[]; active?: boolean })[];
+        users: (IUser & { active?: boolean })[];
         nextCursor: string | null;
       };
     },

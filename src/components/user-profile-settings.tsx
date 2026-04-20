@@ -9,17 +9,15 @@ import NextImage from "next/image";
 import { EditUserProfile } from "./edit-user-profile";
 import { FaUserCheck, FaUserPlus } from "react-icons/fa6";
 import { useFollowUser } from "@/hooks/use-follow-user";
-import { useUserById } from "@/hooks/use-user-by-id";
-import { toast } from "react-toastify";
-import { ICommonResponse } from "@/utils/types";
+import { IUser } from "@/utils/types";
+import { UseQueryResult } from "@tanstack/react-query";
 
 interface UserProfileSettingsProps {
   id: string;
+  result: UseQueryResult<IUser, Error>;
 }
 
-export function UserProfileSettings({ id }: UserProfileSettingsProps) {
-  const result = useUserById(id);
-
+export function UserProfileSettings({ id, result }: UserProfileSettingsProps) {
   const { user: activeUser } = useUserStore((state) => state);
 
   const { handleFollowUser, disabled } = useFollowUser();
@@ -32,13 +30,7 @@ export function UserProfileSettings({ id }: UserProfileSettingsProps) {
   const {
     data: user,
     isLoading,
-    isError,
-    error,
   } = result;
-
-  if (isError) {
-    toast.error((error as unknown as ICommonResponse).message);
-  }
 
   return (
     <Box
@@ -48,6 +40,7 @@ export function UserProfileSettings({ id }: UserProfileSettingsProps) {
       flexDirection="column"
       overflow="hidden"
       position="relative"
+      mb="4"
     >
       <EditUserProfile result={result} />
       {!user || isLoading ? (

@@ -4,8 +4,7 @@ import React from "react";
 import { Box, HStack, Skeleton, Text } from "@chakra-ui/react";
 import { EditUserProfileImage } from "./edit-user-profile-image";
 import { ringCss } from "@/utils/helpers/define-style";
-import { toast } from "react-toastify";
-import { ICommonResponse, IUser } from "@/utils/types";
+import { IUser } from "@/utils/types";
 import { UseQueryResult } from "@tanstack/react-query";
 
 interface EditUserProfileProps {
@@ -16,13 +15,7 @@ export function EditUserProfile({ result }: EditUserProfileProps) {
   const {
     data: user,
     isLoading,
-    isError,
-    error,
   } = result;
-
-  if (isError) {
-    toast.error((error as unknown as ICommonResponse).message);
-  }
 
   return (
     <HStack
