@@ -1,6 +1,6 @@
 "use client";
 
-import { IComment, ICommonResponse, ILike, INotify, IPost, IUser } from "@/utils/types";
+import { IComment, ICommonResponse, IFollower, ILike, INotify, IPost, IUser } from "@/utils/types";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
@@ -35,6 +35,12 @@ export interface ServerToClientEvents {
   deleteComment: (comment: IComment) => void;
   deleteReplyComment: (comment: IComment) => void;
   newLikeComment: (like: ILike) => void;
+  follow: (
+    follower: IFollower & {
+      following: IUser & { followers: IFollower[] };
+      follower: IUser & { followers: IFollower[] };
+    },
+  ) => void;
 }
 
 export interface ClientToServerEvents {
