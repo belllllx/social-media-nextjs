@@ -11,10 +11,10 @@ import { useFollowUser } from "@/hooks/use-follow-user";
 
 interface PeopleSuggestProps {
   user: IUser & { followers: IFollower[] };
-  activeUserId: string;
+  activeUser: IUser;
 }
 
-export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
+export function PeopleSuggest({ user, activeUser }: PeopleSuggestProps) {
   const handleUserClick = useNavigateUser(user);
 
   const { handleFollowUser, disabled } = useFollowUser();
@@ -54,7 +54,10 @@ export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
       <IconButton
         onClick={(e) => {
           e.stopPropagation();
-          handleFollowUser(activeUserId, user.id);
+          handleFollowUser.mutate({
+            activeUser,
+            targetUser: user,
+          });
         }}
         loading={disabled}
         disabled={disabled}
@@ -68,7 +71,7 @@ export function PeopleSuggest({ user, activeUserId }: PeopleSuggestProps) {
         size="lg"
       >
         {user.followers.some(
-          (follower) => follower.followerId === activeUserId
+          (follower) => follower.followerId === activeUser.id
         ) ? (
           <FaUserCheck color="black" />
         ) : (

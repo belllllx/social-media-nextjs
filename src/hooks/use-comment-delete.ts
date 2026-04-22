@@ -155,15 +155,27 @@ export function useCommentDelete(queryClient: QueryClient) {
       };
     },
     onError: (error, { postId }, context) => {
+      if (
+        !context
+        ||
+        !context.prevPosts
+        ||
+        !context.prevPost
+        ||
+        !context.prevComments
+      ) {
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context?.prevPosts);
+      >(["posts"], context.prevPosts);
 
-      queryClient.setQueryData<IPost>(["post", postId], context?.prevPost);
+      queryClient.setQueryData<IPost>(["post", postId], context.prevPost);
 
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
-      >(["comments", postId], context?.prevComments);
+      >(["comments", postId], context.prevComments);
     },
     onSettled: (data, error, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });

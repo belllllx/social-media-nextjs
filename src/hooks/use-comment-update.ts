@@ -104,10 +104,14 @@ export function useCommentUpdate(queryClient: QueryClient) {
 
       return prevComments;
     },
-    onError: (error, { postId }, context) => {
+    onError: (error, { postId }, prevComments) => {
+      if(!prevComments){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
-      >(["comments", postId], context);
+      >(["comments", postId], prevComments);
     },
     onSuccess: ({ data }) => {
       const updatedComment = data as unknown as IComment;

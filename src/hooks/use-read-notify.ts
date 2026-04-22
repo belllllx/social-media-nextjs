@@ -48,10 +48,14 @@ export function useReadNotify() {
 
       return prevNoifies;
     },
-    onError: (error, notifyId, context) => {
+    onError: (error, notifyId, prevNoifies) => {
+      if(!prevNoifies){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
-      >(["notifies"], context);
+      >(["notifies"], prevNoifies);
     },
     onSuccess: (res) => {
       const notifyData = res.data as unknown as INotify;

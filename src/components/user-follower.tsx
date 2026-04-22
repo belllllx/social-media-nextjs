@@ -67,7 +67,10 @@ export function UserFollower({ user, followerOfUser }: UserFollowerProps) {
             }
 
             e.stopPropagation();
-            handleFollowUser(activeUser.id, followerOfUser.id);
+            handleFollowUser.mutate({
+              activeUser,
+              targetUser: followerOfUser,
+            });
           }}
           loading={disabled}
           disabled={disabled}

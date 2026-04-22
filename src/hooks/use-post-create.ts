@@ -81,9 +81,19 @@ export function usePostCreate(queryClient: QueryClient) {
       };
     },
     onError: (error, variables, context) => {
+      if(
+        !context 
+        || 
+        !context.optimisticId 
+        || 
+        !context.prevPosts
+      ){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context?.prevPosts);
+      >(["posts"], context.prevPosts);
     },
     onSuccess: ({ data }, variables, context) => {
       const createdPost = data as unknown as IPost;

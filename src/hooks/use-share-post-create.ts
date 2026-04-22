@@ -88,9 +88,17 @@ export function useSharePostCreate(queryClient: QueryClient) {
       };
     },
     onError: (error, variables, context) => {
+      if(
+        !context 
+        || 
+        !context.prevPosts
+      ){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context?.prevPosts);
+      >(["posts"], context.prevPosts);
     },
     onSuccess: ({ data }, variables, context) => {
       const createdSharePost = data as unknown as IPost;

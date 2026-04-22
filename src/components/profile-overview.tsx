@@ -6,7 +6,7 @@ import { UserContents } from "./user-contents";
 import { useUserById } from "@/hooks/use-user-by-id";
 import { toast } from "react-toastify";
 import { ICommonResponse } from "@/utils/types";
-import { UserContentsSkeleton } from "./user-contents-skeleton";
+import { Stack } from "@chakra-ui/react";
 
 interface ProfileOverviewProps {
   id: string;
@@ -16,8 +16,6 @@ export function ProfileOverview({ id }: ProfileOverviewProps) {
   const result = useUserById(id);
 
   const {
-    data: user,
-    isLoading,
     isError,
     error,
   } = result;
@@ -27,13 +25,9 @@ export function ProfileOverview({ id }: ProfileOverviewProps) {
   }
 
   return (
-    <>
+    <Stack gapY="4" height="100vh">
       <UserProfileSettings id={id} result={result} />
-      {!user || isLoading ? (
-        <UserContentsSkeleton />
-      ) : (
-        <UserContents user={user} />
-      )}
-    </>
+      <UserContents result={result} />
+    </Stack>
   );
 }

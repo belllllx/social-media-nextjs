@@ -64,7 +64,7 @@ export function PeoplesSuggest() {
                 <PeopleSuggest
                   key={user.id}
                   user={user}
-                  activeUserId={activeUser.id}
+                  activeUser={activeUser}
                 />
               ))
             ) : (

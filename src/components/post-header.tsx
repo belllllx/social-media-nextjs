@@ -96,7 +96,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const deletePostMutation = usePostDelete(queryClient);
 
   const handleUpdatePost = useCallback(async ({ message }: { message?: string }) => {
-    if (!message && !filesUrl.length) {
+    if (!post.parent && !post.parentId && !message && !filesUrl.length) {
       return;
     }
 
@@ -107,6 +107,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
           message: !message ? "" : message,
           filesUrl,
           shouldDeleteCurrentFiles,
+          isSharePost: post.parent && post.parentId ? true : false,
         },
       });
 

@@ -19,6 +19,9 @@ export function UserInfosCard({ user }: UserInfosCardProps) {
       gapY="4"
       backgroundColor="white"
       p="4"
+      mdDown={{
+        width: "full",
+      }}
     >
       <Text textStyle="lg" fontWeight="bold">Info</Text>
 

@@ -156,6 +156,7 @@ export type UpdatePostPayload = {
   message?: string,
   filesUrl: string[];
   shouldDeleteCurrentFiles?: boolean;
+  isSharePost: boolean;
 }
 
 export type CreateCommentPayload = {

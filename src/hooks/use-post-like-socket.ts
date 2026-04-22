@@ -4,7 +4,6 @@ import {
 } from "@/providers/socket-io-provider";
 import { IPost } from "@/utils/types";
 import { InfiniteData, QueryClient } from "@tanstack/react-query";
-import { isEqual } from "lodash";
 import { useEffect } from "react";
 import { Socket } from "socket.io-client";
 
@@ -43,7 +42,7 @@ export function usePostLikeSocket(
                   likes: [...post.likes],
                 }
                 const index = copyPost.likes.findIndex((prevLike) =>
-                  isEqual(prevLike, like)
+                  prevLike.userId === like.userId
                 );
                 if (index !== -1) {
                   copyPost.likes.splice(index, 1);
@@ -68,7 +67,7 @@ export function usePostLikeSocket(
           likes: [...oldPost.likes],
         }
         const index = copyPost.likes.findIndex((prevLike) =>
-          isEqual(prevLike, like)
+          prevLike.userId === like.userId
         );
         if (index !== -1) {
           copyPost.likes.splice(index, 1);

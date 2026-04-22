@@ -14,10 +14,10 @@ export function UserContentsSkeleton() {
         p="4"
       >
          <Skeleton height="5" width="15%" />
-         <Skeleton height="5" width="60%" />
-         <Skeleton height="5" width="30%" />
-         <Skeleton height="5" width="30%" />
-         <Skeleton height="5" width="40%" />
+         <Skeleton height="5" width="70%" />
+         <Skeleton height="5" width="35%" />
+         <Skeleton height="5" width="35%" />
+         <Skeleton height="5" width="85%" />
       </Box>
     </HStack>
   );

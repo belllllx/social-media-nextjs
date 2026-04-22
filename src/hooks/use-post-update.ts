@@ -127,11 +127,21 @@ export function usePostUpdate(queryClient: QueryClient) {
       };
     },
     onError: (error, { currentPost }, context) => {
+      if(
+        !context
+        ||
+        !context.prevPosts
+        ||
+        !context.prevPost
+      ){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context?.prevPosts);
+      >(["posts"], context.prevPosts);
 
-      queryClient.setQueryData<IPost>(["post", currentPost.id], context?.prevPost);
+      queryClient.setQueryData<IPost>(["post", currentPost.id], context.prevPost);
     },
     onSuccess: ({ data }) => {
       const updatePost = data as unknown as IPost;

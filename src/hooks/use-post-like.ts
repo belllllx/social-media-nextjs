@@ -121,11 +121,21 @@ export function usePostLike(queryClient: QueryClient) {
       };
     },
     onError: (error, { postId }, context) => {
+      if(
+        !context
+        ||
+        !context.prevPosts
+        ||
+        !context.prevPost
+      ){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], context?.prevPosts);
+      >(["posts"], context.prevPosts);
 
-      queryClient.setQueryData<IPost>(["post", postId], context?.prevPost);
+      queryClient.setQueryData<IPost>(["post", postId], context.prevPost);
     },
     onSettled: (data, error, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });

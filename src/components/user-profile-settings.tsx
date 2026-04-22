@@ -40,7 +40,6 @@ export function UserProfileSettings({ id, result }: UserProfileSettingsProps) {
       flexDirection="column"
       overflow="hidden"
       position="relative"
-      mb="4"
     >
       <EditUserProfile result={result} />
       {!user || isLoading ? (
@@ -53,7 +52,12 @@ export function UserProfileSettings({ id, result }: UserProfileSettingsProps) {
         >
           {user && user.profileBackgroundUrl && (
             <Image alt="user-background-image" asChild>
-              <NextImage src={user.profileBackgroundUrl} alt={"userBackgroundImage"} fill />
+              <NextImage 
+                src={user.profileBackgroundUrl} 
+                alt={"userBackgroundImage"} 
+                fill
+                unoptimized
+              />
             </Image>
           )}
         </Box>
@@ -75,7 +79,10 @@ export function UserProfileSettings({ id, result }: UserProfileSettingsProps) {
           </HStack>
         ) : (
           <Button
-            onClick={() => handleFollowUser(activeUser.id, id)}
+            onClick={() => handleFollowUser.mutate({
+              activeUser,
+              targetUser: user,
+            })}
             disabled={disabled}
             loading={disabled}
           >

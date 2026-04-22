@@ -132,10 +132,14 @@ export function useCommentLike(queryClient: QueryClient) {
 
       return prevComments;
     },
-    onError: (error, { postId }, context) => {
+    onError: (error, { postId }, prevComments) => {
+      if(!prevComments){
+        return;
+      }
+
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
-      >(["comments", postId], context);
+      >(["comments", postId], prevComments);
     },
     onSettled: (data, error, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });

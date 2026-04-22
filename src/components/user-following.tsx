@@ -67,7 +67,10 @@ export function UserFollowing({ user, followingOfUser }: UserFollowingProps) {
             }
 
             e.stopPropagation();
-            handleFollowUser(activeUser.id, followingOfUser.id);
+            handleFollowUser.mutate({
+              activeUser,
+              targetUser: followingOfUser,
+            });
           }}
           loading={disabled}
           disabled={disabled}
