@@ -19,7 +19,6 @@ export function UserContents({ result }: UserContentsProps) {
   return (
     <HStack
       height="full"
-      minH="0"
       gapX="4"
       mdDown={{
         flexDirection: "column",

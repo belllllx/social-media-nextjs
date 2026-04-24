@@ -7,10 +7,6 @@ export function TopBarActions() {
     <HStack 
       alignItems="center" 
       gapX="4"
-      display="none"
-      lg={{
-        display: "flex"
-      }}
     >
       <NotifyAction />
       <UserAction />

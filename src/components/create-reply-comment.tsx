@@ -7,7 +7,7 @@ import {
   IPost,
   IUser,
 } from "@/utils/types";
-import { Avatar, Box, HStack, IconButton, Input, Text } from "@chakra-ui/react";
+import { Avatar, Box, Button, HStack, IconButton, Input, Text } from "@chakra-ui/react";
 import React, {
   ChangeEvent,
   useCallback,
@@ -35,7 +35,7 @@ import { useCommentCreate } from "@/hooks/use-comment-create";
 
 interface CreateReplyCommentProps {
   isOpenReply: boolean;
-  activeUser: IUser | null;
+  activeUser: IUser;
   onOpenReply: (open: boolean) => void;
   post: IPost;
   comment: IComment;
@@ -78,7 +78,7 @@ export function CreateReplyComment({
   const createCommentMutation = useCommentCreate(queryClient);
 
   const handleCreateReplyComment = useCallback(async ({ message }: { message?: string }) => {
-    if (!activeUser || (!message && !fileUrl) || !message) {
+    if (!message && !fileUrl) {
       return;
     }
 
@@ -111,6 +111,7 @@ export function CreateReplyComment({
         return;
       }
 
+      onOpenReply(false);
       setShowReplyOnCommentId({
         commentId: comment.id,
         open: true,
@@ -196,14 +197,14 @@ export function CreateReplyComment({
       {isOpenReply && (
         <HStack gapX="3" alignItems="flex-start" mb="2">
           <>
-            {activeUser?.profileUrl ? (
+            {activeUser.profileUrl ? (
               <Avatar.Root size="lg">
-                <Avatar.Fallback name={activeUser?.fullname} />
-                <Avatar.Image src={activeUser?.profileUrl} />
+                <Avatar.Fallback name={activeUser.fullname} />
+                <Avatar.Image src={activeUser.profileUrl} />
               </Avatar.Root>
             ) : (
               <Avatar.Root size="lg">
-                <Avatar.Fallback name={activeUser?.fullname} />
+                <Avatar.Fallback name={activeUser.fullname} />
               </Avatar.Root>
             )}
             <form onSubmit={onSubmit} className="w-full">
@@ -243,15 +244,19 @@ export function CreateReplyComment({
               name="photo"
               accept=".jpg,.jpeg,.png,.webp"
             />
-            <Text
+            <Button
               onClick={() => onOpenReply(false)}
-              cursor="pointer"
-              color="fg.muted"
-              py="2"
+              disabled={isSubmitting || disabled}
+              type="button"
+              variant="ghost"
+              px="0"
               textStyle="sm"
+              _hover={{
+                background: "none",
+              }}
             >
               Cancel
-            </Text>
+            </Button>
           </>
         </HStack>
       )}
@@ -282,7 +287,14 @@ export function CreateReplyComment({
             <FaXmark />
           </IconButton>
           <Image alt="upload-reply-image" asChild>
-            <NextImage src={fileUrl} alt={fileUrl} fill />
+            <NextImage
+              src={fileUrl}
+              alt={fileUrl}
+              fill
+              style={{
+                objectFit: "cover"
+              }}
+            />
           </Image>
         </Box>
       )}

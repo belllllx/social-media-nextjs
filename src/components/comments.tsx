@@ -12,14 +12,16 @@ import { QueryClient } from "@tanstack/react-query";
 
 interface CommentsProps {
   post: IPost;
-  activeUser: IUser | null;
+  activeUser: IUser;
   queryClient: QueryClient;
+  userId?: string;
 }
 
 export function Comments({
   post,
   activeUser,
   queryClient,
+  userId,
 }: CommentsProps) {
   const { showCommentOnPostId } = useActionStore((state) => state);
 
@@ -74,6 +76,7 @@ export function Comments({
                       post={post}
                       activeUser={activeUser}
                       queryClient={queryClient}
+                      userId={userId}
                     />
                   </Stack>
                 ))}

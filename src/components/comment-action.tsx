@@ -11,7 +11,7 @@ import { QueryClient } from "@tanstack/react-query";
 interface CommentActionProps {
   post: IPost;
   comment: IComment;
-  activeUser: IUser | null;
+  activeUser: IUser;
   queryClient: QueryClient;
 }
 

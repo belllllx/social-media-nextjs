@@ -235,23 +235,23 @@ export function useFollowUser() {
       queryClient.setQueryData<IUser>(["user", targetUser.id], context.prevUserTarget);
       queryClient.setQueryData<IUser>(["user", activeUser.id], context.prevUserActive);
     },
-    onSettled: (data) => {
-      if (!data) {
-        return;
-      }
+    // onSettled: (data) => {
+    //   if (!data) {
+    //     return;
+    //   }
 
-      const followerData = data.data as {
-        follower: {
-          follower: IUser;
-          following: IUser;
-        } & IFollower
-      }
+    //   const followerData = data.data as {
+    //     follower: {
+    //       follower: IUser;
+    //       following: IUser;
+    //     } & IFollower
+    //   }
 
-      queryClient.invalidateQueries({ queryKey: ["usersSuggest"] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      queryClient.invalidateQueries({ queryKey: ["user", followerData.follower.followingId] });
-      queryClient.invalidateQueries({ queryKey: ["user", followerData.follower.followerId] });
-    },
+    //   queryClient.invalidateQueries({ queryKey: ["usersSuggest"] });
+    //   queryClient.invalidateQueries({ queryKey: ["profile"] });
+    //   queryClient.invalidateQueries({ queryKey: ["user", followerData.follower.followingId] });
+    //   queryClient.invalidateQueries({ queryKey: ["user", followerData.follower.followerId] });
+    // },
   });
 
   return {

@@ -57,6 +57,7 @@ export function UserProfileSettings({ id, result }: UserProfileSettingsProps) {
                 alt={"userBackgroundImage"} 
                 fill
                 unoptimized
+                className="object-cover"
               />
             </Image>
           )}

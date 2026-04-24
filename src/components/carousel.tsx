@@ -24,6 +24,7 @@ interface CarouselProps {
   isDisabled?: boolean;
   onSetDisabled?: (status: boolean) => void;
   onSetFilesUrl?: (fileUrl: string) => void;
+  onSetIsDeletePostFile: (isDeleted: boolean, deletedPostFile: string) => void;
   itemsHeight?: string;
   isShowCloseBtn?: boolean;
 }
@@ -34,37 +35,43 @@ export function Carousel({
   isDisabled,
   onSetDisabled,
   onSetFilesUrl,
+  onSetIsDeletePostFile,
   itemsHeight,
   isShowCloseBtn = false,
 }: CarouselProps) {
   const handleDeleteFile = useCallback(async (fileUrl: string) => {
-    if (!(onSetDisabled && onSetFilesUrl && isShowCloseBtn)) {
-      return;
-    }
+    console.log({
+      fileUrl
+    })
 
-    try {
-      onSetDisabled(true);
-      const res = await callApi<{ data: DeleteFilePayload }>(
-        "delete",
-        "post/delete/file",
-        {
-          data: { fileUrl },
-        }
-      );
-      if (!res.success) {
-        toast.error(formatToastMessages(res.message));
-        return;
-      }
+    // if (!(onSetDisabled && onSetFilesUrl && isShowCloseBtn)) {
+    //   return;
+    // }
 
-      toast.success(formatToastMessages(res.message));
-      onSetFilesUrl(fileUrl);
-    } catch (error) {
-      toast.error("Failed to delete file");
-      console.error("Failed to delete file", error);
-    } finally {
-      onSetDisabled(false);
-    }
-  }, [isShowCloseBtn, onSetDisabled, onSetFilesUrl]);
+    // try {
+    //   onSetDisabled(true);
+    //   const res = await callApi<{ data: DeleteFilePayload }>(
+    //     "delete",
+    //     "post/delete/file",
+    //     {
+    //       data: { fileUrl },
+    //     }
+    //   );
+    //   if (!res.success) {
+    //     toast.error(formatToastMessages(res.message));
+    //     return;
+    //   }
+
+    //   toast.success(formatToastMessages(res.message));
+    //   onSetFilesUrl(fileUrl);
+    //   onSetIsDeletePostFile(true, fileUrl);
+    // } catch (error) {
+    //   toast.error("Failed to delete file");
+    //   console.error("Failed to delete file", error);
+    // } finally {
+    //   onSetDisabled(false);
+    // }
+  }, [isShowCloseBtn, onSetDisabled, onSetFilesUrl, onSetIsDeletePostFile]);
 
   return (
     <ChakraCarousel.Root
@@ -90,10 +97,12 @@ export function Carousel({
 
         <ChakraCarousel.ItemGroup width="full">
           {fileUrls.map((file, index) => (
-            <ChakraCarousel.Item key={file} index={index}>
+            <ChakraCarousel.Item key={index} index={index}>
               {isShowCloseBtn && (
                 <IconButton
-                  onClick={() => handleDeleteFile(file)}
+                  onClick={() => {
+                    handleDeleteFile(file);
+                  }}
                   disabled={isDisabled}
                   aria-label="Remove file"
                   position="absolute"
@@ -123,7 +132,9 @@ export function Carousel({
                       alt={file}
                       fill
                       unoptimized
-                      style={{ objectFit: inDialog ? "fill" : "cover" }}
+                      style={{
+                        objectFit: "cover"
+                      }}
                     />
                   </Image>
                 </Box>

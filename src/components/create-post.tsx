@@ -46,9 +46,9 @@ export function CreatePost() {
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
   const [disabled, setDisabled] = useState(false);
 
-  const { user, isLoading } = useUserStore((state) => state);
+  const { user: activeUser, isLoading } = useUserStore((state) => state);
 
-  const handleUserClick = useNavigateUser(user); 
+  const handleUserClick = useNavigateUser(activeUser);
 
   const loadingComponent = useLoadingComponent(isLoading);
 
@@ -71,14 +71,14 @@ export function CreatePost() {
   const content = watch("message");
 
   const handleCreatePost = useCallback(async ({ message }: { message?: string }) => {
-    if (!(filesUrl.length || message) || !user) {
+    if (!(filesUrl.length || message) || !activeUser) {
       return;
     }
 
     try {
       setDisabled(true);
       const res = await createPostMutation.mutateAsync({
-        user,
+        activeUser,
         payload: {
           message: !message ? undefined : message,
           filesUrl,
@@ -98,7 +98,7 @@ export function CreatePost() {
     } finally {
       setDisabled(false);
     }
-  }, [createPostMutation, filesUrl, form, user]);
+  }, [createPostMutation, filesUrl, form, activeUser]);
 
   const onSubmit = handleSubmit(handleCreatePost);
 
@@ -187,16 +187,16 @@ export function CreatePost() {
           {loadingComponent || isLoading ? (
             <SkeletonCircle size="12" />
           ) : (
-            user && (
+            activeUser && (
               <Box onClick={handleUserClick} cursor="pointer">
-                {user.profileUrl ? (
+                {activeUser.profileUrl ? (
                   <Avatar.Root size="xl">
-                    <Avatar.Fallback name={user.fullname} />
-                    <Avatar.Image src={user.profileUrl} />
+                    <Avatar.Fallback name={activeUser.fullname} />
+                    <Avatar.Image src={activeUser.profileUrl} />
                   </Avatar.Root>
                 ) : (
                   <Avatar.Root size="xl">
-                    <Avatar.Fallback name={user.fullname} />
+                    <Avatar.Fallback name={activeUser.fullname} />
                   </Avatar.Root>
                 )}
               </Box>
@@ -312,7 +312,14 @@ export function CreatePost() {
               </IconButton>
               {getFileDir(fileUrl) === "image" ? (
                 <Image alt="upload-post-image" asChild>
-                  <NextImage src={fileUrl} alt={fileUrl} fill />
+                  <NextImage
+                    src={fileUrl}
+                    alt={fileUrl}
+                    fill
+                    style={{
+                      objectFit: "cover"
+                    }}
+                  />
                 </Image>
               ) : (
                 <SocialVideoPlayer src={fileUrl} />

@@ -24,16 +24,19 @@ import { useCommentCountDeleteSocket } from "@/hooks/use-comment-count-delete-so
 import { useCommentUpdateSocket } from "@/hooks/use-comment-update-socket";
 import { useReplyCountDeleteSocket } from "@/hooks/use-reply-count-delete-socket";
 import { useReplyDeleteSocket } from "@/hooks/use-reply-delete-socket";
+import { useUserStore } from "@/providers/user-store-provider";
 
 export function Posts() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const { socket } = useSocketIo();
 
+  const { user: activeUser } = useUserStore((state) => state);
+
   const queryClient = useQueryClient();
 
   usePostCreateSocket(socket, queryClient);
-  usePostLikeSocket(socket, queryClient);
+  usePostLikeSocket(socket, queryClient, activeUser?.id);
   usePostUpdateSocket(socket, queryClient);
   usePostDeleteSocket(socket, queryClient);
   

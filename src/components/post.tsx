@@ -21,14 +21,16 @@ interface PostProps {
   post: IPost;
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
   queryClient: QueryClient;
+  userId?: string;
 }
 
-export function Post({ 
+export function Post({
   post,
   socket,
   queryClient,
+  userId,
 }: PostProps) {
-  const { user } = useUserStore((state) => state);
+  const { user: activeUser } = useUserStore((state) => state);
 
   useCommentLikeSocket(post.id, socket, queryClient);
 
@@ -41,9 +43,11 @@ export function Post({
       p="4"
       mb="4"
     >
-      <PostHeader post={post} activeUser={user}>
-        <PostUserHeader post={post} />
-      </PostHeader>
+      {activeUser && (
+        <PostHeader post={post} activeUser={activeUser}>
+          <PostUserHeader post={post} />
+        </PostHeader>
+      )}
 
       {post.parentId && post.parent ? (
         <SharePost parentPost={post.parent} post={post} />
@@ -51,19 +55,25 @@ export function Post({
         <PostBody post={post} />
       )}
 
-      <PostAction 
-        post={post} 
-        activeUser={user}
-        queryClient={queryClient}
-       />
+      {activeUser && (
+        <PostAction
+          post={post}
+          activeUser={activeUser}
+          queryClient={queryClient}
+          userId={userId}
+        />
+      )}
 
       <ToggleViewComments post={post} />
 
-      <Comments 
-        post={post} 
-        activeUser={user} 
-        queryClient={queryClient}
-      />
+      {activeUser && (
+        <Comments
+          post={post}
+          activeUser={activeUser}
+          queryClient={queryClient}
+          userId={userId}
+        />
+      )}
 
       <CommentOverview post={post} queryClient={queryClient} />
     </Stack>

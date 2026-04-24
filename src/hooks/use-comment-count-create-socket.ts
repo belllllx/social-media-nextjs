@@ -53,6 +53,46 @@ export function useCommentCountCreateSocket(
         };
       });
 
+      queryClient.setQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts", newComment.post.userId], (oldPosts) => {
+        if (!oldPosts) {
+          return undefined;
+        }
+
+        return {
+          ...oldPosts,
+          pages: oldPosts.pages.map((page) => {
+            // ถ้าไม่ใช้ post target ข้าม
+            if (!page.posts.some((post) => post.id === newComment.postId)) {
+              return page;
+            }
+
+            return {
+              ...page,
+              posts: page.posts.map((post) => {
+                // ถ้าไม่ใช่ post ที่ comment ให้ข้าม
+                if (post.id !== newComment.postId) {
+                  return post;
+                }
+
+                // ถ้าเป็น create reply มา ไม่ count
+                if (newComment.parentId) {
+                  return post;
+                }
+
+                const updatePost = {
+                  ...post,
+                  commentsCount: post.commentsCount + 1,
+                };
+
+                return updatePost;
+              }),
+            };
+          }),
+        };
+      });
+
       queryClient.setQueryData<IPost>(["post", newComment.postId], (oldPost) => {
         if (!oldPost) {
           return undefined;

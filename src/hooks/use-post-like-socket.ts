@@ -10,6 +10,7 @@ import { Socket } from "socket.io-client";
 export function usePostLikeSocket(
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null,
   queryClient: QueryClient,
+  userId?: string,
 ) {
   useEffect(() => {
     socket?.on("newLike", (like) => {
@@ -57,6 +58,52 @@ export function usePostLikeSocket(
         };
       });
 
+      if (userId) {
+        queryClient.setQueryData<
+          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+        >(["posts", userId], (oldPosts) => {
+          if (!oldPosts) {
+            return undefined;
+          }
+
+          return {
+            ...oldPosts,
+            pages: oldPosts.pages.map((page) => {
+              // ไม่ใข่ page target ข้าม
+              if (!page.posts.some((prevPost) => prevPost.id === like.postId)) {
+                return page;
+              }
+
+              return {
+                ...page,
+                posts: page.posts.map((post) => {
+                  // ไม่ใข่ post target ข้าม
+                  if (post.id !== like.postId) {
+                    return post;
+                  }
+
+                  // แก้เฉพาะ target
+                  const copyPost = {
+                    ...post,
+                    likes: [...post.likes],
+                  }
+                  const index = copyPost.likes.findIndex((prevLike) =>
+                    prevLike.userId === like.userId
+                  );
+                  if (index !== -1) {
+                    copyPost.likes.splice(index, 1);
+                  } else {
+                    copyPost.likes.unshift(like);
+                  }
+
+                  return copyPost;
+                }),
+              };
+            }),
+          };
+        });
+      }
+
       queryClient.setQueryData<IPost>(["post", like.postId], (oldPost) => {
         if (!oldPost) {
           return undefined;
@@ -82,5 +129,5 @@ export function usePostLikeSocket(
     return () => {
       socket?.off("newLike");
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, userId]);
 }

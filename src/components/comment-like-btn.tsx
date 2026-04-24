@@ -22,7 +22,7 @@ import { useCommentLike } from "@/hooks/use-comment-like";
 interface CommentLikeBtnProps {
   post: IPost;
   comment: IComment;
-  activeUser: IUser | null;
+  activeUser: IUser;
   queryClient: QueryClient;
 }
 
@@ -37,10 +37,6 @@ export function CommentLikeBtn({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCommentLike = useCallback(async () => {
-    if (!activeUser) {
-      return;
-    }
-
     try {
       setIsLoading(true);
       const res = await commentLikeMutation.mutateAsync({
@@ -60,7 +56,7 @@ export function CommentLikeBtn({
     } finally {
       setIsLoading(false);
     }
-  }, [commentLikeMutation, activeUser, post.id, comment.id]);
+  }, [commentLikeMutation, post.id, comment.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">
@@ -74,7 +70,7 @@ export function CommentLikeBtn({
           justifyContent="flex-end"
           size="md"
         >
-          {comment.likes.some((like) => like.userId === activeUser?.id) ? (
+          {comment.likes.some((like) => like.userId === activeUser.id) ? (
             <BiSolidLike />
           ) : (
             <BiLike />

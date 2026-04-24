@@ -5,6 +5,7 @@ import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 interface MutationType {
   postId: string;
   comment: IComment;
+  userId?: string;
 }
 
 export function useCommentDelete(queryClient: QueryClient) {
@@ -13,9 +14,10 @@ export function useCommentDelete(queryClient: QueryClient) {
     Error,
     MutationType,
     {
-      prevComments?: InfiniteData<{ comments: IComment[]; nextCursor: string | null }>,
-      prevPosts?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>,
-      prevPost?: IPost,
+      prevComments?: InfiniteData<{ comments: IComment[]; nextCursor: string | null }>;
+      prevPosts?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>;
+      prevPostsByUser?: InfiniteData<{ posts: IPost[]; nextCursor: string | null }>;
+      prevPost?: IPost;
     }
   >({
     mutationFn: async ({ postId, comment }) => {
@@ -25,12 +27,22 @@ export function useCommentDelete(queryClient: QueryClient) {
       );
       return res;
     },
-    onMutate: async ({ postId, comment: currentComment }) => {
+    onMutate: async ({
+      postId,
+      comment: currentComment,
+      userId,
+    }) => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["posts", userId] });
       await queryClient.cancelQueries({ queryKey: ["comments", postId] });
 
       const prevPosts = queryClient.getQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"]);
+
+      const prevPostsByUser = queryClient.getQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts", userId]);
 
       const prevPost = queryClient.getQueryData<IPost>(["post", postId]);
 
@@ -62,6 +74,39 @@ export function useCommentDelete(queryClient: QueryClient) {
               queryClient.setQueryData<
                 InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
               >(["posts"], (oldPosts) => {
+                if (!oldPosts) {
+                  return undefined;
+                }
+
+                return {
+                  ...oldPosts,
+                  pages: oldPosts.pages.map((page) => {
+                    // ไม่ใช่เพจ target ข้าม
+                    if (!page.posts.some((post) => post.id === postId)) {
+                      return page;
+                    }
+
+                    return {
+                      ...page,
+                      posts: page.posts.map((post) => {
+                        // ไม่ใข่ post target ข้าม
+                        if (post.id !== postId) {
+                          return post;
+                        }
+
+                        return {
+                          ...post,
+                          commentsCount: post.commentsCount - 1,
+                        }
+                      }),
+                    }
+                  }),
+                }
+              });
+
+              queryClient.setQueryData<
+                InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+              >(["posts", userId], (oldPosts) => {
                 if (!oldPosts) {
                   return undefined;
                 }
@@ -150,15 +195,18 @@ export function useCommentDelete(queryClient: QueryClient) {
 
       return {
         prevPosts,
+        prevPostsByUser,
         prevPost,
         prevComments,
       };
     },
-    onError: (error, { postId }, context) => {
+    onError: (error, { postId, userId }, context) => {
       if (
         !context
         ||
         !context.prevPosts
+        ||
+        !context.prevPostsByUser
         ||
         !context.prevPost
         ||
@@ -171,16 +219,20 @@ export function useCommentDelete(queryClient: QueryClient) {
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"], context.prevPosts);
 
+      queryClient.setQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts", userId], context.prevPostsByUser);
+
       queryClient.setQueryData<IPost>(["post", postId], context.prevPost);
 
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", postId], context.prevComments);
     },
-    onSettled: (data, error, { postId }) => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      queryClient.invalidateQueries({ queryKey: ["post", postId] });
-      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    },
+    // onSettled: (data, error, { postId }) => {
+    //   queryClient.invalidateQueries({ queryKey: ["posts"] });
+    //   queryClient.invalidateQueries({ queryKey: ["post", postId] });
+    //   queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    // },
   });
 }

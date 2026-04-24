@@ -117,7 +117,7 @@ export interface IPost {
   parentId: string | null;
   user: IUser;
   likes: ILike[];
-  filesUrl?: string[];
+  filesUrl: string[];
   parent?: IPost;
   comments: IComment[];
   commentsCount: number;
@@ -160,7 +160,7 @@ export type UpdatePostPayload = {
 }
 
 export type CreateCommentPayload = {
-  message: string;
+  message?: string;
   fileUrl?: string;
   replyToUserId?: string;
 }

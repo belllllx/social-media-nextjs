@@ -30,10 +30,10 @@ export interface ServerToClientEvents {
   updatePost: (post: IPost) => void;
   deletePost: (post: IPost) => void;
   newLike: (like: ILike) => void;
-  createComment: (comment: IComment) => void;
+  createComment: (comment: IComment & { post: IPost }) => void;
   updateComment: (comment: IComment) => void;
-  deleteComment: (comment: IComment) => void;
-  deleteReplyComment: (comment: IComment) => void;
+  deleteComment: (comment: IComment & { post: IPost }) => void;
+  deleteReplyComment: (comment: IComment & { post: IPost }) => void;
   newLikeComment: (like: ILike) => void;
   follow: (
     follower: IFollower & {

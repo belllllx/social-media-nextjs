@@ -30,7 +30,7 @@ import { useNavigateUser } from "@/hooks/use-navigate-user";
 
 interface PostShareBtnProps {
   post: IPost;
-  activeUser: IUser | null;
+  activeUser: IUser;
 }
 
 export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
@@ -40,7 +40,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
 
   const [openDialog, setOpenDialog] = useState(false);
 
-  const handleUserClick = useNavigateUser(activeUser); 
+  const handleUserClick = useNavigateUser(activeUser);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -62,13 +62,9 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
   const sharePostCreateMutation = useSharePostCreate(queryClient);
 
   const handleCreateSharePost = useCallback(async ({ message }: { message?: string }) => {
-    if (!activeUser) {
-      return;
-    }
-
     try {
       const res = await sharePostCreateMutation.mutateAsync({
-        user: activeUser,
+        activeUser,
         post,
         payload: {
           message: !message ? undefined : message,
@@ -123,14 +119,14 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
             <Dialog.Body>
               <Stack gapY="4">
                 <HStack gap="4">
-                  {activeUser?.profileUrl ? (
+                  {activeUser.profileUrl ? (
                     <Avatar.Root
                       onClick={handleUserClick}
                       cursor="pointer"
                       size="xl"
                     >
-                      <Avatar.Fallback name={activeUser?.fullname} />
-                      <Avatar.Image src={activeUser?.profileUrl} />
+                      <Avatar.Fallback name={activeUser.fullname} />
+                      <Avatar.Image src={activeUser.profileUrl} />
                     </Avatar.Root>
                   ) : (
                     <Avatar.Root
@@ -138,7 +134,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                       cursor="pointer"
                       size="xl"
                     >
-                      <Avatar.Fallback name={activeUser?.fullname} />
+                      <Avatar.Fallback name={activeUser.fullname} />
                     </Avatar.Root>
                   )}
                   <Text
@@ -147,7 +143,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                     fontWeight="medium"
                     fontSize="md"
                   >
-                    {activeUser?.fullname}
+                    {activeUser.fullname}
                   </Text>
                 </HStack>
 

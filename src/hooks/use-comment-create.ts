@@ -110,7 +110,7 @@ export function useCommentCreate(queryClient: QueryClient) {
 
                   const newReplyOrTagComment: IComment = {
                     id: optimisticId,
-                    message: payload.message,
+                    message: payload.message ?? "",
                     postId,
                     userId: user.id,
                     user,
@@ -142,7 +142,7 @@ export function useCommentCreate(queryClient: QueryClient) {
 
         const newComment: IComment = {
           id: optimisticId,
-          message: payload.message,
+          message: payload.message ?? "",
           postId,
           userId: user.id,
           user,

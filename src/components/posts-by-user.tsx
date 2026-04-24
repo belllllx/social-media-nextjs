@@ -37,7 +37,11 @@ export function PostsByUser({ userId }: PostsByUserProps) {
   const queryClient = useQueryClient();
 
   usePostCreateSocket(socket, queryClient);
-  usePostLikeSocket(socket, queryClient);
+  usePostLikeSocket(
+    socket, 
+    queryClient, 
+    userId,
+  );
   usePostUpdateSocket(socket, queryClient);
   usePostDeleteSocket(socket, queryClient);
 
@@ -106,6 +110,7 @@ export function PostsByUser({ userId }: PostsByUserProps) {
                 post={post}
                 socket={socket}
                 queryClient={queryClient}
+                userId={userId}
               />)
             ) : (
               <ItemsNotFound title="post" />

@@ -19,6 +19,7 @@ export function ProfileOverview({ id }: ProfileOverviewProps) {
   const queryClient = useQueryClient();
 
   const { socket } = useSocketIo();
+
   useFollowUserSocket(socket, queryClient);
 
   const result = useUserById(id);
@@ -33,7 +34,7 @@ export function ProfileOverview({ id }: ProfileOverviewProps) {
   }
 
   return (
-    <Stack gapY="4" height="100vh">
+    <Stack gapY="4" minH="100vh">
       <UserProfileSettings id={id} result={result} />
       <UserContents result={result} />
     </Stack>

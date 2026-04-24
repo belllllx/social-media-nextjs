@@ -17,7 +17,6 @@ export function PostsByUserOverview({ userId }: PostsByUserOverviewProps) {
     <Stack
       width="full"
       flex="1"
-      minH="0"
       gapY="4"
     >
       {activeUser && activeUser.id === userId && (<CreatePost />)}

@@ -21,29 +21,28 @@ import { usePostLike } from "@/hooks/use-post-like";
 
 interface PostLikeBtnProps {
   post: IPost;
-  activeUser: IUser | null;
+  activeUser: IUser;
   queryClient: QueryClient;
+  userId?: string;
 }
 
 export function PostLikeBtn({
   post,
   activeUser,
   queryClient,
+  userId,
 }: PostLikeBtnProps) {
   const postLikeMutation = usePostLike(queryClient);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePostLike = useCallback(async () => {
-    if (!activeUser) {
-      return;
-    }
-
     try {
       setIsLoading(true);
       const res = await postLikeMutation.mutateAsync({
-        user: activeUser,
+        activeUser,
         postId: post.id,
+        userId,
       });
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -70,7 +69,7 @@ export function PostLikeBtn({
           p="0"
           justifyContent="flex-end"
         >
-          {post.likes.some((like) => like.userId === activeUser?.id) ? (
+          {post.likes.some((like) => like.userId === activeUser.id) ? (
             <BiSolidLike />
           ) : (
             <BiLike />

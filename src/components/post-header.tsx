@@ -38,19 +38,23 @@ import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { toast } from "react-toastify";
 import { Carousel } from "./carousel";
-import { useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { notifyDelete } from "@/utils/helpers/notify-delete";
 import { usePostUpdate } from "@/hooks/use-post-update";
 import { usePostDelete } from "@/hooks/use-post-delete";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
+import { replace } from "@/utils/helpers/router";
+import { usePathname } from "next/navigation";
 
 interface PostHeaderProps {
   children: React.ReactNode;
   post: IPost;
-  activeUser: IUser | null;
+  activeUser: IUser
 }
 
 export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
+  const pathname = usePathname();
+
   const queryClient = useQueryClient();
 
   const photoRef = useRef<HTMLInputElement>(null);
@@ -65,6 +69,8 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
   const [shouldDeleteCurrentFiles, setShouldDeleteCurrentFiles] =
     useState(false);
+  const [isDeletePostFile, setIsDeletePostFile] = useState(false);
+  const [deletedPostFile, setDeletedPostFile] = useState("");
 
   const handleUserClick = useNavigateUser(post.user);
 
@@ -86,7 +92,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   const content = watch("message");
 
-  const initialMessage = post.message ?? "";
+  const initialMessage = useMemo(() => post.message ?? "", [post.message]);
   const initialFilesUrl = useMemo(
     () => post.filesUrl ?? [],
     [post.filesUrl]
@@ -121,6 +127,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       reset();
       setFilesUrl([]);
       setShouldDeleteCurrentFiles(false);
+      setIsDeletePostFile(false);
     } catch (error) {
       toast.error("Failed to update post");
       console.error("Failed to update post", error);
@@ -154,10 +161,45 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
         }
       }
 
+      if (isDeletePostFile) {
+        queryClient.setQueryData<
+          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+        >(["posts"], (oldPosts) => {
+          if (!oldPosts) {
+            return undefined;
+          }
+
+          return {
+            ...oldPosts,
+            pages: oldPosts.pages.map((page) => {
+              // ไม่ใช่ page target ข้าม
+              if (!page.posts.some((prevPost) => prevPost.id === post.id)) {
+                return page;
+              }
+
+              return {
+                ...page,
+                posts: page.posts.map((prevPost) => {
+                  // ไม่ใช่ post target ข้าม
+                  if (prevPost.id !== post.id) {
+                    return prevPost;
+                  }
+
+                  return {
+                    ...prevPost,
+                    filesUrl: filesUrl.filter((fileUrl) => fileUrl !== deletedPostFile),
+                  };
+                }),
+              };
+            }),
+          }
+        });
+      }
+
       setOpenDeleteDialog(false);
       setOpenEditDialog(open);
     },
-    [content, filesUrl, initialMessage, initialFilesUrl],
+    [content, filesUrl, initialMessage, initialFilesUrl, isDeletePostFile, queryClient, post, deletedPostFile],
   );
 
   const handleOpenDeleteDialog = useCallback((open: boolean) => {
@@ -204,13 +246,12 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   const handleDeletePost = useCallback(async () => {
     try {
-      if (!activeUser) {
-        return;
-      }
-
       setDisabledDeletePost(true);
 
-      const res = await deletePostMutation.mutateAsync(post.id);
+      const res = await deletePostMutation.mutateAsync({
+        postId: post.id,
+        activeUserId: activeUser.id,
+      });
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -219,13 +260,17 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       notifyDelete(queryClient);
       setOpenDeleteDialog(false);
       toast.success(formatToastMessages(res.message));
+
+      if (pathname.startsWith("/post")) {
+        replace("/feed");
+      }
     } catch (error) {
       toast.error("Failed to delete post");
       console.error("Failed to delete post", error);
     } finally {
       setDisabledDeletePost(false);
     }
-  }, [deletePostMutation, activeUser, post.id, queryClient]);
+  }, [deletePostMutation, post.id, queryClient]);
 
   const handleInputFilesClick = useCallback(
     (ref: RefObject<HTMLInputElement | null>) => {
@@ -239,7 +284,14 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   }, []);
 
   const handleSetFilesUrl = useCallback((fileUrl: string) => {
-    setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
+    setFilesUrl((prevFiles) => {
+      return prevFiles.filter((file) => file !== fileUrl)
+    });
+  }, []);
+
+  const handleSetIsDeletePostFile = useCallback((isDeleted: boolean, deletedPostFile: string) => {
+    setIsDeletePostFile(isDeleted);
+    setDeletedPostFile(deletedPostFile);
   }, []);
 
   useEffect(() => {
@@ -274,7 +326,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   return (
     <HStack>
       {children}
-      {post.userId === activeUser?.id && (
+      {post.userId === activeUser.id && (
         <Popover.Root
           open={openPopover}
           onOpenChange={(e) => setOpenPopover(e.open)}
@@ -387,6 +439,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     isDisabled={disabled}
                                     onSetDisabled={handleSetDisabled}
                                     onSetFilesUrl={handleSetFilesUrl}
+                                    onSetIsDeletePostFile={handleSetIsDeletePostFile}
                                     itemsHeight="300px"
                                     isShowCloseBtn
                                   />
@@ -420,38 +473,39 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                           accept="video/*"
                                           multiple
                                         />
-                                        <button
+                                        <IconButton
                                           onClick={() =>
                                             handleInputFilesClick(photoRef)
                                           }
                                           disabled={disabled || isSubmitting}
                                           type="button"
-                                          className="disabled:cursor-not-allowed cursor-pointer"
+                                          variant="ghost"
+                                          px="0"
+                                          justifyContent="flex-end"
+                                          color="red.500"
+                                          _hover={{
+                                            background: "none"
+                                          }}
                                         >
-                                          <Icon
-                                            size="lg"
-                                            color="red.500"
-                                            cursor="pointer"
-                                          >
-                                            <MdAddPhotoAlternate />
-                                          </Icon>
-                                        </button>
-                                        <button
+                                          <MdAddPhotoAlternate />
+                                        </IconButton>
+                                        <IconButton
                                           onClick={() =>
                                             handleInputFilesClick(videoRef)
                                           }
                                           disabled={disabled || isSubmitting}
                                           type="button"
-                                          className="disabled:cursor-not-allowed cursor-pointer"
+                                          variant="ghost"
+                                          px="0"
+                                          justifyContent="flex-start"
+                                          size="xs"
+                                          color="red.500"
+                                          _hover={{
+                                            background: "none"
+                                          }}
                                         >
-                                          <Icon
-                                            cursor="pointer"
-                                            size="md"
-                                            color="red.500"
-                                          >
-                                            <FaPaperclip />
-                                          </Icon>
-                                        </button>
+                                          <FaPaperclip />
+                                        </IconButton>
                                       </HStack>
                                     </HStack>
                                   )}

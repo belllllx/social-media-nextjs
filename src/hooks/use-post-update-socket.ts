@@ -66,6 +66,59 @@ export function usePostUpdateSocket(
         };
       });
 
+      queryClient.setQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts", updatePost.userId], (oldPosts) => {
+        if (!oldPosts) {
+          return undefined;
+        }
+
+        return {
+          ...oldPosts,
+          pages: oldPosts.pages.map((page) => {
+            // ไม่ใข่ page target ข้าม
+            if (!page.posts.some((prevPost) => prevPost.id === updatePost.id)) {
+              return page;
+            }
+
+            return {
+              ...page,
+              posts: page.posts.map((post) => {
+                // ไม่ใข่ post target ข้าม
+                if (
+                  post.id !== updatePost.id &&
+                  post.parentId !== updatePost.id
+                ) {
+                  return post;
+                }
+
+                // แก้เฉพาะ target
+                if (post.parentId === updatePost.id) {
+                  const newUpdateParentPost: IPost = {
+                    ...post,
+                    parent: {
+                      ...updatePost,
+                      message: updatePost.message,
+                      filesUrl: [...(updatePost.filesUrl ?? [])],
+                    },
+                  };
+
+                  return newUpdateParentPost;
+                }
+
+                const newUpdatePost: IPost = {
+                  ...updatePost,
+                  message: updatePost.message,
+                  filesUrl: [...(updatePost.filesUrl ?? [])],
+                };
+
+                return newUpdatePost;
+              }),
+            };
+          }),
+        };
+      });
+
       queryClient.setQueryData<IPost>(["post", updatePost.id], (oldPost) => {
         if (!oldPost) {
           return undefined;

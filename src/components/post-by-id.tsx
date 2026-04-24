@@ -19,6 +19,8 @@ import { useReplyDeleteSocket } from "@/hooks/use-reply-delete-socket";
 import { Box } from "@chakra-ui/react";
 import { usePost } from "@/hooks/use-post";
 import { Error } from "./error";
+import { useUserStore } from "@/providers/user-store-provider";
+import { useUpdatePostEditProfile } from "@/hooks/use-update-post-edit-profile";
 
 interface PostByIdProps {
     id: string;
@@ -29,8 +31,16 @@ export function PostById({ id }: PostByIdProps) {
 
     const { socket } = useSocketIo();
 
+    const { user: activeUser, isUpdatedProfileStatus } = useUserStore((state) => state);
+
+    useUpdatePostEditProfile(
+        queryClient,
+        id,
+        isUpdatedProfileStatus,
+    );
+
     usePostCreateSocket(socket, queryClient);
-    usePostLikeSocket(socket, queryClient);
+    usePostLikeSocket(socket, queryClient, activeUser?.id);
     usePostUpdateSocket(socket, queryClient);
     usePostDeleteSocket(socket, queryClient);
 

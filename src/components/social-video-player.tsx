@@ -123,6 +123,7 @@ export function SocialVideoPlayer({
       {/* Top-left controls (pause/play + mute) */}
       <div className="absolute top-4 left-4 flex gap-3 z-20">
         <button
+          type="button"
           aria-label={isPlaying ? "Pause" : "Play"}
           onClick={(e) => {
             e.stopPropagation();
@@ -157,6 +158,7 @@ export function SocialVideoPlayer({
         </button>
 
         <button
+          type="button"
           aria-label={isMuted ? "Unmute" : "Mute"}
           onClick={(e) => {
             e.stopPropagation();

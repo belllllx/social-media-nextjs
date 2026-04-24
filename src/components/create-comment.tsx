@@ -58,7 +58,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
     setShowCommentOnPostId,
   } = useActionStore((state) => state);
 
-  const handleUserClick = useNavigateUser(user); 
+  const handleUserClick = useNavigateUser(user);
 
   const form = useForm<CreateContentSchema>({
     resolver: zodResolver(createContentSchema),
@@ -80,7 +80,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
   const createCommentMutation = useCommentCreate(queryClient);
 
   const handleCreateComment = useCallback(async ({ message }: { message?: string }) => {
-    if (!user || (!message && !fileUrl) || !message) {
+    if ((!message && !fileUrl) || !user) {
       return;
     }
 
@@ -183,7 +183,6 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
       <HStack gapX="3">
         {user?.profileUrl ? (
           <Avatar.Root onClick={handleUserClick} size="md" cursor="pointer">
-            <Avatar.Fallback name={user?.fullname} />
             <Avatar.Image src={user?.profileUrl} />
           </Avatar.Root>
         ) : (
@@ -256,7 +255,14 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
             <FaXmark />
           </IconButton>
           <Image alt="upload-comment-image" asChild>
-            <NextImage src={fileUrl} alt={fileUrl} fill />
+            <NextImage
+              src={fileUrl}
+              alt={fileUrl}
+              fill
+              style={{
+                objectFit: "cover"
+              }}
+            />
           </Image>
         </Box>
       )}

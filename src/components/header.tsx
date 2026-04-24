@@ -15,6 +15,10 @@ export function Header() {
       justifyContent="center"
       gapX="10"
       shadow="sm"
+      mdDown={{
+        justifyContent: "space-between",
+        px: "4"
+      }}
     >
       <Logo />
       <SearchPeople />
