@@ -18,6 +18,7 @@ export function TagUser({ comment }: TagUserProps) {
       cursor="pointer"
       fontWeight="semibold"
       color="blue.600"
+      wordBreak="break-word"
     >
       @{comment.replyToUser?.fullname}
     </Text>

@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Stack } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import { IPost } from "@/utils/types";
 import { PostUserHeader } from "./post-user-header";
 import { PostBody } from "./post-body";
 import { PostFiles } from "./post-files";
+import Linkify from "linkify-react";
 
 interface SharePostProps {
   parentPost?: IPost;
@@ -18,7 +19,17 @@ export function SharePost({
 }: SharePostProps) {
   return (
     <Stack gapY="3">
-      {!inCreateSharePost && post.message && <Box>{post.message}</Box>}
+      {!inCreateSharePost && post.message && (
+        <Linkify
+          options={{
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "text-blue-500 underline",
+          }}
+        >
+          <Text wordBreak="break-word">{post.message}</Text>
+        </Linkify>
+      )}
       {parentPost ? (
         <Stack
           borderWidth="1px"

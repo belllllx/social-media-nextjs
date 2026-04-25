@@ -52,6 +52,7 @@ import { TagUser } from "./tag-user";
 import { useCommentUpdate } from "@/hooks/use-comment-update";
 import { useCommentDelete } from "@/hooks/use-comment-delete";
 import { useNavigateUser } from "@/hooks/use-navigate-user";
+import Linkify from "linkify-react";
 
 interface CommentProps {
   comment: IComment;
@@ -404,6 +405,7 @@ export function Comment({
                       onClick={handleUserClick}
                       cursor="pointer"
                       fontWeight="semibold"
+                      wordBreak="break-word"
                     >
                       {comment.user.fullname}
                     </Text>
@@ -413,15 +415,29 @@ export function Comment({
                   </HStack>
 
                   {!comment.replyToUser && !comment.replyToUserId && comment.message ? (
-                    <Text wordBreak="break-word">
-                      {comment.message}
-                    </Text>
+                    <Linkify
+                      options={{
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        className: "text-blue-500 underline",
+                      }}
+                    >
+                      <Text wordBreak="break-word">{comment.message}</Text>
+                    </Linkify>
                   ) : null}
 
                   {comment.replyToUser && comment.replyToUserId && comment.message ? (
-                    <HStack gapX="2">
+                    <HStack gapX="2" alignItems="flex-start">
                       <TagUser comment={comment} />
-                      <Text wordBreak="break-word">{comment.message}</Text>
+                      <Linkify
+                        options={{
+                          target: "_blank",
+                          rel: "noopener noreferrer",
+                          className: "text-blue-500 underline",
+                        }}
+                      >
+                        <Text wordBreak="break-word">{comment.message}</Text>
+                      </Linkify>
                     </HStack>
                   ) : null}
 

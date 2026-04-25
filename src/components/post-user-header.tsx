@@ -38,6 +38,7 @@ export function PostUserHeader({ post }: PostHeaderProps) {
           onClick={handleUserClick}
           cursor="pointer"
           fontWeight="medium"
+          wordBreak="break-word"
         >
           {post.user.fullname}
         </Text>

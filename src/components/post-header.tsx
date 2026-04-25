@@ -408,6 +408,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     cursor="pointer"
                                     fontWeight="medium"
                                     fontSize="md"
+                                    wordBreak="break-word"
                                   >
                                     {post.user.fullname}
                                   </Text>
@@ -433,6 +434,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                       border="none"
                                       resize="none"
                                       placeholder="Write something..."
+                                      scrollbar="hidden"
                                     />
                                     <EmojiPicker
                                       inputRef={inputRef}

@@ -1,10 +1,11 @@
-import { HStack } from "@chakra-ui/react";
+import { HStack, Stack } from "@chakra-ui/react";
 import React from "react";
 import { UserInfosCard } from "./user-infos-card";
 import { IUser } from "@/utils/types";
 import { PostsByUserOverview } from "./posts-by-user-overview";
 import { UseQueryResult } from "@tanstack/react-query";
 import { UserContentsSkeleton } from "./user-contents-skeleton";
+import { PostsSkeleton } from "./posts-skeleton";
 
 interface UserContentsProps {
   result: UseQueryResult<IUser, Error>;
@@ -28,7 +29,16 @@ export function UserContents({ result }: UserContentsProps) {
       alignItems="flex-start"
     >
       {!user || isLoading ? (
-        <UserContentsSkeleton />
+        <>
+          <UserContentsSkeleton />
+          <Stack 
+            gapY="4" 
+            width="full" 
+            flex="1"
+          >
+            <PostsSkeleton amount={3} />
+          </Stack>
+        </>
       ) : (
         <>
           <UserInfosCard user={user} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Flex, Stack } from "@chakra-ui/react";
+import { Box, Stack } from "@chakra-ui/react";
 import React, { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Spinner } from "./spinner";
@@ -10,7 +10,6 @@ import { usePostCreateSocket } from "@/hooks/use-post-create-socket";
 import { usePostLikeSocket } from "@/hooks/use-post-like-socket";
 import { useSocketIo } from "@/providers/socket-io-provider";
 import { useQueryClient } from "@tanstack/react-query";
-import { PostsSkeleton } from "./posts-skeleton";
 import { Error } from "./error";
 import { usePostUpdateSocket } from "@/hooks/use-post-update-socket";
 import { usePostDeleteSocket } from "@/hooks/use-post-delete-socket";
@@ -55,9 +54,7 @@ export function PostsByUser({ userId }: PostsByUserProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
     isError,
-    status,
     error,
     refetch,
   } = usePostsByUser(10, userId);
@@ -80,39 +77,25 @@ export function PostsByUser({ userId }: PostsByUserProps) {
       position="relative"
     >
       <Stack gapY="4">
-        {status === "pending" ? (
-          <PostsSkeleton amount={3} />
-        ) : isLoading ? (
-          <Flex
-            width="full"
-            height="full"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Spinner size="lg" />
-          </Flex>
-        ) : (
-          posts &&
-          posts.pages.map((group, i) => (
-            <Fragment key={i}>
-              {group.posts.length ? (
-                group.posts.map((post) => <Post
-                  key={post.id}
-                  post={post}
-                  socket={socket}
-                  queryClient={queryClient}
-                  userId={userId}
-                />)
-              ) : (
-                <ItemsNotFound title="post" />
-              )}
-            </Fragment>
-          ))
-        )}
+        {posts && posts.pages.map((group, i) => (
+          <Fragment key={i}>
+            {group.posts.length ? (
+              group.posts.map((post) => <Post
+                key={post.id}
+                post={post}
+                socket={socket}
+                queryClient={queryClient}
+                userId={userId}
+              />)
+            ) : (
+              <ItemsNotFound title="post" />
+            )}
+          </Fragment>
+        ))}
 
         {isFetchingNextPage && <Spinner />}
       </Stack>
-      
+
       <Box ref={ref} />
     </Box>
   );

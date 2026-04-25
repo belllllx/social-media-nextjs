@@ -26,6 +26,9 @@ export function PostAction({
         alignItems="center"
         justifyContent="space-between"
         px="8"
+        mdDown={{
+          px: "0",
+        }}
       >
         <PostLikeBtn
           post={post}
