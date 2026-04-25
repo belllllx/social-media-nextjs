@@ -5,19 +5,10 @@ import { ItemsNotFound } from "./items-not-found";
 import { Spinner } from "./spinner";
 import { UsersSkeleton } from "./users-skeleton";
 import { UserStatus } from "./user-status";
-import { useUsersOnlineSocket } from "@/hooks/use-users-online-socket";
-import { useQueryClient } from "@tanstack/react-query";
 import { Error } from "./error";
 import { useUsersOnline } from "@/hooks/use-users-online";
-import { useUserStore } from "@/providers/user-store-provider";
 
 export function UsersStatus() {
-  const queryClient = useQueryClient();
-
-  const { user } = useUserStore((state) => state);
-
-  useUsersOnlineSocket(user?.id, queryClient);
-
   const {
     data: users,
     isLoading,

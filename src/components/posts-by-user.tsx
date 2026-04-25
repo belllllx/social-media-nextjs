@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, Flex } from "@chakra-ui/react";
-import React, { Fragment, useEffect, useRef } from "react";
+import { Box, Flex, Stack } from "@chakra-ui/react";
+import React, { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Spinner } from "./spinner";
 import { ItemsNotFound } from "./items-not-found";
@@ -11,8 +11,6 @@ import { usePostLikeSocket } from "@/hooks/use-post-like-socket";
 import { useSocketIo } from "@/providers/socket-io-provider";
 import { useQueryClient } from "@tanstack/react-query";
 import { PostsSkeleton } from "./posts-skeleton";
-import { useScroll } from "@/hooks/use-scroll";
-import { ScrollBtn } from "./scroll-btn";
 import { Error } from "./error";
 import { usePostUpdateSocket } from "@/hooks/use-post-update-socket";
 import { usePostDeleteSocket } from "@/hooks/use-post-delete-socket";
@@ -30,16 +28,14 @@ interface PostsByUserProps {
 }
 
 export function PostsByUser({ userId }: PostsByUserProps) {
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-
   const { socket } = useSocketIo();
 
   const queryClient = useQueryClient();
 
   usePostCreateSocket(socket, queryClient);
   usePostLikeSocket(
-    socket, 
-    queryClient, 
+    socket,
+    queryClient,
     userId,
   );
   usePostUpdateSocket(socket, queryClient);
@@ -53,8 +49,6 @@ export function PostsByUser({ userId }: PostsByUserProps) {
 
   useReplyCountDeleteSocket(socket, queryClient);
   useReplyDeleteSocket(socket, queryClient);
-
-  const showButton = useScroll(scrollRef);
 
   const {
     data: posts,
@@ -81,45 +75,44 @@ export function PostsByUser({ userId }: PostsByUserProps) {
 
   return (
     <Box
-      ref={scrollRef}
-      flex="1"
-      minH="0"
-      overflowY="auto"
+      width="full"
+      height="full"
       position="relative"
     >
-      {showButton && <ScrollBtn scrollRef={scrollRef} />}
+      <Stack gapY="4">
+        {status === "pending" ? (
+          <PostsSkeleton amount={3} />
+        ) : isLoading ? (
+          <Flex
+            width="full"
+            height="full"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Spinner size="lg" />
+          </Flex>
+        ) : (
+          posts &&
+          posts.pages.map((group, i) => (
+            <Fragment key={i}>
+              {group.posts.length ? (
+                group.posts.map((post) => <Post
+                  key={post.id}
+                  post={post}
+                  socket={socket}
+                  queryClient={queryClient}
+                  userId={userId}
+                />)
+              ) : (
+                <ItemsNotFound title="post" />
+              )}
+            </Fragment>
+          ))
+        )}
 
-      {status === "pending" ? (
-        <PostsSkeleton amount={3} />
-      ) : isLoading ? (
-        <Flex
-          width="full"
-          height="full"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Spinner size="lg" />
-        </Flex>
-      ) : (
-        posts &&
-        posts.pages.map((group, i) => (
-          <Fragment key={i}>
-            {group.posts.length ? (
-              group.posts.map((post) => <Post
-                key={post.id}
-                post={post}
-                socket={socket}
-                queryClient={queryClient}
-                userId={userId}
-              />)
-            ) : (
-              <ItemsNotFound title="post" />
-            )}
-          </Fragment>
-        ))
-      )}
-
-      {isFetchingNextPage && <Spinner />}
+        {isFetchingNextPage && <Spinner />}
+      </Stack>
+      
       <Box ref={ref} />
     </Box>
   );

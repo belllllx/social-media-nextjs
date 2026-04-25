@@ -34,7 +34,10 @@ export function ProfileOverview({ id }: ProfileOverviewProps) {
   }
 
   return (
-    <Stack gapY="4" minH="100vh">
+    <Stack 
+      gapY="4" 
+      flex="1" 
+    >
       <UserProfileSettings id={id} result={result} />
       <UserContents result={result} />
     </Stack>

@@ -4,10 +4,8 @@ import { UsersStatus } from "./users-status";
 export function PeopleStatus() {
   return (
     <Box
-      backgroundColor="white"
       width="full"
       height="full"
-      minHeight="0"
       borderRadius="lg"
       display="flex"
       flexDirection="column"
@@ -22,7 +20,11 @@ export function PeopleStatus() {
         Online users
       </Text>
       <Separator width="full" />
-      <Box overflowY="auto" flex="1" width="full">
+      <Box 
+        overflowY="auto" 
+        flex="1" 
+        width="full"
+      >
         <UsersStatus />
       </Box>
     </Box>

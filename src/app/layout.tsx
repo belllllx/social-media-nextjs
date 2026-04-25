@@ -10,6 +10,8 @@ import { SocketIoProvider } from "@/providers/socket-io-provider";
 import { TanstackQueryErrorResetBoundary } from "@/providers/tanstack-query-error-reset-boundary";
 import { ActionStoreProvider } from "@/providers/action-store-provider";
 import "./globals.css";
+import "swiper/css";
+import "swiper/css/pagination";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

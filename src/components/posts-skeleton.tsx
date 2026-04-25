@@ -22,7 +22,6 @@ export function PostsSkeleton({ amount = 1 }: PostsSkeletonProps) {
           width="full"
           backgroundColor="white"
           p="4"
-          mb="4"
         >
           <HStack key={item} >
             <SkeletonCircle size="12" />

@@ -18,7 +18,7 @@ export function MainLayoutContent({ children }: MainLayoutProps) {
       {(pathname === "/feed" || pathname.startsWith("/post")) && (
         <SuggestPeople />
       )}
-      <div className={`max-w-screen ${pathname.startsWith("/profile") ? "2xl:max-w-[55vw]" : "2xl:max-w-[35vw]"} w-full`}>
+      <div className={`max-w-screen ${pathname.startsWith("/profile") ? "2xl:max-w-[55vw]" : "2xl:max-w-[35vw]"} w-full h-full`}>
         <UserInit />
         {children}
       </div>

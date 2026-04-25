@@ -4,10 +4,13 @@ import { PeoplesSuggest } from "./peoples-suggest";
 export function SuggestPeople() {
   return (
     <Box
+      position="fixed"
+      top="calc(8vh + 16px)"
+      bottom="16px"
+      left="56"
+      zIndex="40"
       borderRadius="lg"
-      width="40vw"
-      height="full"
-      backgroundColor="white"
+      width="19.6vw"
       p="4"
       display="none"
       flexDirection="column"
@@ -19,7 +22,11 @@ export function SuggestPeople() {
         Suggest people
       </Text>
       <Separator width="full" />
-      <Box overflowY="auto" flex="1" width="full">
+      <Box 
+        overflowY="auto" 
+        flex="1" 
+        width="full"
+      >
         <PeoplesSuggest />
       </Box>
     </Box>

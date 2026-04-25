@@ -41,7 +41,6 @@ export function Post({
       width="full"
       backgroundColor="white"
       p="4"
-      mb="4"
     >
       {activeUser && (
         <PostHeader post={post} activeUser={activeUser}>

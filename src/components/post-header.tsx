@@ -11,11 +11,11 @@ import React, {
 } from "react";
 import {
   Avatar,
+  Box,
   Button,
   CloseButton,
   Dialog,
   HStack,
-  Icon,
   IconButton,
   Popover,
   Portal,
@@ -71,6 +71,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
     useState(false);
   const [isDeletePostFile, setIsDeletePostFile] = useState(false);
   const [deletedPostFile, setDeletedPostFile] = useState("");
+  const [isDeletingFile, setIsDeletingFile] = useState(false);
 
   const handleUserClick = useNavigateUser(post.user);
 
@@ -143,6 +144,11 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
   const handleOpenEditDialog = useCallback(
     (open: boolean) => {
+      // 🔥 กันปิดระหว่างกำลังลบ
+      if (!open && isDeletingFile) {
+        return;
+      }
+
       if (!open) {
         const isMessageChanged = content !== initialMessage;
         const isFilesChanged =
@@ -187,7 +193,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
 
                   return {
                     ...prevPost,
-                    filesUrl: filesUrl.filter((fileUrl) => fileUrl !== deletedPostFile),
+                    filesUrl: prevPost.filesUrl.filter((fileUrl) => fileUrl !== deletedPostFile),
                   };
                 }),
               };
@@ -199,7 +205,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
       setOpenDeleteDialog(false);
       setOpenEditDialog(open);
     },
-    [content, filesUrl, initialMessage, initialFilesUrl, isDeletePostFile, queryClient, post, deletedPostFile],
+    [content, filesUrl, initialMessage, initialFilesUrl, isDeletePostFile, queryClient, post, deletedPostFile, isDeletingFile],
   );
 
   const handleOpenDeleteDialog = useCallback((open: boolean) => {
@@ -284,14 +290,16 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   }, []);
 
   const handleSetFilesUrl = useCallback((fileUrl: string) => {
-    setFilesUrl((prevFiles) => {
-      return prevFiles.filter((file) => file !== fileUrl)
-    });
+    setFilesUrl((prevFiles) => prevFiles.filter((file) => file !== fileUrl));
   }, []);
 
   const handleSetIsDeletePostFile = useCallback((isDeleted: boolean, deletedPostFile: string) => {
     setIsDeletePostFile(isDeleted);
     setDeletedPostFile(deletedPostFile);
+  }, []);
+
+  const handleSetDeletingFile = useCallback((isDeleting: boolean) => {
+    setIsDeletingFile(isDeleting);
   }, []);
 
   useEffect(() => {
@@ -433,16 +441,18 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     />
                                   </HStack>
 
-                                  <Carousel
-                                    fileUrls={filesUrl}
-                                    inDialog={true}
-                                    isDisabled={disabled}
-                                    onSetDisabled={handleSetDisabled}
-                                    onSetFilesUrl={handleSetFilesUrl}
-                                    onSetIsDeletePostFile={handleSetIsDeletePostFile}
-                                    itemsHeight="300px"
-                                    isShowCloseBtn
-                                  />
+                                  <Box>
+                                    <Carousel
+                                      fileUrls={filesUrl}
+                                      isDisabled={disabled}
+                                      onSetDisabled={handleSetDisabled}
+                                      onSetFilesUrl={handleSetFilesUrl}
+                                      onSetIsDeletePostFile={handleSetIsDeletePostFile}
+                                      onSetDeletingFile={handleSetDeletingFile}
+                                      itemsHeight="300px"
+                                      isShowCloseBtn
+                                    />
+                                  </Box>
 
                                   {!post.parentId && (
                                     <HStack

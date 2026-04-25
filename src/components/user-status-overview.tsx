@@ -5,8 +5,12 @@ import { PeopleStatus } from "./people-status";
 export function UserStatusOverview() {
   return (
     <Stack
-      width="40vw"
-      height="full"
+      position="fixed"
+      top="calc(8vh + 16px)"
+      bottom="16px"
+      right="56"
+      zIndex="40"
+      width="19.6vw"
       display="none"
       flexDirection="column"
       alignItems="center"

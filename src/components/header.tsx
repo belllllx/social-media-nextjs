@@ -6,6 +6,10 @@ import { TopBarActions } from "./top-bar-actions";
 export function Header() {
   return (
     <Box
+      position="sticky"
+      top="0"
+      zIndex="40"
+      backgroundColor="white"
       height="8vh"
       width="full"
       py="4"

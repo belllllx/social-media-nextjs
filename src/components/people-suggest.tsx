@@ -28,7 +28,7 @@ export function PeopleSuggest({ user, activeUser }: PeopleSuggestProps) {
       alignItems="center"
       justifyContent="space-between"
       _hover={{
-        backgroundColor: "gray.100",
+        backgroundColor: "gray.emphasized",
         transitionDuration: "slow",
       }}
       px="2"

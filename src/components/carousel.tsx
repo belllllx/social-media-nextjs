@@ -1,14 +1,11 @@
 "use client";
 
-import React, { forwardRef, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   Box,
-  Carousel as ChakraCarousel,
   IconButton,
-  IconButtonProps,
   Image,
 } from "@chakra-ui/react";
-import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
 import { SocialVideoPlayer } from "./social-video-player";
 import { getFileDir } from "@/utils/helpers/get-file-dir";
 import NextImage from "next/image";
@@ -17,175 +14,128 @@ import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { DeleteFilePayload } from "@/utils/types";
 import { FaXmark } from "react-icons/fa6";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
 
 interface CarouselProps {
   fileUrls: string[];
-  inDialog: boolean;
   isDisabled?: boolean;
   onSetDisabled?: (status: boolean) => void;
   onSetFilesUrl?: (fileUrl: string) => void;
-  onSetIsDeletePostFile: (isDeleted: boolean, deletedPostFile: string) => void;
+  onSetIsDeletePostFile?: (isDeleted: boolean, deletedPostFile: string) => void;
+  onSetDeletingFile?: (isDeleting: boolean) => void
   itemsHeight?: string;
   isShowCloseBtn?: boolean;
 }
 
 export function Carousel({
   fileUrls,
-  inDialog,
   isDisabled,
   onSetDisabled,
   onSetFilesUrl,
   onSetIsDeletePostFile,
+  onSetDeletingFile,
   itemsHeight,
   isShowCloseBtn = false,
 }: CarouselProps) {
   const handleDeleteFile = useCallback(async (fileUrl: string) => {
-    console.log({
-      fileUrl
-    })
+    if (
+      !onSetDisabled
+      ||
+      !onSetFilesUrl
+      ||
+      !isShowCloseBtn
+      ||
+      !onSetIsDeletePostFile
+      ||
+      !onSetDeletingFile
+    ) {
+      return;
+    }
 
-    // if (!(onSetDisabled && onSetFilesUrl && isShowCloseBtn)) {
-    //   return;
-    // }
+    try {
+      onSetDeletingFile(true);
+      onSetDisabled(true);
+      const res = await callApi<{ data: DeleteFilePayload }>(
+        "delete",
+        "post/delete/file",
+        {
+          data: { fileUrl },
+        }
+      );
+      if (!res.success) {
+        toast.error(formatToastMessages(res.message));
+        return;
+      }
 
-    // try {
-    //   onSetDisabled(true);
-    //   const res = await callApi<{ data: DeleteFilePayload }>(
-    //     "delete",
-    //     "post/delete/file",
-    //     {
-    //       data: { fileUrl },
-    //     }
-    //   );
-    //   if (!res.success) {
-    //     toast.error(formatToastMessages(res.message));
-    //     return;
-    //   }
-
-    //   toast.success(formatToastMessages(res.message));
-    //   onSetFilesUrl(fileUrl);
-    //   onSetIsDeletePostFile(true, fileUrl);
-    // } catch (error) {
-    //   toast.error("Failed to delete file");
-    //   console.error("Failed to delete file", error);
-    // } finally {
-    //   onSetDisabled(false);
-    // }
-  }, [isShowCloseBtn, onSetDisabled, onSetFilesUrl, onSetIsDeletePostFile]);
+      toast.success(formatToastMessages(res.message));
+      onSetFilesUrl(fileUrl);
+      onSetIsDeletePostFile(true, fileUrl);
+    } catch (error) {
+      toast.error("Failed to delete file");
+      console.error("Failed to delete file", error);
+    } finally {
+      onSetDeletingFile(false);
+      onSetDisabled(false);
+    }
+  }, [isShowCloseBtn, onSetDisabled, onSetFilesUrl, onSetIsDeletePostFile, onSetDeletingFile]);
 
   return (
-    <ChakraCarousel.Root
-      allowMouseDrag
-      slideCount={fileUrls.length}
-      cursor="pointer"
-      width="full"
-      mx="auto"
-      gap="4"
-      position="relative"
-      colorPalette="white"
-      rounded="2xl"
-      overflow="hidden"
+    <Swiper
+      pagination={{
+        dynamicBullets: true,
+      }}
+      modules={[Pagination]}
+      grabCursor
+      className="mySwiper"
     >
-      <ChakraCarousel.Control gap="4" width="full" position="relative">
-        {inDialog && (
-          <ChakraCarousel.PrevTrigger asChild>
-            <ActionButton insetStart="4">
-              <LuArrowLeft />
-            </ActionButton>
-          </ChakraCarousel.PrevTrigger>
-        )}
-
-        <ChakraCarousel.ItemGroup width="full">
-          {fileUrls.map((file, index) => (
-            <ChakraCarousel.Item key={index} index={index}>
-              {isShowCloseBtn && (
-                <IconButton
-                  onClick={() => {
-                    handleDeleteFile(file);
+      {fileUrls.map((file) => (
+        <SwiperSlide key={file}>
+          {isShowCloseBtn && (
+            <IconButton
+              onClick={() => handleDeleteFile(file)}
+              disabled={isDisabled}
+              aria-label="Remove file"
+              position="absolute"
+              top="2"
+              right="2"
+              color="white"
+              rounded="full"
+              zIndex="10"
+              backgroundColor="red.500"
+              size="xs"
+            >
+              <FaXmark />
+            </IconButton>
+          )}
+          {getFileDir(file) === "image" ? (
+            <Box
+              width="full"
+              height={itemsHeight ?? "450px"}
+              position="relative"
+              rounded="2xl"
+              overflow="hidden"
+            >
+              <Image alt="carousel-image" asChild>
+                <NextImage
+                  priority
+                  src={file}
+                  alt={file}
+                  fill
+                  unoptimized
+                  style={{
+                    objectFit: "cover"
                   }}
-                  disabled={isDisabled}
-                  aria-label="Remove file"
-                  position="absolute"
-                  top="2"
-                  right="2"
-                  color="white"
-                  rounded="full"
-                  zIndex="10"
-                  backgroundColor="red.500"
-                  size="xs"
-                >
-                  <FaXmark />
-                </IconButton>
-              )}
-              {getFileDir(file) === "image" ? (
-                <Box
-                  width="full"
-                  height={itemsHeight ?? "450px"}
-                  position="relative"
-                  rounded="2xl"
-                  overflow="hidden"
-                >
-                  <Image alt="carousel-image" asChild>
-                    <NextImage
-                      priority
-                      src={file}
-                      alt={file}
-                      fill
-                      unoptimized
-                      style={{
-                        objectFit: "cover"
-                      }}
-                    />
-                  </Image>
-                </Box>
-              ) : (
-                <Box width="full" height={itemsHeight ?? "450px"}>
-                  <SocialVideoPlayer src={file} />
-                </Box>
-              )}
-            </ChakraCarousel.Item>
-          ))}
-        </ChakraCarousel.ItemGroup>
-
-        {inDialog && (
-          <ChakraCarousel.NextTrigger asChild>
-            <ActionButton insetEnd="4">
-              <LuArrowRight />
-            </ActionButton>
-          </ChakraCarousel.NextTrigger>
-        )}
-
-        <Box position="absolute" bottom="6" width="full">
-          <ChakraCarousel.Indicators
-            transition="width 0.2s ease-in-out"
-            transformOrigin="center"
-            opacity="0.5"
-            boxSize="2"
-            _current={{
-              width: "10",
-              bg: "colorPalette.subtle",
-              opacity: 1,
-            }}
-          />
-        </Box>
-      </ChakraCarousel.Control>
-    </ChakraCarousel.Root>
+                />
+              </Image>
+            </Box>
+          ) : (
+            <Box width="full" height={itemsHeight ?? "450px"}>
+              <SocialVideoPlayer src={file} />
+            </Box>
+          )}
+        </SwiperSlide>
+      ))}
+    </Swiper>
   );
 }
-
-const ActionButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  function ActionButton(props, ref) {
-    return (
-      <IconButton
-        {...props}
-        ref={ref}
-        size="xs"
-        variant="outline"
-        rounded="full"
-        position="absolute"
-        zIndex="1"
-        bg="bg"
-      />
-    );
-  }
-);

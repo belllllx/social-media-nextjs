@@ -20,7 +20,7 @@ export function PostFiles({ fileUrls }: PostFilesProps) {
     >
       <Dialog.Trigger asChild>
         <Box>
-          <Carousel fileUrls={fileUrls} inDialog={false} />
+          <Carousel fileUrls={fileUrls} />
         </Box>
       </Dialog.Trigger>
       <Portal>
@@ -28,10 +28,11 @@ export function PostFiles({ fileUrls }: PostFilesProps) {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Body p="4">
-              <Carousel fileUrls={fileUrls} inDialog />
+              <Carousel fileUrls={fileUrls} />
             </Dialog.Body>
             <Dialog.CloseTrigger 
               asChild 
+              zIndex="40"
               backgroundColor="gray.100"
               rounded="full"
               _hover={{
