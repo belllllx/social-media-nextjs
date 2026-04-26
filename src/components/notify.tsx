@@ -41,7 +41,13 @@ export function Notify({ notify }: NotifyPops) {
             </Avatar.Root>
           )}
           <VStack alignItems="start" justifyContent="center" gap="0">
-            <Text fontWeight="medium" truncate>
+            <Text
+              fontWeight="medium"
+              maxW="150px"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+            >
               {notify.sender.fullname}
             </Text>
             <Flex maxW="200px">

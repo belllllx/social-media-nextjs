@@ -60,6 +60,10 @@ export function EditUserProfile({ result }: EditUserProfileProps) {
             mdDown={{
               textStyle: "xl",
             }}
+            maxW="300px"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            whiteSpace="nowrap"
           >
             {user.fullname}
           </Text>

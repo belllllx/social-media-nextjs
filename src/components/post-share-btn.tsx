@@ -142,6 +142,10 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                     cursor="pointer"
                     fontWeight="medium"
                     fontSize="md"
+                    maxW="200px"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    whiteSpace="nowrap"
                   >
                     {activeUser.fullname}
                   </Text>
@@ -163,6 +167,7 @@ export function PostShareBtn({ post, activeUser }: PostShareBtnProps) {
                       border="none"
                       resize="none"
                       placeholder="Write something..."
+                      scrollbar="hidden"
                     />
                     <EmojiPicker
                       inputRef={inputRef}

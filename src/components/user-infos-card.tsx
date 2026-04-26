@@ -4,6 +4,7 @@ import { formatDateOfBirth } from "@/utils/helpers/format-date";
 import React from "react";
 import { ActiveUserFollower } from "./active-user-follower";
 import { ActiveUserFollowing } from "./active-user-following";
+import Linkify from "linkify-react";
 
 interface UserInfosCardProps {
   user: IUser
@@ -47,13 +48,24 @@ export function UserInfosCard({ user }: UserInfosCardProps) {
         gapX="2"
       >
         Information:
-        <Text
-          textStyle="md"
-          fontWeight="bold"
-          truncate
+        <Linkify
+          options={{
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "text-blue-500 underline",
+          }}
         >
-          {user.info ?? "-"}
-        </Text>
+          <Text
+            textStyle="md"
+            fontWeight="bold"
+            maxW="200px"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            whiteSpace="nowrap"
+          >
+            {user.info ?? "-"}
+          </Text>
+        </Linkify>
       </Flex>
     </Box>
   );

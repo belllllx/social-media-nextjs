@@ -72,8 +72,6 @@ export function PostById({ id }: PostByIdProps) {
     return (
         <Box
             height="full"
-            overflowY="auto"
-            pr="2"
         >
             <Post
                 post={post}

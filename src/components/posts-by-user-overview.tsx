@@ -18,6 +18,10 @@ export function PostsByUserOverview({ userId }: PostsByUserOverviewProps) {
       width="full"
       flex="1"
       gapY="4"
+      maxW="35vw"
+      mdDown={{
+        maxW: "full",
+      }}
     >
       {activeUser && activeUser.id === userId && (<CreatePost />)}
       <PostsByUser userId={userId} />

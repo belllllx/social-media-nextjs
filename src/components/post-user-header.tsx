@@ -14,7 +14,7 @@ export function PostUserHeader({ post }: PostHeaderProps) {
   const handleUserClick = useNavigateUser(post.user);
 
   return (
-    <HStack gapX="3">
+    <HStack alignItems="flex-start" gapX="3">
       {post.user.profileUrl ? (
         <Avatar.Root
           onClick={handleUserClick}
@@ -38,7 +38,10 @@ export function PostUserHeader({ post }: PostHeaderProps) {
           onClick={handleUserClick}
           cursor="pointer"
           fontWeight="medium"
-          wordBreak="break-word"
+          maxW="200px"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
         >
           {post.user.fullname}
         </Text>

@@ -2,27 +2,47 @@
 
 import { Button, HStack } from "@chakra-ui/react";
 import { callApi } from "@/utils/helpers/call-api";
-import { ForgotPasswordSchema } from "@/utils/validations/auth";
+import { AuthSchema } from "@/utils/validations/auth";
 import { toast } from "react-toastify";
 import { useCallback, useState } from "react";
 import { useAuthUserStore } from "@/providers/auth-user-store-provider";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
+import { RegisterPayload } from "@/stores/auth-user-store";
+import { ICommonResponse } from "@/utils/types";
 
-export function ResendOtpLink() {
-  const { email } = useAuthUserStore((state) => state);
+interface ResendOtpLinkProps {
+  resendOtpUrl: "email/send" | "email/register/send"
+}
+
+export function ResendOtpLink({ resendOtpUrl }: ResendOtpLinkProps) {
+  const { email, registerPayload } = useAuthUserStore((state) => state);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const handleResendOtp = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await callApi<ForgotPasswordSchema>("post", "email/send", {
-        email,
-      });
-      if (!res.success) {
-        toast.error(formatToastMessages(res.message));
+      let res: Promise<ICommonResponse>;
+      if (resendOtpUrl === "email/send") {
+        res = callApi<AuthSchema>("post", resendOtpUrl, {
+          email,
+        });
       } else {
-        toast.success(formatToastMessages(res.message));
+        if (!registerPayload) {
+          return;
+        }
+
+        res = callApi<AuthSchema & { createUserDto: RegisterPayload }>("post", resendOtpUrl, {
+          email,
+          createUserDto: registerPayload,
+        });
+      }
+
+      const result = await res;
+      if (!result.success) {
+        toast.error(formatToastMessages(result.message));
+      } else {
+        toast.success(formatToastMessages(result.message));
       }
     } catch (error) {
       toast.error("Failed to resend otp");
@@ -30,7 +50,7 @@ export function ResendOtpLink() {
     } finally {
       setIsLoading(false);
     }
-  }, [email]);
+  }, [email, registerPayload]);
 
   return (
     <HStack fontWeight="normal" gapX="0">

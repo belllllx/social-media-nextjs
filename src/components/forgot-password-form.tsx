@@ -2,8 +2,8 @@
 
 import { callApi } from "@/utils/helpers/call-api";
 import {
-  forgotPasswordSchema,
-  ForgotPasswordSchema,
+  AuthSchema,
+  authSchema,
 } from "@/utils/validations/auth";
 import { Button, Field, Fieldset, Input } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +22,8 @@ export function ForgotPasswordForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<ForgotPasswordSchema>({
-    resolver: zodResolver(forgotPasswordSchema),
+  } = useForm<AuthSchema>({
+    resolver: zodResolver(authSchema),
     defaultValues: {
       email: "",
     },
@@ -31,7 +31,7 @@ export function ForgotPasswordForm() {
 
   const handleSendEmail = useCallback(async (data: { email: string }) => {
     try {
-      const res = await callApi<ForgotPasswordSchema>(
+      const res = await callApi<AuthSchema>(
         "post",
         "email/send",
         data,

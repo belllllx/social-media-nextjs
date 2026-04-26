@@ -77,6 +77,17 @@ export function EditUserInfoForm({
 
         onCloseDialog();
 
+        queryClient.setQueryData<IUser>(["profile"], (oldUser) => {
+          if (!oldUser) {
+            return undefined;
+          }
+
+          return {
+            ...oldUser,
+            fullname: updatedUser.fullname,
+          }
+        });
+
         queryClient.setQueryData<IUser>(["user", user.id], (oldUser) => {
           if (!oldUser) {
             return undefined;
@@ -89,6 +100,9 @@ export function EditUserInfoForm({
             info: updatedUser.info,
           }
         });
+
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+        queryClient.invalidateQueries({ queryKey: ["comments"] });
 
         toast.success(formatToastMessages(res.message));
       }

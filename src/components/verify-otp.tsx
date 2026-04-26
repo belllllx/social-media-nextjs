@@ -4,8 +4,8 @@ import { VerifyOtpForm } from "./verify-otp-form";
 export function VerifyOtp() {
   return (
     <>
-      <VerifyOtpForm />
-      <ResendOtpLink />
+      <VerifyOtpForm verifyOtpUrl="email/verify-otp" />
+      <ResendOtpLink resendOtpUrl="email/send" />
     </>
   );
 }

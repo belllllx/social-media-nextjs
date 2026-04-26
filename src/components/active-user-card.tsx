@@ -9,7 +9,7 @@ import { useNavigateUser } from "@/hooks/use-navigate-user";
 export function ActiveUserCard() {
   const { user, isLoading } = useUserStore((state) => state);
 
-  const handleUserClick = useNavigateUser(user); 
+  const handleUserClick = useNavigateUser(user);
 
   const loadingComponent = useLoadingComponent(isLoading);
 
@@ -53,7 +53,15 @@ export function ActiveUserCard() {
               </Avatar.Root>
             )}
             <Stack gap="0" flex="1" ml="3">
-              <Text fontWeight="medium">{user.fullname}</Text>
+              <Text
+                fontWeight="medium"
+                maxW="200px"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+              >
+                {user.fullname}
+              </Text>
               <Text color="fg.muted" textStyle="sm">
                 {user.email}
               </Text>

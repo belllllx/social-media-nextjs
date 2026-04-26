@@ -396,16 +396,31 @@ export function Comment({
                   backgroundColor={
                     comment.message ? "gray.100" : "transparent"
                   }
-                  gapY={comment.message ? "0" : "2"}
+                  gapY={
+                    comment.message
+                      &&
+                      !comment.replyToUser
+                      ?
+                      "0"
+                      :
+                      !comment.replyToUser
+                        ?
+                        "2"
+                        :
+                        "0"
+                  }
                   rounded="2xl"
                   p={comment.message ? "2" : "0"}
                 >
-                  <HStack alignItems="center" gapX="2">
+                  <HStack alignItems="flex-start" gapX="2">
                     <Text
                       onClick={handleUserClick}
                       cursor="pointer"
                       fontWeight="semibold"
-                      wordBreak="break-word"
+                      maxW="200px"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
                     >
                       {comment.user.fullname}
                     </Text>
@@ -427,8 +442,8 @@ export function Comment({
                   ) : null}
 
                   {comment.replyToUser && comment.replyToUserId && comment.message ? (
-                    <HStack gapX="2" alignItems="flex-start">
-                      <TagUser comment={comment} />
+                    <Text as="span" wordBreak="break-word">
+                      <TagUser replyToUser={comment.replyToUser} />{" "}
                       <Linkify
                         options={{
                           target: "_blank",
@@ -436,9 +451,9 @@ export function Comment({
                           className: "text-blue-500 underline",
                         }}
                       >
-                        <Text wordBreak="break-word">{comment.message}</Text>
+                        {comment.message}
                       </Linkify>
-                    </HStack>
+                    </Text>
                   ) : null}
 
                   {!comment.replyToUser && !comment.replyToUserId && !comment.message && comment.fileUrl ? (
@@ -446,10 +461,10 @@ export function Comment({
                   ) : null}
 
                   {comment.replyToUser && comment.replyToUserId && !comment.message && comment.fileUrl ? (
-                    <>
-                      <TagUser comment={comment} />
+                    <Stack gapY="2">
+                      <TagUser replyToUser={comment.replyToUser} />
                       <CommentFile comment={comment} />
-                    </>
+                    </Stack>
                   ) : null}
                 </Stack>
 

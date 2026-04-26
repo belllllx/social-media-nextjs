@@ -4,7 +4,7 @@ export type RegisterSchema = z.infer<typeof registerSchema>;
 
 export type LoginSchema = z.infer<typeof loginSchema>;
 
-export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
+export type AuthSchema = z.infer<typeof authSchema>;
 
 export type OtpSchema = z.infer<typeof otpSchema>;
 
@@ -31,7 +31,7 @@ export const loginSchema = registerSchema
     password: z.string().trim().min(1, "Password is required"),
   });
 
-export const forgotPasswordSchema = z.object({
+export const authSchema = z.object({
   email: z.email("Invalid email address").trim(),
 });
 

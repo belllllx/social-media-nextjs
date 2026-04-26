@@ -9,8 +9,12 @@ import { toast } from "react-toastify";
 import { PasswordInput } from "./ui/password-input";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useCallback } from "react";
+import { navigate } from "@/utils/helpers/router";
+import { useAuthUserStore } from "@/providers/auth-user-store-provider";
 
 export function RegisterForm() {
+  const { setEmail, setRegisterPayload } = useAuthUserStore((state) => state);
+
   const {
     register,
     handleSubmit,
@@ -32,11 +36,25 @@ export function RegisterForm() {
     email: string;
     password: string;
   }) => {
+    const {
+      fullname,
+      username,
+      email,
+      password,
+    } = data;
+
     try {
       const res = await callApi<RegisterSchema>("post", "auth/register", data);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
       } else {
+        setRegisterPayload({
+          fullname,
+          username,
+          password,
+        });
+        setEmail(email);
+        navigate("/verify-otp-register");
         reset();
         toast.success(formatToastMessages(res.message));
       }
@@ -44,7 +62,7 @@ export function RegisterForm() {
       toast.error("Failed to register");
       console.error("Failed to register", error);
     }
-  }, [reset]);
+  }, [reset, navigate, setEmail, setRegisterPayload]);
 
   const onSubmit = handleSubmit(handleRegister);
 

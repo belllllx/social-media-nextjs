@@ -332,7 +332,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
   }, [post.filesUrl, post.message, reset, setValue, openEditDialog]);
 
   return (
-    <HStack>
+    <HStack alignItems="flex-start">
       {children}
       {post.userId === activeUser.id && (
         <Popover.Root
@@ -408,7 +408,10 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
                                     cursor="pointer"
                                     fontWeight="medium"
                                     fontSize="md"
-                                    wordBreak="break-word"
+                                    maxW="200px"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    whiteSpace="nowrap"
                                   >
                                     {post.user.fullname}
                                   </Text>

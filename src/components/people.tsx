@@ -11,7 +11,7 @@ interface PeopleProps {
 }
 
 export function People({ user, onClosePopover }: PeopleProps) {
-  const handleUserClick = useNavigateUser(user); 
+  const handleUserClick = useNavigateUser(user);
 
   const handleClickPeople = useCallback(() => {
     onClosePopover(false);
@@ -28,9 +28,9 @@ export function People({ user, onClosePopover }: PeopleProps) {
         transitionDuration: "slow",
       }}
     >
-      <HStack 
-        onClick={handleClickPeople} 
-        gapX="3" 
+      <HStack
+        onClick={handleClickPeople}
+        gapX="3"
         my="2"
         cursor="pointer"
       >
@@ -45,7 +45,15 @@ export function People({ user, onClosePopover }: PeopleProps) {
           </Avatar.Root>
         )}
         <Stack gap="0">
-          <Text fontWeight="medium">{user.fullname}</Text>
+          <Text
+            fontWeight="medium"
+            maxW="200px"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            whiteSpace="nowrap"
+          >
+            {user.fullname}
+          </Text>
           <Text color="fg.muted" textStyle="sm">
             {user.email}
           </Text>

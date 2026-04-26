@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   IAtPayload,
   IErrorTokenPayload,
-  IForgotPasswordPayload,
+  IAuthUserPayload,
   IResetPasswordPayload,
 } from "./utils/types";
 import { checkJwtGuard } from "./utils/helpers/check-jwt-guard";
@@ -10,6 +10,9 @@ import { refreshAccessToken } from "./utils/helpers/refresh-access-token";
 import { nextRedirect } from "./utils/helpers/next-redirect";
 import { setCookies } from "./utils/helpers/set-cookies";
 
+const secretRegister = new TextEncoder().encode(
+  process.env.REGISTER_SECRET
+);
 const secretForgotPassword = new TextEncoder().encode(
   process.env.FORGOT_PASSWORD_SECRET
 );
@@ -24,10 +27,21 @@ const atSecret = new TextEncoder().encode(process.env.AT_SECRET);
 export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname === "/verify-otp") {
     const token = req.cookies.get("forgot_password_token")?.value;
-    const redirect = await checkJwtGuard<IForgotPasswordPayload>({
+    const redirect = await checkJwtGuard<IAuthUserPayload>({
       req,
       token,
       secret: secretForgotPassword,
+      validate: (payload) => payload.sendEmailVerified === true,
+    });
+    if (redirect) {
+      return redirect;
+    }
+  } else if (req.nextUrl.pathname === "/verify-otp-register") {
+    const token = req.cookies.get("register_token")?.value;
+    const redirect = await checkJwtGuard<IAuthUserPayload>({
+      req,
+      token,
+      secret: secretRegister,
       validate: (payload) => payload.sendEmailVerified === true,
     });
     if (redirect) {
@@ -113,6 +127,7 @@ export const config = {
   matcher: [
     "/",
     "/verify-otp",
+    "/verify-otp-register",
     "/reset-password",
     "/login-error",
     "/feed",

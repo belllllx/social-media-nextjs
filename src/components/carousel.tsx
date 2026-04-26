@@ -87,7 +87,7 @@ export function Carousel({
       }}
       modules={[Pagination]}
       grabCursor
-      className="mySwiper"
+      className="mySwiper w-full"
     >
       {fileUrls.map((file) => (
         <SwiperSlide key={file}>

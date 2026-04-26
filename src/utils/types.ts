@@ -11,7 +11,7 @@ export type OtpBody = {
   otp: string;
 }
 
-export type IForgotPasswordPayload = {
+export type IAuthUserPayload = {
   email: string;
   sendEmailVerified: boolean;
 }

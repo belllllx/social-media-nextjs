@@ -46,7 +46,15 @@ export function PeopleSuggest({ user, activeUser }: PeopleSuggestProps) {
         </Avatar.Root>
       )}
       <Stack gap="0" flex="1" ml="3">
-        <Text fontWeight="medium">{user.fullname}</Text>
+        <Text
+          fontWeight="medium"
+          maxW="200px"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
+        >
+          {user.fullname}
+        </Text>
         <Text color="fg.muted" textStyle="sm">
           {user.email}
         </Text>

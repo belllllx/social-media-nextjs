@@ -1,5 +1,6 @@
 "use client";
 
+import { createAuthUserStore } from "@/stores/auth-user-store";
 import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { navigate } from "@/utils/helpers/router";
@@ -11,7 +12,13 @@ import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-export function VerifyOtpForm() {
+interface VerifyOtpFormProps {
+  verifyOtpUrl: "email/verify-otp" | "auth/register/verify-otp";
+}
+
+export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
+  const authUserStore = createAuthUserStore();
+
   const {
     control,
     handleSubmit,
@@ -26,7 +33,7 @@ export function VerifyOtpForm() {
 
   const handleVerifyOtp = useCallback(async (data: { otp: string[] }) => {
     try {
-      const res = await callApi<OtpBody>("post", "email/verify-otp", {
+      const res = await callApi<OtpBody>("post", verifyOtpUrl, {
         otp: data.otp.join(""),
       });
       if (!res.success) {
@@ -34,13 +41,19 @@ export function VerifyOtpForm() {
       } else {
         reset();
         toast.success(formatToastMessages(res.message));
-        navigate("/reset-password");
+        if(verifyOtpUrl === "email/verify-otp"){
+          navigate("/reset-password");
+          return;
+        }
+
+        authUserStore.persist.clearStorage();
+        navigate("/");
       }
     } catch (error) {
       toast.error("Failed to verify otp");
       console.error("Failed to verify otp", error);
     }
-  }, [reset]);
+  }, [reset, verifyOtpUrl, navigate, authUserStore]);
 
   const onSubmit = handleSubmit(handleVerifyOtp);
 

@@ -37,7 +37,15 @@ export function LikeUser({ like }: LikeUserProps) {
         </Avatar.Root>
       )}
       <Stack gap="0" flex="1" ml="3">
-        <Text fontWeight="medium">{like.user.fullname}</Text>
+        <Text 
+          fontWeight="medium" 
+          maxW="200px"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
+        >
+          {like.user.fullname}
+        </Text>
         <Text color="fg.muted" textStyle="sm">
           {like.user.email}
         </Text>

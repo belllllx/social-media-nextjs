@@ -3,7 +3,7 @@
 import { useUserStore } from "@/providers/user-store-provider";
 import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
-import { IComment, DeleteFilePayload, IPost, IUser } from "@/utils/types";
+import { DeleteFilePayload, IUser } from "@/utils/types";
 import { Box, Button, CloseButton, Dialog, Portal, Stack } from "@chakra-ui/react";
 import React, { ChangeEvent, useCallback, useRef, useState } from "react";
 import { MdAddAPhoto } from "react-icons/md";
@@ -13,7 +13,7 @@ import { TbPhotoOff } from "react-icons/tb";
 import Cropper from "react-easy-crop";
 import { useFileObjectUrl } from "@/hooks/use-file-object-url";
 import { getCroppedImg } from "@/utils/helpers/crop-image";
-import { InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCropImage } from "@/hooks/use-crop-image";
 
 interface UploadUserProfileImageBtnProps {

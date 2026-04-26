@@ -1,26 +1,32 @@
 "use client";
 
 import { useNavigateUser } from "@/hooks/use-navigate-user";
-import { IComment } from "@/utils/types";
+import { IUser } from "@/utils/types";
 import { Text } from "@chakra-ui/react";
 import React from "react";
 
 interface TagUserProps {
-  comment: IComment;
+  replyToUser: IUser;
 }
 
-export function TagUser({ comment }: TagUserProps) {
-  const handleUserClick = useNavigateUser(comment.replyToUser);
+export function TagUser({ replyToUser }: TagUserProps) {
+  const handleUserClick = useNavigateUser(replyToUser);
 
   return (
     <Text
       onClick={handleUserClick}
+      as="span"
+      display="inline-block"
       cursor="pointer"
       fontWeight="semibold"
       color="blue.600"
-      wordBreak="break-word"
+      maxW="200px"
+      overflow="hidden"
+      textOverflow="ellipsis"
+      whiteSpace="nowrap"
+      verticalAlign="bottom"
     >
-      @{comment.replyToUser?.fullname}
+      @{replyToUser.fullname}
     </Text>
   );
 }
