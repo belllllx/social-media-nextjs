@@ -11,15 +11,15 @@ export type OtpSchema = z.infer<typeof otpSchema>;
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 
 export const registerSchema = z.object({
-  fullname: z.string().trim().min(1, "Fullname is required"),
-  username: z.string().trim().min(1, "Username is required"),
-  email: z.email("Invalid email address").trim(),
+  fullname: z.string().trim().min(1, "Fullname is required").max(30, "Fullname must be less than or equal to 30 length"),
+  username: z.string().trim().min(1, "Username is required").max(15, "Username must be less than or equal to 15 length"),
+  email: z.email("Invalid email address").trim().max(30, "Email must be less than or equal to 30 length"),
   password: z
     .string()
     .trim()
     .min(6, "Password must be at least 6 characters long")
     .max(20, "Password must be at most 20 characters long"),
-});
+}); 
 
 export const loginSchema = registerSchema
   .omit({
@@ -32,7 +32,7 @@ export const loginSchema = registerSchema
   });
 
 export const authSchema = z.object({
-  email: z.email("Invalid email address").trim(),
+  email: z.email("Invalid email address").trim().max(30, "Email must be less than or equal to 30 length"),
 });
 
 export const otpSchema = z.object({

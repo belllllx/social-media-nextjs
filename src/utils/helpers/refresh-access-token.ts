@@ -1,6 +1,6 @@
 import { ICommonResponse, IToken } from "../types";
 
-export async function refreshAccessToken(token: string | undefined | null) {
+export async function refreshAccessToken(token?: string | null) {
   if (!token) {
     return false;
   }

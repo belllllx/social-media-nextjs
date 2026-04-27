@@ -200,12 +200,45 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
             }),
           }
         });
+
+        queryClient.setQueryData<
+          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+        >(["posts", activeUser.id], (oldPosts) => {
+          if (!oldPosts) {
+            return undefined;
+          }
+
+          return {
+            ...oldPosts,
+            pages: oldPosts.pages.map((page) => {
+              // ไม่ใช่ page target ข้าม
+              if (!page.posts.some((prevPost) => prevPost.id === post.id)) {
+                return page;
+              }
+
+              return {
+                ...page,
+                posts: page.posts.map((prevPost) => {
+                  // ไม่ใช่ post target ข้าม
+                  if (prevPost.id !== post.id) {
+                    return prevPost;
+                  }
+
+                  return {
+                    ...prevPost,
+                    filesUrl: prevPost.filesUrl.filter((fileUrl) => fileUrl !== deletedPostFile),
+                  };
+                }),
+              };
+            }),
+          }
+        });
       }
 
       setOpenDeleteDialog(false);
       setOpenEditDialog(open);
     },
-    [content, filesUrl, initialMessage, initialFilesUrl, isDeletePostFile, queryClient, post, deletedPostFile, isDeletingFile],
+    [content, filesUrl, initialMessage, initialFilesUrl, isDeletePostFile, queryClient, post, deletedPostFile, isDeletingFile, activeUser],
   );
 
   const handleOpenDeleteDialog = useCallback((open: boolean) => {
@@ -276,7 +309,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
     } finally {
       setDisabledDeletePost(false);
     }
-  }, [deletePostMutation, post.id, queryClient]);
+  }, [deletePostMutation, post.id, queryClient, activeUser.id]);
 
   const handleInputFilesClick = useCallback(
     (ref: RefObject<HTMLInputElement | null>) => {

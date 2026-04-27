@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionStore } from "@/providers/action-store-provider";
 import { createAuthUserStore } from "@/stores/auth-user-store";
 import { callApi } from "@/utils/helpers/call-api";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
@@ -17,6 +18,8 @@ interface VerifyOtpFormProps {
 }
 
 export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
+  const { clearDisabled } = useActionStore((state) => state);
+
   const authUserStore = createAuthUserStore();
 
   const {
@@ -46,6 +49,7 @@ export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
           return;
         }
 
+        clearDisabled();
         authUserStore.persist.clearStorage();
         navigate("/");
       }
@@ -53,7 +57,7 @@ export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
       toast.error("Failed to verify otp");
       console.error("Failed to verify otp", error);
     }
-  }, [reset, verifyOtpUrl, navigate, authUserStore]);
+  }, [reset, verifyOtpUrl, authUserStore, clearDisabled]);
 
   const onSubmit = handleSubmit(handleVerifyOtp);
 

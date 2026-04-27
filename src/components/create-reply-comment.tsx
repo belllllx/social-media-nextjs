@@ -7,7 +7,7 @@ import {
   IPost,
   IUser,
 } from "@/utils/types";
-import { Avatar, Box, Button, HStack, IconButton, Input, Text } from "@chakra-ui/react";
+import { Avatar, Box, Button, HStack, IconButton, Input } from "@chakra-ui/react";
 import React, {
   ChangeEvent,
   useCallback,
@@ -122,7 +122,7 @@ export function CreateReplyComment({
       toast.error("Failed to create reply comment");
       console.error("Failed to create reply comment", error);
     }
-  }, [createCommentMutation, activeUser, fileUrl, comment, post.id, reset, setShowReplyOnCommentId]);
+  }, [createCommentMutation, activeUser, fileUrl, comment, post.id, reset, setShowReplyOnCommentId, onOpenReply]);
 
   const onSubmit = handleSubmit(handleCreateReplyComment);
 

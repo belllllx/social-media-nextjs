@@ -11,8 +11,11 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useCallback } from "react";
 import { navigate } from "@/utils/helpers/router";
 import { useAuthUserStore } from "@/providers/auth-user-store-provider";
+import { useActionStore } from "@/providers/action-store-provider";
 
 export function RegisterForm() {
+  const { setDisabled } = useActionStore((state) => state);
+
   const { setEmail, setRegisterPayload } = useAuthUserStore((state) => state);
 
   const {
@@ -44,6 +47,7 @@ export function RegisterForm() {
     } = data;
 
     try {
+      setDisabled();
       const res = await callApi<RegisterSchema>("post", "auth/register", data);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -62,7 +66,7 @@ export function RegisterForm() {
       toast.error("Failed to register");
       console.error("Failed to register", error);
     }
-  }, [reset, navigate, setEmail, setRegisterPayload]);
+  }, [reset, setEmail, setRegisterPayload, setDisabled]);
 
   const onSubmit = handleSubmit(handleRegister);
 

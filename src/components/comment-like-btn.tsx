@@ -56,7 +56,7 @@ export function CommentLikeBtn({
     } finally {
       setIsLoading(false);
     }
-  }, [commentLikeMutation, post.id, comment.id]);
+  }, [commentLikeMutation, post.id, comment.id, activeUser]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">

@@ -90,7 +90,7 @@ export function Carousel({
       className="mySwiper w-full"
     >
       {fileUrls.map((file) => (
-        <SwiperSlide key={file}>
+        <SwiperSlide key={file} className="w-full">
           {isShowCloseBtn && (
             <IconButton
               onClick={() => handleDeleteFile(file)}

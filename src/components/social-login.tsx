@@ -6,12 +6,15 @@ import { IoLogoGithub } from "react-icons/io";
 import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 import { navigate } from "@/utils/helpers/router";
+import { useActionStore } from "@/providers/action-store-provider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const GOOGLE_LOGIN_URL = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URL!;
 const GITHUB_LOGIN_URL = process.env.NEXT_PUBLIC_GITHUB_LOGIN_URL!;
 
 export function SocialLogin() {
+  const { isDisabled } = useActionStore((state) => state);
+
   const pathname = usePathname();
 
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -26,7 +29,7 @@ export function SocialLogin() {
       {(pathname === "/" || pathname === "/register") && (
         <HStack width="400px">
           <Button
-            disabled={isRedirecting}
+            disabled={isRedirecting || isDisabled}
             onClick={() => handleLogin(`${API_URL}${GOOGLE_LOGIN_URL}`)}
             flex="1"
             variant="surface"
@@ -40,7 +43,7 @@ export function SocialLogin() {
             </HStack>
           </Button>
           <Button
-            disabled={isRedirecting}
+            disabled={isRedirecting || isDisabled}
             onClick={() => handleLogin(`${API_URL}${GITHUB_LOGIN_URL}`)}
             flex="1"
             variant="surface"

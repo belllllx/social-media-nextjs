@@ -110,7 +110,7 @@ export function EditUserInfoForm({
       toast.error("Failed to edit user info");
       console.error("Failed to edit user info", error);
     }
-  }, [onCloseDialog, reset, activeUser, queryClient]);
+  }, [onCloseDialog, reset, activeUser, queryClient, user.id]);
 
   const onSubmit = handleSubmit(handleEditUserInfo);
 

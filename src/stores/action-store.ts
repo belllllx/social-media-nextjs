@@ -14,12 +14,15 @@ export type ActionState = {
   focusPostId: string | null;
   showCommentOnPostId: showCommentOnPostId[];
   showReplyOnCommentId: showReplyOnCommentId[];
+  isDisabled: boolean;
 };
 
 export type FocusAction = {
   setFocusPostId: (focusPostId: string | null) => void;
   setShowCommentOnPostId: (showCommentOnPostId: showCommentOnPostId) => void;
   setShowReplyOnCommentId: (showReplyOnCommentId: showReplyOnCommentId) => void;
+  setDisabled: () => void;
+  clearDisabled: () => void;
 };
 
 export type ActionStore = ActionState & FocusAction;
@@ -28,6 +31,7 @@ export const defaultInitState: ActionState = {
   focusPostId: null,
   showCommentOnPostId: [],
   showReplyOnCommentId: [],
+  isDisabled: false,
 };
 
 export function createActionStore(initState: ActionState = defaultInitState) {
@@ -70,5 +74,7 @@ export function createActionStore(initState: ActionState = defaultInitState) {
               }),
             ],
       })),
+      setDisabled: () => set({ isDisabled: true }),
+      clearDisabled: () => set({ isDisabled: false }),
   }));
 }

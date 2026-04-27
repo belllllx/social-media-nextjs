@@ -75,6 +75,7 @@ export function useSharePostCreate(queryClient: QueryClient) {
           commentsCount: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
+          filesUrl: [],
         }
 
         const newFirstPage = {
@@ -108,6 +109,7 @@ export function useSharePostCreate(queryClient: QueryClient) {
           commentsCount: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
+          filesUrl: [],
         }
 
         const newFirstPage = {

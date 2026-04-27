@@ -16,7 +16,7 @@ export function People({ user, onClosePopover }: PeopleProps) {
   const handleClickPeople = useCallback(() => {
     onClosePopover(false);
     handleUserClick();
-  }, [onClosePopover]);
+  }, [onClosePopover, handleUserClick]);
 
   return (
     <Box

@@ -51,7 +51,7 @@ export function UploadUserProfileImageBtn({ user }: UploadUserProfileImageBtnPro
     }
 
     setOpenDialog(open);
-  }, [handleClearImageSrc]);
+  }, [handleClearImageSrc, handleClearCropImage]);
 
   const handleSaveEditProfile = useCallback(async () => {
     try {
@@ -119,7 +119,7 @@ export function UploadUserProfileImageBtn({ user }: UploadUserProfileImageBtnPro
     } finally {
       setDisabled(false);
     }
-  }, [imageSrc, croppedAreaPixels, activeUser, queryClient, user.id, handleClearCropImage, handleClearImageSrc]);
+  }, [imageSrc, croppedAreaPixels, activeUser, queryClient, user.id, handleClearCropImage, handleClearImageSrc, setUpdatedProfile]);
 
   const handleFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +191,7 @@ export function UploadUserProfileImageBtn({ user }: UploadUserProfileImageBtnPro
     } finally {
       setDisabled(false);
     }
-  }, [activeUser, queryClient, user.id, handleClearCropImage, handleClearImageSrc]);
+  }, [activeUser, queryClient, user.id, handleClearCropImage, handleClearImageSrc, setUpdatedProfile]);
 
   return (
     <>

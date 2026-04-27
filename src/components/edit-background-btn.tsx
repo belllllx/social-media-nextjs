@@ -50,7 +50,7 @@ export function EditBackgroundBtn({ user }: EditBackgroundBtnProps) {
     }
 
     setOpenDialog(open);
-  }, [handleClearImageSrc]);
+  }, [handleClearImageSrc, handleClearCropImage]);
 
   const handleSaveEditBackground = useCallback(async () => {
     try {

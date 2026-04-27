@@ -50,7 +50,7 @@ export function ResendOtpLink({ resendOtpUrl }: ResendOtpLinkProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [email, registerPayload]);
+  }, [email, registerPayload, resendOtpUrl]);
 
   return (
     <HStack fontWeight="normal" gapX="0">

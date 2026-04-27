@@ -304,7 +304,7 @@ export function Comment({
     }
 
     setOpenEditComment(false);
-  }, [content, fileUrl, initialMessage, initialFileUrl, isDeleteCommentFile, queryClient, comment]);
+  }, [content, fileUrl, initialMessage, initialFileUrl, isDeleteCommentFile, queryClient, comment, post.id]);
 
   const handleDeleteComment = useCallback(async () => {
     try {
@@ -329,7 +329,7 @@ export function Comment({
     } finally {
       setDisabledDeleteComment(false);
     }
-  }, [deleteCommentMutation, post.id, comment, queryClient]);
+  }, [deleteCommentMutation, post.id, comment, queryClient, userId]);
 
   useEffect(() => {
     if (!openEditComment) {
