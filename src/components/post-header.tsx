@@ -309,7 +309,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
     } finally {
       setDisabledDeletePost(false);
     }
-  }, [deletePostMutation, post.id, queryClient, activeUser.id]);
+  }, [deletePostMutation, post.id, queryClient, activeUser.id, pathname]);
 
   const handleInputFilesClick = useCallback(
     (ref: RefObject<HTMLInputElement | null>) => {
