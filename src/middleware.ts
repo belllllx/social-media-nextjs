@@ -25,6 +25,16 @@ const secretErrorToken = new TextEncoder().encode(
 const atSecret = new TextEncoder().encode(process.env.AT_SECRET);
 
 export async function middleware(req: NextRequest) {
+  console.log("cookies:", req.cookies.getAll());
+
+  const at = req.cookies.get("access_token");
+  const rt = req.cookies.get("refresh_token");
+
+  console.log({
+    at,
+    rt,
+  })
+
   if (req.nextUrl.pathname === "/verify-otp") {
     const token = req.cookies.get("forgot_password_token")?.value;
     const redirect = await checkJwtGuard<IAuthUserPayload>({
