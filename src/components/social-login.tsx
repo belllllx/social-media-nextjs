@@ -33,7 +33,6 @@ export function SocialLogin() {
             onClick={() => handleLogin(`${API_URL}${GOOGLE_LOGIN_URL}`)}
             flex="1"
             variant="surface"
-            asChild
           >
             <HStack>
               <Icon size="lg">
@@ -47,7 +46,6 @@ export function SocialLogin() {
             onClick={() => handleLogin(`${API_URL}${GITHUB_LOGIN_URL}`)}
             flex="1"
             variant="surface"
-            asChild
           >
             <HStack>
               <Icon size="lg">
