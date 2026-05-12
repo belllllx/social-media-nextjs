@@ -14,7 +14,7 @@ import { useAuthUserStore } from "@/providers/auth-user-store-provider";
 import { useActionStore } from "@/providers/action-store-provider";
 
 export function RegisterForm() {
-  const { setDisabled } = useActionStore((state) => state);
+  const { setDisabled, clearDisabled } = useActionStore((state) => state);
 
   const { setEmail, setRegisterPayload } = useAuthUserStore((state) => state);
 
@@ -65,8 +65,10 @@ export function RegisterForm() {
     } catch (error) {
       toast.error("Failed to register");
       console.error("Failed to register", error);
+    } finally {
+      clearDisabled();
     }
-  }, [reset, setEmail, setRegisterPayload, setDisabled]);
+  }, [reset, setEmail, setRegisterPayload, setDisabled, clearDisabled]);
 
   const onSubmit = handleSubmit(handleRegister);
 

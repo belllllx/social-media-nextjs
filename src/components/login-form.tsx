@@ -12,8 +12,11 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useSocketIo } from "@/providers/socket-io-provider";
+import { useActionStore } from "@/providers/action-store-provider";
 
 export function LoginForm() {
+  const { setDisabled, clearDisabled } = useActionStore((state) => state);
+
   const { socket } = useSocketIo();
 
   const queryClient = useQueryClient();
@@ -36,6 +39,7 @@ export function LoginForm() {
     password: string;
   }) => {
     try {
+      setDisabled();
       const res = await callApi<LoginSchema>("post", "auth/login", data);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
@@ -50,8 +54,10 @@ export function LoginForm() {
     } catch (error) {
       toast.error("Failed to login");
       console.error("Failed to login", error);
+    } finally {
+      clearDisabled();
     }
-  }, [queryClient, socket, reset]);
+  }, [queryClient, socket, reset, setDisabled, clearDisabled]);
 
   const onSubmit = handleSubmit(handleLogin);
 
