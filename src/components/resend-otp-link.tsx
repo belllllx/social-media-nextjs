@@ -7,11 +7,10 @@ import { toast } from "react-toastify";
 import { useCallback, useState } from "react";
 import { useAuthUserStore } from "@/providers/auth-user-store-provider";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
-import { RegisterPayload } from "@/stores/auth-user-store";
 import { ICommonResponse } from "@/utils/types";
 
 interface ResendOtpLinkProps {
-  resendOtpUrl: "email/send" | "email/register/send"
+  resendOtpUrl: "email/send" | "auth/register/resend-email"
 }
 
 export function ResendOtpLink({ resendOtpUrl }: ResendOtpLinkProps) {
@@ -32,9 +31,8 @@ export function ResendOtpLink({ resendOtpUrl }: ResendOtpLinkProps) {
           return;
         }
 
-        res = callApi<AuthSchema & { createUserDto: RegisterPayload }>("post", resendOtpUrl, {
-          email,
-          createUserDto: registerPayload,
+        res = callApi("post", resendOtpUrl, undefined, {
+          withCredentials: true,
         });
       }
 

@@ -1,8 +1,9 @@
 export interface ICommonResponse {
   status: number;
   success: boolean;
-  message: string | string[];
+  message: string;
   data?: Record<string, unknown> | string | unknown[];
+  error_fields?: Record<string, string>;
 }
 
 export type ApiBody<T> = T;

@@ -36,15 +36,22 @@ export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
 
   const handleVerifyOtp = useCallback(async (data: { otp: string[] }) => {
     try {
-      const res = await callApi<OtpBody>("post", verifyOtpUrl, {
-        otp: data.otp.join(""),
-      });
+      const res = await callApi<OtpBody>(
+        "post",
+        verifyOtpUrl,
+        {
+          otp: data.otp.join(""),
+        },
+        {
+          withCredentials: true,
+        },
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
       } else {
         reset();
         toast.success(formatToastMessages(res.message));
-        if(verifyOtpUrl === "email/verify-otp"){
+        if (verifyOtpUrl === "email/verify-otp") {
           navigate("/reset-password");
           return;
         }

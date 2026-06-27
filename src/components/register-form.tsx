@@ -48,7 +48,7 @@ export function RegisterForm() {
 
     try {
       setDisabled();
-      const res = await callApi<RegisterSchema>("post", "auth/register", data);
+      const res = await callApi<RegisterSchema>("post", "auth/register/send-email", data);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
       } else {

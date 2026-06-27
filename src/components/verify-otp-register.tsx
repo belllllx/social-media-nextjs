@@ -5,7 +5,7 @@ export function VerifyOtpRegister() {
   return (
     <>
       <VerifyOtpForm verifyOtpUrl="auth/register/verify-otp" />
-      <ResendOtpLink resendOtpUrl="email/register/send" />
+      <ResendOtpLink resendOtpUrl="auth/register/resend-email" />
     </>
   );
 }
