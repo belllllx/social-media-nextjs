@@ -3,7 +3,7 @@ export interface ICommonResponse {
   success: boolean;
   message: string;
   data?: Record<string, unknown> | string | unknown[];
-  error_fields?: Record<string, string>;
+  errorFields?: Record<string, string>;
 }
 
 export type ApiBody<T> = T;

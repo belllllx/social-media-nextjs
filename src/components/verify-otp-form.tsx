@@ -14,7 +14,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 interface VerifyOtpFormProps {
-  verifyOtpUrl: "email/verify-otp" | "auth/register/verify-otp";
+  verifyOtpUrl: "auth/forgot-password/verify-otp" | "auth/register/verify-otp";
 }
 
 export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
@@ -51,7 +51,7 @@ export function VerifyOtpForm({ verifyOtpUrl }: VerifyOtpFormProps) {
       } else {
         reset();
         toast.success(formatToastMessages(res.message));
-        if (verifyOtpUrl === "email/verify-otp") {
+        if (verifyOtpUrl === "auth/forgot-password/verify-otp") {
           navigate("/reset-password");
           return;
         }

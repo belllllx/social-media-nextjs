@@ -38,7 +38,7 @@ export function ResetPasswordForm() {
     try {
       const res = await callApi<ResetPasswordSchema>(
         "patch",
-        "user/reset-password",
+        "auth/forgot-password/reset-password",
         data,
       );
       if (!res.success) {

@@ -10,7 +10,7 @@ import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { ICommonResponse } from "@/utils/types";
 
 interface ResendOtpLinkProps {
-  resendOtpUrl: "email/send" | "auth/register/resend-email"
+  resendOtpUrl: "auth/forgot-password/resend-email" | "auth/register/resend-email"
 }
 
 export function ResendOtpLink({ resendOtpUrl }: ResendOtpLinkProps) {
@@ -22,7 +22,7 @@ export function ResendOtpLink({ resendOtpUrl }: ResendOtpLinkProps) {
     try {
       setIsLoading(true);
       let res: Promise<ICommonResponse>;
-      if (resendOtpUrl === "email/send") {
+      if (resendOtpUrl === "auth/forgot-password/resend-email") {
         res = callApi<AuthSchema>("post", resendOtpUrl, {
           email,
         });

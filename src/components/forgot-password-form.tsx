@@ -33,7 +33,7 @@ export function ForgotPasswordForm() {
     try {
       const res = await callApi<AuthSchema>(
         "post",
-        "email/send",
+        "/auth/forgot-password/send-email",
         data,
       );
       if (!res.success) {
