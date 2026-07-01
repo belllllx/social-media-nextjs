@@ -12,7 +12,7 @@ export default function AuthLayout({
   return (
     <HStack minHeight="100vh">
       <VStack 
-        width="100vw" 
+        width="100vw"
         height="100vh"
         justifyContent="center"
         gapY="3"

@@ -1,15 +1,17 @@
 "use client";
 
-import { Button, HStack, Icon } from "@chakra-ui/react";
+import { Button, HStack, Icon, Stack } from "@chakra-ui/react";
 import { FcGoogle } from "react-icons/fc";
 import { IoLogoGithub } from "react-icons/io";
 import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 import { navigate } from "@/utils/helpers/router";
 import { useActionStore } from "@/providers/action-store-provider";
+import { IoLogoFacebook } from "react-icons/io5";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const GOOGLE_LOGIN_URL = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URL!;
+const FACEBOOK_LOGIN_URL = process.env.NEXT_PUBLIC_FACEBOOK_LOGIN_URL!;
 const GITHUB_LOGIN_URL = process.env.NEXT_PUBLIC_GITHUB_LOGIN_URL!;
 
 export function SocialLogin() {
@@ -27,12 +29,16 @@ export function SocialLogin() {
   return (
     <>
       {(pathname === "/" || pathname === "/register") && (
-        <HStack width="400px">
+        <Stack
+          gapY="2"
+          maxWidth="400px" 
+          width="full"
+        >
           <Button
             disabled={isRedirecting || isDisabled}
             onClick={() => handleLogin(`${API_URL}${GOOGLE_LOGIN_URL}`)}
-            flex="1"
             variant="surface"
+            width="full"
           >
             <HStack>
               <Icon size="lg">
@@ -41,11 +47,26 @@ export function SocialLogin() {
               Google login
             </HStack>
           </Button>
+
+          <Button
+            disabled={isRedirecting || isDisabled}
+            onClick={() => handleLogin(`${API_URL}${FACEBOOK_LOGIN_URL}`)}
+            variant="surface"
+            width="full"
+          >
+            <HStack>
+              <Icon size="lg">
+                <IoLogoFacebook />
+              </Icon>
+              Facebook login
+            </HStack>
+          </Button>
+
           <Button
             disabled={isRedirecting || isDisabled}
             onClick={() => handleLogin(`${API_URL}${GITHUB_LOGIN_URL}`)}
-            flex="1"
             variant="surface"
+            width="full"
           >
             <HStack>
               <Icon size="lg">
@@ -54,7 +75,7 @@ export function SocialLogin() {
               Github login
             </HStack>
           </Button>
-        </HStack>
+        </Stack>
       )}
     </>
   );
