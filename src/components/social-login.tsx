@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 import { navigate } from "@/utils/helpers/router";
 import { useActionStore } from "@/providers/action-store-provider";
-import { IoLogoFacebook } from "react-icons/io5";
+import NextImage from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const GOOGLE_LOGIN_URL = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URL!;
@@ -55,9 +55,12 @@ export function SocialLogin() {
             width="full"
           >
             <HStack>
-              <Icon size="lg">
-                <IoLogoFacebook />
-              </Icon>
+              <NextImage
+                src="/facebook-icon.png"
+                alt="Facebook login"
+                width={28}
+                height={28}
+              />
               Facebook login
             </HStack>
           </Button>
