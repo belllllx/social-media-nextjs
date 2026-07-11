@@ -12,7 +12,7 @@ export function useCommentCreateSocket(
   queryClient: QueryClient,
 ) {
   useEffect(() => {
-    socket?.on("createComment", (newComment) => {
+    socket?.on("newComment", (newComment) => {
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", newComment.postId], (oldComments) => {
@@ -73,7 +73,7 @@ export function useCommentCreateSocket(
     });
 
     return () => {
-      socket?.off("createComment");
+      socket?.off("newComment");
     };
   }, [socket, queryClient]);
 }

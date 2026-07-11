@@ -67,7 +67,7 @@ enum NotificationType {
   POST,
   REPLY,
 }
-
+ 
 export interface INotify {
   id: string;
   type: NotificationType;

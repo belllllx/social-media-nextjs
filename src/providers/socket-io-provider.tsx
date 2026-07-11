@@ -26,11 +26,11 @@ export interface ServerToClientEvents {
   [event: `notification:${string}`]: (notifications: INotify) => void;
   usersActive: (users: (IUser & { active: boolean })[]) => void;
   exception: (error: { success: boolean; message: string }) => void;
-  createPost: (post: IPost) => void;
+  newPost: (post: IPost) => void;
   updatePost: (post: IPost) => void;
   deletePost: (post: IPost) => void;
   newLike: (like: ILike) => void;
-  createComment: (comment: IComment & { post: IPost }) => void;
+  newComment: (comment: IComment & { post: IPost }) => void;
   updateComment: (comment: IComment) => void;
   deleteComment: (comment: IComment & { post: IPost }) => void;
   deleteReplyComment: (comment: IComment & { post: IPost }) => void;

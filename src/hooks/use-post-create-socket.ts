@@ -12,7 +12,7 @@ export function usePostCreateSocket(
   queryClient: QueryClient,
 ) {
   useEffect(() => {
-    socket?.on("createPost", (newPost) => {
+    socket?.on("newPost", (newPost) => {
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"], (oldPosts) => {
@@ -53,7 +53,7 @@ export function usePostCreateSocket(
     });
 
     return () => {
-      socket?.off("createPost");
+      socket?.off("newPost");
     };
   }, [socket, queryClient]);
 }
