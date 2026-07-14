@@ -11,13 +11,10 @@ import { navigate } from "@/utils/helpers/router";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useSocketIo } from "@/providers/socket-io-provider";
 import { useActionStore } from "@/providers/action-store-provider";
 
 export function LoginForm() {
   const { setDisabled, clearDisabled } = useActionStore((state) => state);
-
-  const { socket } = useSocketIo();
 
   const queryClient = useQueryClient();
 
@@ -26,7 +23,6 @@ export function LoginForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    setError,
   } = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -49,7 +45,6 @@ export function LoginForm() {
         toast.success(formatToastMessages(res.message));
 
         queryClient.clear();
-        socket?.disconnect().connect();
         navigate("/feed");
       }
     } catch (error) {
@@ -58,7 +53,7 @@ export function LoginForm() {
     } finally {
       clearDisabled();
     }
-  }, [queryClient, socket, reset, setDisabled, clearDisabled]);
+  }, [queryClient, reset, setDisabled, clearDisabled]);
 
   const onSubmit = handleSubmit(handleLogin);
 

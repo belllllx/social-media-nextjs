@@ -1,13 +1,11 @@
 "use client";
 
-import { IComment, ICommonResponse, IFollower, ILike, INotify, IPost, IUser } from "@/utils/types";
+import { IComment, IFollower, ILike, INotify, IPost, IUser } from "@/utils/types";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
-import { refreshInstance } from "@/utils/axios-instance";
-import { isAxiosError } from "axios";
-import { navigate } from "@/utils/helpers/router";
+import { usePathname } from "next/navigation";
 
 interface SocketIoProviderProps {
   children: React.ReactNode;
@@ -48,6 +46,7 @@ export interface ClientToServerEvents {
 }
 
 export function SocketIoProvider({ children }: SocketIoProviderProps) {
+  const pathname = usePathname()
   const [socket, setSocket] = useState<Socket<
     ServerToClientEvents,
     ClientToServerEvents
@@ -55,6 +54,14 @@ export function SocketIoProvider({ children }: SocketIoProviderProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (
+      pathname !== "/feed" &&
+      !pathname.startsWith("/post") &&
+      !pathname.startsWith("/profile")
+    ) {
+      return;
+    }
+
     const socketInstance: Socket<ServerToClientEvents, ClientToServerEvents> =
       io(process.env.NEXT_PUBLIC_WS_URL!, {
         withCredentials: true,
@@ -68,24 +75,8 @@ export function SocketIoProvider({ children }: SocketIoProviderProps) {
       setIsConnected(false);
     });
 
-    socketInstance.on("connect_error", (error) => {
+    socketInstance.on("connect_error", async (error) => {
       toast.error(formatToastMessages(error.message));
-    });
-
-    socketInstance.on("exception", async (errorException) => {
-      if (!errorException.success) {
-        try {
-          await refreshInstance.post<ICommonResponse>("auth/refresh-token");
-        } catch (error: unknown) {
-          if (isAxiosError<ICommonResponse>(error)) {
-            if (error.response?.data.status === 401) {
-              navigate("/");
-              toast.error(formatToastMessages(errorException.message));
-              return;
-            }
-          }
-        }
-      }
     });
 
     setSocket(socketInstance);
@@ -93,7 +84,7 @@ export function SocketIoProvider({ children }: SocketIoProviderProps) {
     return () => {
       socketInstance.disconnect();
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <SocketIoContext.Provider value={{ socket, isConnected }}>

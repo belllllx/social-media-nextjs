@@ -20,12 +20,11 @@ export function usePostCreate(queryClient: QueryClient) {
     }
   >({
     mutationFn: async ({
-      activeUser,
       payload,
     }) => {
       const res = await callApi<CreatePostPayload>(
         "post",
-        `post/create/${activeUser.id}`,
+        "post/create",
         payload,
       );
       return res;

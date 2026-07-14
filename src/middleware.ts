@@ -70,7 +70,9 @@ export async function middleware(req: NextRequest) {
       return redirect;
     }
   } else if (
-    req.nextUrl.pathname === "/feed"
+    req.nextUrl.pathname === "/feed" || 
+    req.nextUrl.pathname.startsWith("/post") ||
+    req.nextUrl.pathname.startsWith("/profile")
   ) {
     const token = req.cookies.get("access_token")?.value;
     const redirect = await checkJwtGuard<IAtPayload>({
@@ -131,5 +133,7 @@ export const config = {
     "/reset-password",
     "/login-error",
     "/feed",
+    "/post/:path*",
+    "/profile/:path*",
   ],
 };
