@@ -21,14 +21,13 @@ export function useSharePostCreate(queryClient: QueryClient) {
     }
   >({
     mutationFn: async ({
-      activeUser,
       post,
       payload,
     }) => {
       const url =
         post.parent && post.parentId
-          ? `post/share/create/${activeUser.id}/${post.parentId}`
-          : `post/share/create/${activeUser.id}/${post.id}`;
+          ? `post/share/create/${post.parentId}`
+          : `post/share/create/${post.id}`;
 
       const res = await callApi<Omit<CreatePostPayload, "filesUrl">>(
         "post",
