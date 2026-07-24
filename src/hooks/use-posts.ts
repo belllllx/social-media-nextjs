@@ -7,8 +7,8 @@ export function usePosts(limit: number) {
     queryKey: ["posts"],
     queryFn: async ({ pageParam }: { pageParam: string | null }) => {
       const url = pageParam
-        ? `post/find?&cursor=${pageParam}&limit=${limit}`
-        : `post/find?&limit=${limit}`;
+        ? `post/finds?&cursor=${pageParam}&limit=${limit}`
+        : `post/finds?&limit=${limit}`;
 
       await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));
       const res = await callApi("get", url);

@@ -21,9 +21,11 @@ export function usePostCreateSocket(
         }
         const firstPage = oldPosts.pages[0];
 
+        const isExist = firstPage.posts.some((prevPost) => prevPost.id === newPost.id);
+
         const newFirstPage = {
           ...firstPage,
-          posts: [newPost, ...firstPage.posts],
+          posts: !isExist ? [newPost, ...firstPage.posts] : firstPage.posts,
         };
 
         return {
@@ -40,9 +42,11 @@ export function usePostCreateSocket(
         }
         const firstPage = oldPosts.pages[0];
 
+        const isExist = firstPage.posts.some((prevPost) => prevPost.id === newPost.id);
+
         const newFirstPage = {
           ...firstPage,
-          posts: [newPost, ...firstPage.posts],
+          posts: !isExist ? [newPost, ...firstPage.posts] : firstPage.posts,
         };
 
         return {
