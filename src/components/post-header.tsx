@@ -261,7 +261,7 @@ export function PostHeader({ children, post, activeUser }: PostHeaderProps) {
           setDisabled(true);
           const res = await callApi(
             "post",
-            "post/files/create",
+            "post/upload-files",
             formData,
           );
           if (!res.success) {

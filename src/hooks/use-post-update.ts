@@ -79,8 +79,8 @@ export function usePostUpdate(queryClient: QueryClient) {
                     ...post,
                     parent: {
                       ...currentPost,
-                      message: payload.message ?? null,
-                      filesUrl: [...(payload.filesUrl ?? [])],
+                      message: payload.message ?? currentPost.message,
+                      filesUrl: [...(payload.filesUrl ?? currentPost.filesUrl)],
                     },
                   };
 
@@ -89,8 +89,8 @@ export function usePostUpdate(queryClient: QueryClient) {
 
                 const newUpdatePost: IPost = {
                   ...currentPost,
-                  message: payload.message ?? null,
-                  filesUrl: [...(payload.filesUrl ?? [])],
+                  message: payload.message ?? currentPost.message,
+                  filesUrl: [...(payload.filesUrl ?? currentPost.filesUrl)],
                 };
 
                 return newUpdatePost;
@@ -132,8 +132,8 @@ export function usePostUpdate(queryClient: QueryClient) {
                     ...post,
                     parent: {
                       ...currentPost,
-                      message: payload.message ?? null,
-                      filesUrl: [...(payload.filesUrl ?? [])],
+                      message: payload.message ?? currentPost.message,
+                      filesUrl: [...(payload.filesUrl ?? currentPost.filesUrl)],
                     },
                   };
 
@@ -142,8 +142,8 @@ export function usePostUpdate(queryClient: QueryClient) {
 
                 const newUpdatePost: IPost = {
                   ...currentPost,
-                  message: payload.message ?? null,
-                  filesUrl: [...(payload.filesUrl ?? [])],
+                  message: payload.message ?? currentPost.message,
+                  filesUrl: [...(payload.filesUrl ?? currentPost.filesUrl)],
                 };
 
                 return newUpdatePost;
@@ -163,8 +163,8 @@ export function usePostUpdate(queryClient: QueryClient) {
             ...oldPost,
             parent: {
               ...currentPost,
-              message: payload.message ?? null,
-              filesUrl: [...(payload.filesUrl ?? [])],
+              message: payload.message ?? currentPost.message,
+              filesUrl: [...(payload.filesUrl ?? currentPost.filesUrl)],
             },
           };
 
@@ -173,8 +173,8 @@ export function usePostUpdate(queryClient: QueryClient) {
 
         const newUpdatePost: IPost = {
           ...currentPost,
-          message: payload.message ?? null,
-          filesUrl: [...(payload.filesUrl ?? [])],
+          message: payload.message ?? currentPost.message,
+          filesUrl: [...(payload.filesUrl ?? currentPost.filesUrl)],
         };
 
         return newUpdatePost;
@@ -239,13 +239,13 @@ export function usePostUpdate(queryClient: QueryClient) {
                 }
 
                 // แก้เฉพาะ target
-                if (post.parentId === updatePost.id) {
+                if (post.parentId === updatePost.id && post.parent) {
                   const newUpdateParentPost: IPost = {
                     ...post,
                     parent: {
-                      ...updatePost,
-                      message: updatePost.message,
-                      filesUrl: [...(updatePost.filesUrl ?? [])],
+                      ...post.parent,
+                      message: updatePost.message ?? post.parent.message,
+                      filesUrl: [...(updatePost.filesUrl ?? post.parent.filesUrl)],
                     },
                   };
 
@@ -253,9 +253,9 @@ export function usePostUpdate(queryClient: QueryClient) {
                 }
 
                 const newUpdatePost: IPost = {
-                  ...updatePost,
-                  message: updatePost.message,
-                  filesUrl: [...(updatePost.filesUrl ?? [])],
+                  ...post,
+                  message: updatePost.message ?? post.message,
+                  filesUrl: [...(updatePost.filesUrl ?? post.filesUrl)],
                 };
 
                 return newUpdatePost;
@@ -292,13 +292,13 @@ export function usePostUpdate(queryClient: QueryClient) {
                 }
 
                 // แก้เฉพาะ target
-                if (post.parentId === updatePost.id) {
+                if (post.parentId === updatePost.id && post.parent) {
                   const newUpdateParentPost: IPost = {
                     ...post,
                     parent: {
-                      ...updatePost,
-                      message: updatePost.message,
-                      filesUrl: [...(updatePost.filesUrl ?? [])],
+                      ...post.parent,
+                      message: updatePost.message ?? post.parent.message,
+                      filesUrl: [...(updatePost.filesUrl ?? post.parent.filesUrl)],
                     },
                   };
 
@@ -307,8 +307,8 @@ export function usePostUpdate(queryClient: QueryClient) {
 
                 const newUpdatePost: IPost = {
                   ...updatePost,
-                  message: updatePost.message,
-                  filesUrl: [...(updatePost.filesUrl ?? [])],
+                  message: updatePost.message ?? post.message,
+                  filesUrl: [...(updatePost.filesUrl ?? post.filesUrl)],
                 };
 
                 return newUpdatePost;
@@ -323,13 +323,13 @@ export function usePostUpdate(queryClient: QueryClient) {
           return undefined;
         }
 
-        if (oldPost.parentId === updatePost.id) {
+        if (oldPost.parentId === updatePost.id && oldPost.parent) {
           const newUpdateParentPost: IPost = {
             ...oldPost,
             parent: {
-              ...updatePost,
-              message: updatePost.message,
-              filesUrl: [...(updatePost.filesUrl ?? [])],
+              ...oldPost.parent,
+              message: updatePost.message ?? oldPost.parent.message,
+              filesUrl: [...(updatePost.filesUrl ?? oldPost.parent.filesUrl)],
             },
           };
 
@@ -338,8 +338,8 @@ export function usePostUpdate(queryClient: QueryClient) {
 
         const newUpdatePost: IPost = {
           ...updatePost,
-          message: updatePost.message,
-          filesUrl: [...(updatePost.filesUrl ?? [])],
+          message: updatePost.message ?? oldPost.message,
+          filesUrl: [...(updatePost.filesUrl ?? oldPost.filesUrl)],
         };
 
         return newUpdatePost;
