@@ -69,7 +69,7 @@ export function PostLikeBtn({
           p="0"
           justifyContent="flex-end"
         >
-          {post.likes.some((like) => like.userId === activeUser.id) ? (
+          {post?.likes?.some((like) => like.userId === activeUser.id) ? (
             <BiSolidLike />
           ) : (
             <BiLike />
@@ -77,7 +77,7 @@ export function PostLikeBtn({
         </Button>
         <Dialog.Trigger asChild>
           <Text cursor="pointer">
-            {post.likes.length > 0 ? post.likes.length : ""} Like
+            {post?.likes?.length > 0 ? post?.likes?.length : ""} Like
           </Text>
         </Dialog.Trigger>
       </HStack>
@@ -92,10 +92,10 @@ export function PostLikeBtn({
             </Dialog.Header>
             <Dialog.Body>
               <Box overflowY="auto" flex="1" width="full">
-                {!post.likes.length ? (
+                {!post?.likes?.length ? (
                   <ItemsNotFound title="like" />
                 ) : (
-                  post.likes.map((like) => (
+                  post?.likes?.map((like) => (
                     <LikeUser key={like.userId} like={like} />
                   ))
                 )}
