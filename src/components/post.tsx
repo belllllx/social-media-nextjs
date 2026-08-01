@@ -58,8 +58,6 @@ export function Post({
         <PostAction
           post={post}
           activeUser={activeUser}
-          queryClient={queryClient}
-          userId={userId}
         />
       )}
 

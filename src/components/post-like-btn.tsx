@@ -17,33 +17,33 @@ import { ItemsNotFound } from "./items-not-found";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { QueryClient } from "@tanstack/react-query";
-import { usePostLike } from "@/hooks/use-post-like";
+import { callApi } from "@/utils/helpers/call-api";
 
 interface PostLikeBtnProps {
   post: IPost;
   activeUser: IUser;
-  queryClient: QueryClient;
-  userId?: string;
 }
 
 export function PostLikeBtn({
   post,
   activeUser,
-  queryClient,
-  userId,
 }: PostLikeBtnProps) {
-  const postLikeMutation = usePostLike(queryClient);
+  // const postLikeMutation = usePostLike(queryClient);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePostLike = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await postLikeMutation.mutateAsync({
-        activeUser,
-        postId: post.id,
-        userId,
-      });
+      // const res = await postLikeMutation.mutateAsync({
+      //   activeUser,
+      //   postId: post.id,
+      //   userId,
+      // });
+      const res = await callApi(
+        "post",
+        `post/toggle-like/${post.id}`,
+      );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
@@ -56,7 +56,7 @@ export function PostLikeBtn({
     } finally {
       setIsLoading(false);
     }
-  }, [postLikeMutation, activeUser, post.id, userId]);
+  }, [activeUser.id, post.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">

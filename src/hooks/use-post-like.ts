@@ -21,11 +21,11 @@ export function usePostLike(queryClient: QueryClient) {
   >({
     mutationFn: async ({
       activeUser,
-      postId
+      postId,
     }) => {
       const res = await callApi(
         "post",
-        `post/like/${activeUser.id}/${postId}`,
+        `post/toggle-like/${activeUser.id}/${postId}`,
       );
       return res;
     },

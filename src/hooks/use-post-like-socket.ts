@@ -40,7 +40,7 @@ export function usePostLikeSocket(
                 // แก้เฉพาะ target
                 const copyPost = {
                   ...post,
-                  likes: [...post.likes],
+                  likes: [...(post?.likes || [])],
                 }
                 const index = copyPost.likes.findIndex((prevLike) =>
                   prevLike.userId === like.userId
