@@ -155,7 +155,7 @@ export function Comment({
           setDisabled(true);
           const res = await callApi(
             "post",
-            "comment/file/create",
+            "comment/upload-file",
             formData,
           );
           if (!res.success) {
