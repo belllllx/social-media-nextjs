@@ -27,7 +27,7 @@ export type IErrorTokenPayload = {
 }
 
 export type IAtPayload = {
-  id: string;
+  userId: string;
   authVerified: boolean;
 }
 

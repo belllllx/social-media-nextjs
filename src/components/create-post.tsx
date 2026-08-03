@@ -149,7 +149,7 @@ export function CreatePost() {
       setDisabled(true);
       const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
-        "post/delete/file",
+        "post/delete-file",
         {
           data: { fileUrl },
         },

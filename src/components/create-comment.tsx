@@ -151,7 +151,7 @@ export function CreateComment({ post, queryClient }: CreateCommentProps) {
       setDisabled(true);
       const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
-        "comment/delete/file",
+        "comment/delete-file",
         {
           data: { fileUrl },
         },

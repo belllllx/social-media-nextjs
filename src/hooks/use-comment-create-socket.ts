@@ -42,6 +42,8 @@ export function useCommentCreateSocket(
                     return comment;
                   }
 
+                  const isExistReply = comment.replies.some((prevReply) => prevReply.id === newComment.id)
+
                   const copyReplies = [...comment.replies];
                   copyReplies.unshift(newComment);
 
@@ -50,7 +52,7 @@ export function useCommentCreateSocket(
                     replies: copyReplies,
                   };
 
-                  return updateCommentReply;
+                  return !isExistReply ? updateCommentReply : {...comment};
                 }),
               };
             }),
@@ -60,6 +62,8 @@ export function useCommentCreateSocket(
         // เป็น comment ปกติ
         const firstPage = oldComments.pages[0];
 
+        const isExistComment = firstPage.comments.some((prevComment) => prevComment.id === newComment.id)
+
         const newFirstPage = {
           ...firstPage,
           comments: [newComment, ...firstPage.comments],
@@ -67,7 +71,7 @@ export function useCommentCreateSocket(
 
         return {
           ...oldComments,
-          pages: [newFirstPage, ...oldComments.pages.slice(1)],
+          pages: !isExistComment ? [newFirstPage, ...oldComments.pages.slice(1)] : [...oldComments.pages],
         };
       });
     });

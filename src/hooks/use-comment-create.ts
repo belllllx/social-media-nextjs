@@ -23,7 +23,6 @@ export function useCommentCreate(queryClient: QueryClient) {
     }
   >({
     mutationFn: async ({
-      user,
       postId,
       comment,
       payload,
@@ -32,7 +31,7 @@ export function useCommentCreate(queryClient: QueryClient) {
         ?
         await callApi<CreateCommentPayload>(
           "post",
-          `comment/create/${user.id}/${postId}`,
+          `comment/create/${postId}`,
           payload,
         )
         :
@@ -40,13 +39,13 @@ export function useCommentCreate(queryClient: QueryClient) {
           ?
           await callApi<CreateCommentPayload>(
             "post",
-            `comment/tag/create/${user.id}/${comment.parentId}/${comment.id}/${postId}`,
+            `comment/tag/create/${comment.parentId}/${comment.id}/${postId}`,
             payload,
           )
           :
           await callApi<CreateCommentPayload>(
             "post",
-            `comment/reply/create/${user.id}/${comment.id}/${postId}`,
+            `comment/reply/create/${comment.id}/${postId}`,
             payload,
           );
 
@@ -243,6 +242,7 @@ export function useCommentCreate(queryClient: QueryClient) {
     },
     onSuccess: ({ data }, { postId }, context) => {
       const createdComment = data as unknown as IComment;
+      console.log(createdComment)
 
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
