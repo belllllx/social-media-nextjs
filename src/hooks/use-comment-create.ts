@@ -39,13 +39,13 @@ export function useCommentCreate(queryClient: QueryClient) {
           ?
           await callApi<CreateCommentPayload>(
             "post",
-            `comment/tag/create/${comment.parentId}/${comment.id}/${postId}`,
+            `comment/tag/create/${postId}/${comment.parentId}/${comment.id}`,
             payload,
           )
           :
           await callApi<CreateCommentPayload>(
             "post",
-            `comment/reply/create/${comment.id}/${postId}`,
+            `comment/reply/create/${postId}/${comment.id}`,
             payload,
           );
 
@@ -242,7 +242,6 @@ export function useCommentCreate(queryClient: QueryClient) {
     },
     onSuccess: ({ data }, { postId }, context) => {
       const createdComment = data as unknown as IComment;
-      console.log(createdComment)
 
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });

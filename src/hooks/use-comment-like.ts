@@ -85,7 +85,7 @@ export function useCommentLike(queryClient: QueryClient) {
 
                       const copyReply: IComment = {
                         ...reply,
-                        likes: [...reply.likes],
+                        likes: [...(reply?.likes ?? [])],
                       };
                       const index = copyReply.likes.findIndex(
                         (prevLike) => prevLike.userId === user.id,
@@ -112,7 +112,7 @@ export function useCommentLike(queryClient: QueryClient) {
                 // แก้เฉพาะ target
                 const copyComment = {
                   ...comment,
-                  likes: [...comment.likes],
+                  likes: [...(comment?.likes ?? [])],
                 };
                 const index = copyComment.likes.findIndex((prevLike) =>
                   prevLike.userId === user.id
