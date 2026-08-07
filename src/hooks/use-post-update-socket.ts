@@ -40,13 +40,13 @@ export function usePostUpdateSocket(
                 }
 
                 // แก้เฉพาะ target
-                if (post.parentId === updatePost.id) {
+                if (post.parentId === updatePost.id && post.parent) {
                   const newUpdateParentPost: IPost = {
                     ...post,
                     parent: {
-                      ...updatePost,
+                      ...post.parent,
                       message: updatePost.message,
-                      filesUrl: [...(updatePost.filesUrl ?? [])],
+                      filesUrl: [...(updatePost.filesUrl ?? post.parent.filesUrl)],
                     },
                   };
 
@@ -54,9 +54,9 @@ export function usePostUpdateSocket(
                 }
 
                 const newUpdatePost: IPost = {
-                  ...updatePost,
+                  ...post,
                   message: updatePost.message,
-                  filesUrl: [...(updatePost.filesUrl ?? [])],
+                  filesUrl: [...(updatePost.filesUrl ?? post.filesUrl)],
                 };
 
                 return newUpdatePost;
@@ -93,13 +93,13 @@ export function usePostUpdateSocket(
                 }
 
                 // แก้เฉพาะ target
-                if (post.parentId === updatePost.id) {
+                if (post.parentId === updatePost.id && post.parent) {
                   const newUpdateParentPost: IPost = {
                     ...post,
                     parent: {
-                      ...updatePost,
+                      ...post.parent,
                       message: updatePost.message,
-                      filesUrl: [...(updatePost.filesUrl ?? [])],
+                      filesUrl: [...(updatePost.filesUrl ?? post.parent.filesUrl)],
                     },
                   };
 
@@ -107,9 +107,9 @@ export function usePostUpdateSocket(
                 }
 
                 const newUpdatePost: IPost = {
-                  ...updatePost,
+                  ...post,
                   message: updatePost.message,
-                  filesUrl: [...(updatePost.filesUrl ?? [])],
+                  filesUrl: [...(updatePost.filesUrl ?? post.filesUrl)],
                 };
 
                 return newUpdatePost;
@@ -124,13 +124,13 @@ export function usePostUpdateSocket(
           return undefined;
         }
 
-        if (oldPost.parentId === updatePost.id) {
+        if (oldPost.parentId === updatePost.id && oldPost.parent) {
           const newUpdateParentPost: IPost = {
             ...oldPost,
             parent: {
-              ...updatePost,
+              ...oldPost.parent,
               message: updatePost.message,
-              filesUrl: [...(updatePost.filesUrl ?? [])],
+              filesUrl: [...(updatePost.filesUrl ?? oldPost.parent.filesUrl)],
             },
           };
 
@@ -138,9 +138,9 @@ export function usePostUpdateSocket(
         }
 
         const newUpdatePost: IPost = {
-          ...updatePost,
+          ...oldPost,
           message: updatePost.message,
-          filesUrl: [...(updatePost.filesUrl ?? [])],
+          filesUrl: [...(updatePost.filesUrl ?? oldPost.filesUrl)],
         };
 
         return newUpdatePost;
