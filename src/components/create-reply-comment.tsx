@@ -92,7 +92,6 @@ export function CreateReplyComment({
           payload: {
             message,
             fileUrl: !fileUrl ? undefined : fileUrl,
-            replyToUserId: comment.userId,
           },
         })
         :
@@ -138,7 +137,7 @@ export function CreateReplyComment({
           setDisabled(true);
           const res = await callApi(
             "post",
-            "comment/file/create",
+            "comment/upload-file",
             formData,
           );
           if (!res.success) {
@@ -164,7 +163,7 @@ export function CreateReplyComment({
       setDisabled(true);
       const res = await callApi<{ data: DeleteFilePayload }>(
         "delete",
-        "comment/delete/file",
+        "comment/delete-file",
         {
           data: { fileUrl },
         },

@@ -22,7 +22,7 @@ export function ToggleViewReplys({ comment }: ToggleViewReplysProps) {
 
   return (
     <>
-      {comment.replysCount ? (
+      {comment.repliesCount ? (
         <Text
           onClick={() =>
             setShowReplyOnCommentId({ commentId: comment.id, open: !showReplyData?.open })
@@ -33,13 +33,13 @@ export function ToggleViewReplys({ comment }: ToggleViewReplysProps) {
         >
           {!showReplyData?.open ? (
             <>
-              View {comment.replysCount} reply
-              {comment.replysCount > 1 ? "s" : ""}
+              View {comment.repliesCount} reply
+              {comment.repliesCount > 1 ? "s" : ""}
             </>
           ) : (
             <>
               Hidden reply
-              {comment.replysCount > 1 ? "s" : ""}
+              {comment.repliesCount > 1 ? "s" : ""}
             </>
           )}
         </Text>

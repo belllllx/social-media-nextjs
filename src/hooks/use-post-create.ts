@@ -166,7 +166,8 @@ export function usePostCreate(queryClient: QueryClient) {
                 }
 
                 const updatePost: IPost = {
-                  ...createdPost
+                  ...createdPost,
+                  likes: [],
                 }
                 return updatePost;
               }),
@@ -199,7 +200,8 @@ export function usePostCreate(queryClient: QueryClient) {
                 }
 
                 const updatePost: IPost = {
-                  ...createdPost
+                  ...createdPost,
+                  likes: [],
                 }
                 return updatePost;
               }),

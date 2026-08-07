@@ -7,8 +7,8 @@ export function useComments(postId: string, limit: number) {
     queryKey: ["comments", postId],
     queryFn: async ({ pageParam }: { pageParam: string | null }) => {
       const url = pageParam
-        ? `comment/find/${postId}?&cursor=${pageParam}&limit=${limit}`
-        : `comment/find/${postId}?&limit=${limit}`;
+        ? `comment/finds/${postId}?cursor=${pageParam}&limit=${limit}`
+        : `comment/finds/${postId}?limit=${limit}`;
 
       await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));
       const res = await callApi("get", url);

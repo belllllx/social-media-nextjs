@@ -2,7 +2,7 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "@/providers/socket-io-provider";
-import { IComment } from "@/utils/types";
+import { IComment, IPost } from "@/utils/types";
 import { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Socket } from "socket.io-client";
@@ -21,7 +21,7 @@ export function useCommentCreateSocket(
         }
 
         // ถ้าเป็น reply comment
-        if (newComment.parent && newComment.parentId) {
+        if (newComment.parentId) {
           return {
             ...oldComments,
             pages: oldComments.pages.map((page) => {
@@ -45,14 +45,17 @@ export function useCommentCreateSocket(
                   const isExistReply = comment.replies.some((prevReply) => prevReply.id === newComment.id)
 
                   const copyReplies = [...comment.replies];
-                  copyReplies.unshift(newComment);
+                  copyReplies.unshift({
+                    ...newComment,
+                    likes: [],
+                  });
 
                   const updateCommentReply: IComment = {
                     ...comment,
                     replies: copyReplies,
                   };
 
-                  return !isExistReply ? updateCommentReply : {...comment};
+                  return !isExistReply ? updateCommentReply : { ...comment };
                 }),
               };
             }),
@@ -64,9 +67,15 @@ export function useCommentCreateSocket(
 
         const isExistComment = firstPage.comments.some((prevComment) => prevComment.id === newComment.id)
 
+        const updateNewComment: IComment & {
+          post: IPost;
+        } = {
+          ...newComment,
+          likes: [],
+        }
         const newFirstPage = {
           ...firstPage,
-          comments: [newComment, ...firstPage.comments],
+          comments: [updateNewComment, ...firstPage.comments],
         };
 
         return {

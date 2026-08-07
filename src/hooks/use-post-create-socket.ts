@@ -12,7 +12,9 @@ export function usePostCreateSocket(
   queryClient: QueryClient,
 ) {
   useEffect(() => {
-    socket?.on("newPost", (newPost) => {
+    socket?.on("newPost", async (newPost) => {
+      await new Promise((resolve) => setTimeout(() => resolve(undefined), 500));
+
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"], (oldPosts) => {
@@ -25,7 +27,7 @@ export function usePostCreateSocket(
 
         const newFirstPage = {
           ...firstPage,
-          posts: !isExist ? [newPost, ...firstPage.posts] : firstPage.posts,
+          posts: !isExist ? [newPost, ...firstPage.posts] : [...firstPage.posts],
         };
 
         return {
@@ -46,7 +48,7 @@ export function usePostCreateSocket(
 
         const newFirstPage = {
           ...firstPage,
-          posts: !isExist ? [newPost, ...firstPage.posts] : firstPage.posts,
+          posts: !isExist ? [newPost, ...firstPage.posts] : [...firstPage.posts],
         };
 
         return {

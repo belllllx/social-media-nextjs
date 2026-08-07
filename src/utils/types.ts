@@ -138,7 +138,7 @@ export interface IComment {
   likes: ILike[];
   parent?: IComment;
   reply?: IComment;
-  replysCount: number;
+  repliesCount: number;
   replies: IComment[];
   replyToUserId: string | null;
   replyToUser: IUser | null;
@@ -163,7 +163,6 @@ export type UpdatePostPayload = {
 export type CreateCommentPayload = {
   message?: string;
   fileUrl?: string;
-  replyToUserId?: string;
 }
 
 export type UpdateCommentPayload = {

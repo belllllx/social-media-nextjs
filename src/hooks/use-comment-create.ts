@@ -115,7 +115,7 @@ export function useCommentCreate(queryClient: QueryClient) {
                     user,
                     fileUrl: payload.fileUrl,
                     likes: [],
-                    replysCount: 0,
+                    repliesCount: 0,
                     replies: [],
                     replyToUserId: comment.parentId ? comment.userId : null,
                     replyToUser: comment.parentId ? comment.user : null,
@@ -125,7 +125,7 @@ export function useCommentCreate(queryClient: QueryClient) {
 
                   const updateCommentReply: IComment = {
                     ...prevComment,
-                    replysCount: prevComment.replies.length + 1,
+                    repliesCount: prevComment.replies.length + 1,
                     replies: [newReplyOrTagComment, ...prevComment.replies],
                   };
 
@@ -147,7 +147,7 @@ export function useCommentCreate(queryClient: QueryClient) {
           user,
           fileUrl: payload.fileUrl,
           likes: [],
-          replysCount: 0,
+          repliesCount: 0,
           replies: [],
           replyToUserId: null,
           replyToUser: null,
@@ -283,7 +283,10 @@ export function useCommentCreate(queryClient: QueryClient) {
                     ...comment,
                     replies: comment.replies.map((reply) => {
                       if (reply.id === context.optimisticId) {
-                        return createdComment;
+                        return {
+                          ...createdComment,
+                          likes: [],
+                        };
                       }
                       return reply;
                     }),
@@ -293,7 +296,9 @@ export function useCommentCreate(queryClient: QueryClient) {
                 }
 
                 const updatedComment: IComment = {
-                  ...createdComment
+                  ...createdComment,
+                  replies: [],
+                  likes: [],
                 }
                 return updatedComment;
               }),
