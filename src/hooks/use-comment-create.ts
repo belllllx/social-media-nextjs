@@ -52,10 +52,7 @@ export function useCommentCreate(queryClient: QueryClient) {
       return res;
     },
     onMutate: async ({
-      user,
       postId,
-      comment,
-      payload,
     }) => {
       await queryClient.cancelQueries({ queryKey: ["comments", postId] });
 
@@ -71,144 +68,102 @@ export function useCommentCreate(queryClient: QueryClient) {
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", postId]);
 
-      queryClient.setQueryData<
-        InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
-      >(["comments", postId], (oldComments) => {
-        if (!oldComments) {
-          return undefined;
-        }
+      // queryClient.setQueryData<
+      //   InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
+      // >(["comments", postId], (oldComments) => {
+      //   if (!oldComments) {
+      //     return undefined;
+      //   }
 
-        // ถ้าเป็น reply or tag comment
-        if (comment) {
-          return {
-            ...oldComments,
-            pages: oldComments.pages.map((page) => {
-              // ไม่ใช่ page ที่ reply or tag comment ข้าม
-              if (
-                !page.comments.some(
-                  (prevComment) =>
-                    prevComment.id === comment.id
-                    ||
-                    prevComment.id === comment.parentId
-                )
-              ) {
-                return page;
-              }
+      //   // ถ้าเป็น reply or tag comment
+      //   if (comment) {
+      //     return {
+      //       ...oldComments,
+      //       pages: oldComments.pages.map((page) => {
+      //         // ไม่ใช่ page ที่ reply or tag comment ข้าม
+      //         if (
+      //           !page.comments.some(
+      //             (prevComment) =>
+      //               prevComment.id === comment.id
+      //               ||
+      //               prevComment.id === comment.parentId
+      //           )
+      //         ) {
+      //           return page;
+      //         }
 
-              return {
-                ...page,
-                comments: page.comments.map((prevComment) => {
-                  // ไม่ใช่ comment ที่ reply และ tag ข้าม
-                  if (
-                    prevComment.id !== comment.id
-                    &&
-                    prevComment.id !== comment.parentId
-                  ) {
-                    return prevComment;
-                  }
+      //         return {
+      //           ...page,
+      //           comments: page.comments.map((prevComment) => {
+      //             // ไม่ใช่ comment ที่ reply และ tag ข้าม
+      //             if (
+      //               prevComment.id !== comment.id
+      //               &&
+      //               prevComment.id !== comment.parentId
+      //             ) {
+      //               return prevComment;
+      //             }
 
-                  const newReplyOrTagComment: IComment = {
-                    id: optimisticId,
-                    message: payload.message ?? "",
-                    postId,
-                    userId: user.id,
-                    user,
-                    fileUrl: payload.fileUrl,
-                    likes: [],
-                    repliesCount: 0,
-                    replies: [],
-                    replyToUserId: comment.parentId ? comment.userId : null,
-                    replyToUser: comment.parentId ? comment.user : null,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                  }
+      //             const newReplyOrTagComment: IComment = {
+      //               id: optimisticId,
+      //               message: payload.message ?? "",
+      //               postId,
+      //               userId: user.id,
+      //               user,
+      //               fileUrl: payload.fileUrl,
+      //               likes: [],
+      //               repliesCount: 0,
+      //               replies: [],
+      //               replyToUserId: comment.parentId ? comment.userId : null,
+      //               replyToUser: comment.parentId ? comment.user : null,
+      //               createdAt: new Date(),
+      //               updatedAt: new Date(),
+      //             }
 
-                  const updateCommentReply: IComment = {
-                    ...prevComment,
-                    repliesCount: prevComment.replies.length + 1,
-                    replies: [newReplyOrTagComment, ...prevComment.replies],
-                  };
+      //             const updateCommentReply: IComment = {
+      //               ...prevComment,
+      //               repliesCount: prevComment.replies.length + 1,
+      //               replies: [newReplyOrTagComment, ...prevComment.replies],
+      //             };
 
-                  return updateCommentReply;
-                }),
-              };
-            }),
-          };
-        }
+      //             return updateCommentReply;
+      //           }),
+      //         };
+      //       }),
+      //     };
+      //   }
 
-        // เป็น comment ปกติ
-        const firstPage = oldComments.pages[0];
+      //   // เป็น comment ปกติ
+      //   const firstPage = oldComments.pages[0];
 
-        const newComment: IComment = {
-          id: optimisticId,
-          message: payload.message ?? "",
-          postId,
-          userId: user.id,
-          user,
-          fileUrl: payload.fileUrl,
-          likes: [],
-          repliesCount: 0,
-          replies: [],
-          replyToUserId: null,
-          replyToUser: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
+      //   const newComment: IComment = {
+      //     id: optimisticId,
+      //     message: payload.message ?? "",
+      //     postId,
+      //     userId: user.id,
+      //     user,
+      //     fileUrl: payload.fileUrl,
+      //     likes: [],
+      //     repliesCount: 0,
+      //     replies: [],
+      //     replyToUserId: null,
+      //     replyToUser: null,
+      //     createdAt: new Date(),
+      //     updatedAt: new Date(),
+      //   }
 
-        const newFirstPage = {
-          ...firstPage,
-          comments: [newComment, ...firstPage.comments],
-        };
+      //   const newFirstPage = {
+      //     ...firstPage,
+      //     comments: [newComment, ...firstPage.comments],
+      //   };
 
-        queryClient.setQueryData<
-          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-        >(["posts"], (oldPosts) => {
-          if (!oldPosts) {
-            return undefined;
-          }
 
-          return {
-            ...oldPosts,
-            pages: oldPosts.pages.map((page) => {
-              // ไม่ใช่เพจ target ข้าม
-              if (!page.posts.some((post) => post.id === postId)) {
-                return page;
-              }
 
-              return {
-                ...page,
-                posts: page.posts.map((post) => {
-                  // ไม่ใข่ post target ข้าม
-                  if (post.id !== postId) {
-                    return post;
-                  }
-
-                  return {
-                    ...post,
-                    commentsCount: post.commentsCount + 1,
-                  }
-                }),
-              }
-            }),
-          }
-        });
-
-        queryClient.setQueryData<IPost>(["post", postId], (oldPost) => {
-          if (!oldPost) {
-            return undefined;
-          }
-
-          return {
-            ...oldPost,
-            commentsCount: oldPost.commentsCount + 1,
-          }
-        });
-
-        return {
-          ...oldComments,
-          pages: [newFirstPage, ...oldComments.pages.slice(1)],
-        };
-      });
+      //   return {
+      //     ...oldComments,
+      //     pages: [newFirstPage, ...oldComments.pages.slice(1)],
+      //   };
+      // });
 
       return {
         prevPosts,
@@ -240,72 +195,73 @@ export function useCommentCreate(queryClient: QueryClient) {
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", postId], context.prevComments);
     },
-    onSuccess: ({ data }, { postId }, context) => {
-      const createdComment = data as unknown as IComment;
+    // onSuccess: ({ data }, { postId }, context) => {
+    //   console.log("after res")
+    //   const createdComment = data as unknown as IComment;
 
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+    //   queryClient.invalidateQueries({ queryKey: ["posts"] });
+    //   queryClient.invalidateQueries({ queryKey: ["post", postId] });
 
-      queryClient.setQueryData<
-        InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
-      >(["comments", createdComment.postId], (oldComments) => {
-        if (!oldComments) {
-          return undefined;
-        }
+    //   queryClient.setQueryData<
+    //     InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
+    //   >(["comments", createdComment.postId], (oldComments) => {
+    //     if (!oldComments) {
+    //       return undefined;
+    //     }
 
-        return {
-          ...oldComments,
-          pages: oldComments.pages.map((page) => {
-            // ไม่ใช่ page target ข้าม
-            if (!page.comments.some((comment) =>
-              comment.id === context.optimisticId
-              ||
-              comment.replies.some((reply) => reply.id === context.optimisticId)
-            )) {
-              return page;
-            }
+    //     return {
+    //       ...oldComments,
+    //       pages: oldComments.pages.map((page) => {
+    //         // ไม่ใช่ page target ข้าม
+    //         if (!page.comments.some((comment) =>
+    //           comment.id === context.optimisticId
+    //           ||
+    //           comment.replies.some((reply) => reply.id === context.optimisticId)
+    //         )) {
+    //           return page;
+    //         }
 
-            return {
-              ...page,
-              comments: page.comments.map((comment) => {
-                // ไม่ใช่ comment และ reply or tag target ข้าม
-                if (
-                  comment.id !== context.optimisticId
-                  &&
-                  !comment.replies.some((reply) => reply.id === context.optimisticId)
-                ) {
-                  return comment;
-                }
+    //         return {
+    //           ...page,
+    //           comments: page.comments.map((comment) => {
+    //             // ไม่ใช่ comment และ reply or tag target ข้าม
+    //             if (
+    //               comment.id !== context.optimisticId
+    //               &&
+    //               !comment.replies.some((reply) => reply.id === context.optimisticId)
+    //             ) {
+    //               return comment;
+    //             }
 
-                // กรณีเป็น reply or tag
-                if (comment.replies.some((reply) => reply.id === context.optimisticId)) {
-                  const updatedReplyComment: IComment = {
-                    ...comment,
-                    replies: comment.replies.map((reply) => {
-                      if (reply.id === context.optimisticId) {
-                        return {
-                          ...createdComment,
-                          likes: [],
-                        };
-                      }
-                      return reply;
-                    }),
-                  }
+    //             // กรณีเป็น reply or tag
+    //             if (comment.replies.some((reply) => reply.id === context.optimisticId)) {
+    //               const updatedReplyComment: IComment = {
+    //                 ...comment,
+    //                 replies: comment.replies.map((reply) => {
+    //                   if (reply.id === context.optimisticId) {
+    //                     return {
+    //                       ...createdComment,
+    //                       likes: [],
+    //                     };
+    //                   }
+    //                   return reply;
+    //                 }),
+    //               }
 
-                  return updatedReplyComment;
-                }
+    //               return updatedReplyComment;
+    //             }
 
-                const updatedComment: IComment = {
-                  ...createdComment,
-                  replies: [],
-                  likes: [],
-                }
-                return updatedComment;
-              }),
-            }
-          }),
-        }
-      });
-    },
+    //             const updatedComment: IComment = {
+    //               ...createdComment,
+    //               replies: [],
+    //               likes: [],
+    //             }
+    //             return updatedComment;
+    //           }),
+    //         }
+    //       }),
+    //     }
+    //   });
+    // },
   });
 }

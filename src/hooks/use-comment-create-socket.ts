@@ -28,7 +28,7 @@ export function useCommentCreateSocket(
               // ไม่ใช่ page ที่ reply comment ข้าม
               if (
                 !page.comments.some(
-                  (comment) => comment.id === newComment.parentId,
+                  (comment) => comment.id === newComment.parentId
                 )
               ) {
                 return page;
@@ -42,20 +42,18 @@ export function useCommentCreateSocket(
                     return comment;
                   }
 
-                  const isExistReply = comment.replies.some((prevReply) => prevReply.id === newComment.id)
-
-                  const copyReplies = [...comment.replies];
-                  copyReplies.unshift({
+                  const newReply: IComment = {
                     ...newComment,
                     likes: [],
-                  });
-
+                  }
+                  const updateReplies = [newReply, ...comment.replies];
                   const updateCommentReply: IComment = {
                     ...comment,
-                    replies: copyReplies,
+                    repliesCount: comment.repliesCount + 1,
+                    replies: updateReplies,
                   };
 
-                  return !isExistReply ? updateCommentReply : { ...comment };
+                  return updateCommentReply
                 }),
               };
             }),
@@ -65,13 +63,12 @@ export function useCommentCreateSocket(
         // เป็น comment ปกติ
         const firstPage = oldComments.pages[0];
 
-        const isExistComment = firstPage.comments.some((prevComment) => prevComment.id === newComment.id)
-
         const updateNewComment: IComment & {
           post: IPost;
         } = {
           ...newComment,
           likes: [],
+          replies: [],
         }
         const newFirstPage = {
           ...firstPage,
@@ -80,8 +77,52 @@ export function useCommentCreateSocket(
 
         return {
           ...oldComments,
-          pages: !isExistComment ? [newFirstPage, ...oldComments.pages.slice(1)] : [...oldComments.pages],
+          pages: [newFirstPage, ...oldComments.pages.slice(1)],
         };
+      });
+
+      queryClient.setQueryData<
+        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+      >(["posts"], (oldPosts) => {
+        if (!oldPosts) {
+          return undefined;
+        }
+
+        return {
+          ...oldPosts,
+          pages: oldPosts.pages.map((page) => {
+            // ไม่ใช่เพจ target ข้าม
+            if (!page.posts.some((post) => post.id === newComment.postId)) {
+              return page;
+            }
+
+            return {
+              ...page,
+              posts: page.posts.map((post) => {
+                // ไม่ใข่ post target ข้าม
+                if (post.id !== newComment.postId) {
+                  return post;
+                }
+
+                return {
+                  ...post,
+                  commentsCount: post.commentsCount + 1,
+                }
+              }),
+            }
+          }),
+        }
+      });
+
+      queryClient.setQueryData<IPost>(["post", newComment.postId], (oldPost) => {
+        if (!oldPost) {
+          return undefined;
+        }
+
+        return {
+          ...oldPost,
+          commentsCount: oldPost.commentsCount + 1,
+        }
       });
     });
 

@@ -67,16 +67,11 @@ export function useCommentUpdate(queryClient: QueryClient) {
                 }
 
                 // กรณีเป็น reply or tag
-                if (currentComment.parent && currentComment.parentId) {
-                  // ไม่ใช่ comment ที่ reply or tag ข้าม
-                  if (
-                    !comment.replies.some(
-                      (reply) => reply.id === currentComment.id,
-                    )
-                  ) {
-                    return comment;
-                  }
-
+                if (
+                  comment.replies.some(
+                    (reply) => reply.id === currentComment.id,
+                  )
+                ) {
                   const updatedReplyComment: IComment = {
                     ...comment,
                     replies: [
@@ -105,7 +100,7 @@ export function useCommentUpdate(queryClient: QueryClient) {
       return prevComments;
     },
     onError: (error, { postId }, prevComments) => {
-      if(!prevComments){
+      if (!prevComments) {
         return;
       }
 
@@ -142,26 +137,21 @@ export function useCommentUpdate(queryClient: QueryClient) {
             return {
               ...page,
               comments: page.comments.map((comment) => {
-                const updateComment: IComment = {
-                  ...updatedComment,
-                }
-
-                // กรณีเป็น reply
-                if (updatedComment.parent && updatedComment.parentId) {
-                  // ไม่ใช่ comment ที่ reply ข้าม
-                  if (
-                    !comment.replies.some(
-                      (reply) => reply.id === updatedComment.id,
-                    )
-                  ) {
-                    return comment;
-                  }
-
+                // กรณีเป็น reply or tag
+                if (
+                  comment.replies.some(
+                    (reply) => reply.id === updatedComment.id,
+                  )
+                ) {
                   const updatedReplyComment: IComment = {
                     ...comment,
                     replies: [
                       ...comment.replies.map((reply) =>
-                        reply.id === updatedComment.id ? updateComment : reply,
+                        reply.id === updatedComment.id ? {
+                          ...reply,
+                          message: updatedComment.message ?? reply.message,
+                          fileUrl: updatedComment.fileUrl ?? reply.fileUrl,
+                        } : reply,
                       ),
                     ],
                   };
@@ -175,7 +165,11 @@ export function useCommentUpdate(queryClient: QueryClient) {
                   return comment;
                 }
 
-                return updateComment;
+                return {
+                  ...comment,
+                  message: updatedComment.message ?? comment.message,
+                  fileUrl: updatedComment.fileUrl ?? comment.fileUrl,
+                };
               }),
             };
           }),

@@ -33,28 +33,28 @@ export function useCommentUpdateSocket(
               )
             ) {
               return page;
-            } 
+            }
 
             // page target
             return {
               ...page,
               comments: page.comments.map((comment) => {
-                // กรณีเป็น reply
-                if (updatedComment.parent && updatedComment.parentId) {
-                  // ไม่ใช่ comment ที่ reply ข้าม
-                  if (
-                    !comment.replies.some(
-                      (reply) => reply.id === updatedComment.id,
-                    )
-                  ) {
-                    return comment;
-                  }
 
+                // กรณีเป็น reply
+                if (
+                  comment.replies.some(
+                    (reply) => reply.id === updatedComment.id,
+                  )
+                ) {
                   const updatedReplyComment: IComment = {
                     ...comment,
                     replies: [
                       ...comment.replies.map((reply) =>
-                        reply.id === updatedComment.id ? updatedComment : reply,
+                        reply.id === updatedComment.id ? {
+                          ...reply,
+                          message: updatedComment.message ?? reply.message,
+                          fileUrl: updatedComment.fileUrl ?? reply.fileUrl,
+                        } : reply,
                       ),
                     ],
                   };
@@ -69,7 +69,9 @@ export function useCommentUpdateSocket(
                 }
 
                 const newUpdateComment: IComment = {
-                  ...updatedComment,
+                  ...comment,
+                  message: updatedComment.message ?? comment.message,
+                  fileUrl: updatedComment.fileUrl ?? comment.fileUrl,
                 };
 
                 return newUpdateComment;
