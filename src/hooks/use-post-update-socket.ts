@@ -45,7 +45,7 @@ export function usePostUpdateSocket(
                     ...post,
                     parent: {
                       ...post.parent,
-                      message: updatePost.message,
+                      message: updatePost.message ?? post.parent.message,
                       filesUrl: [...(updatePost.filesUrl ?? post.parent.filesUrl)],
                     },
                   };
@@ -55,7 +55,7 @@ export function usePostUpdateSocket(
 
                 const newUpdatePost: IPost = {
                   ...post,
-                  message: updatePost.message,
+                  message: updatePost.message ?? post.message,
                   filesUrl: [...(updatePost.filesUrl ?? post.filesUrl)],
                 };
 
@@ -98,7 +98,7 @@ export function usePostUpdateSocket(
                     ...post,
                     parent: {
                       ...post.parent,
-                      message: updatePost.message,
+                      message: updatePost.message ?? post.parent.message,
                       filesUrl: [...(updatePost.filesUrl ?? post.parent.filesUrl)],
                     },
                   };
@@ -108,7 +108,7 @@ export function usePostUpdateSocket(
 
                 const newUpdatePost: IPost = {
                   ...post,
-                  message: updatePost.message,
+                  message: updatePost.message ?? post.message,
                   filesUrl: [...(updatePost.filesUrl ?? post.filesUrl)],
                 };
 
@@ -129,7 +129,7 @@ export function usePostUpdateSocket(
             ...oldPost,
             parent: {
               ...oldPost.parent,
-              message: updatePost.message,
+              message: updatePost.message ?? oldPost.parent.message,
               filesUrl: [...(updatePost.filesUrl ?? oldPost.parent.filesUrl)],
             },
           };
@@ -139,7 +139,7 @@ export function usePostUpdateSocket(
 
         const newUpdatePost: IPost = {
           ...oldPost,
-          message: updatePost.message,
+          message: updatePost.message ?? oldPost.message,
           filesUrl: [...(updatePost.filesUrl ?? oldPost.filesUrl)],
         };
 

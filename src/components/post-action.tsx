@@ -9,11 +9,15 @@ import { QueryClient } from "@tanstack/react-query";
 interface PostActionProps {
   post: IPost;
   activeUser: IUser;
+  userId?: string;
+  queryClient: QueryClient;
 }
 
 export function PostAction({
   post,
   activeUser,
+  userId,
+  queryClient,
 }: PostActionProps) {
   return (
     <Stack>
@@ -29,6 +33,8 @@ export function PostAction({
         <PostLikeBtn
           post={post}
           activeUser={activeUser}
+          userId={userId}
+          queryClient={queryClient}
         />
         <PostCommentBtn postId={post.id} />
         <PostShareBtn post={post} activeUser={activeUser} />

@@ -15,13 +15,9 @@ import { PostsSkeleton } from "./posts-skeleton";
 import { Error } from "./error";
 import { usePostUpdateSocket } from "@/hooks/use-post-update-socket";
 import { usePostDeleteSocket } from "@/hooks/use-post-delete-socket";
-import { useCommentCountCreateSocket } from "@/hooks/use-comment-count-create-socket";
 import { useCommentCreateSocket } from "@/hooks/use-comment-create-socket";
 import { useCommentDeleteSocket } from "@/hooks/use-comment-delete-socket";
-import { useCommentCountDeleteSocket } from "@/hooks/use-comment-count-delete-socket";
 import { useCommentUpdateSocket } from "@/hooks/use-comment-update-socket";
-import { useReplyCountDeleteSocket } from "@/hooks/use-reply-count-delete-socket";
-import { useReplyDeleteSocket } from "@/hooks/use-reply-delete-socket";
 import { useUserStore } from "@/providers/user-store-provider";
 
 export function Posts() {
@@ -36,14 +32,9 @@ export function Posts() {
   usePostUpdateSocket(socket, queryClient);
   usePostDeleteSocket(socket, queryClient);
 
-  useCommentCountCreateSocket(socket, queryClient);
-  useCommentCountDeleteSocket(socket, queryClient);
   useCommentCreateSocket(socket, queryClient);
   useCommentUpdateSocket(socket, queryClient);
   useCommentDeleteSocket(socket, queryClient);
-
-  useReplyCountDeleteSocket(socket, queryClient);
-  useReplyDeleteSocket(socket, queryClient);
 
   const {
     data: posts,
@@ -106,7 +97,7 @@ export function Posts() {
 
         {isFetchingNextPage && <Spinner />}
       </Stack>
-      
+
       <Box ref={ref} />
     </Box>
   );

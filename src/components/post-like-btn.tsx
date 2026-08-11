@@ -17,33 +17,33 @@ import { ItemsNotFound } from "./items-not-found";
 import { toast } from "react-toastify";
 import { formatToastMessages } from "@/utils/helpers/format-toast-messages";
 import { QueryClient } from "@tanstack/react-query";
-import { callApi } from "@/utils/helpers/call-api";
+import { usePostLike } from "@/hooks/use-post-like";
 
 interface PostLikeBtnProps {
   post: IPost;
   activeUser: IUser;
+  userId?: string;
+  queryClient: QueryClient;
 }
 
 export function PostLikeBtn({
   post,
   activeUser,
+  userId,
+  queryClient,
 }: PostLikeBtnProps) {
-  // const postLikeMutation = usePostLike(queryClient);
+  const postLikeMutation = usePostLike(queryClient);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePostLike = useCallback(async () => {
     try {
       setIsLoading(true);
-      // const res = await postLikeMutation.mutateAsync({
-      //   activeUser,
-      //   postId: post.id,
-      //   userId,
-      // });
-      const res = await callApi(
-        "post",
-        `post/toggle-like/${post.id}`,
-      );
+      const res = await postLikeMutation.mutateAsync({
+        activeUser,
+        postId: post.id,
+        userId,
+      });
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;

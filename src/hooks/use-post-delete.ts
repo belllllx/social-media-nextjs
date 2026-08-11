@@ -37,52 +37,6 @@ export function usePostDelete(queryClient: QueryClient) {
 
       const prevPost = queryClient.getQueryData<IPost>(["post", postId]);
 
-      queryClient.setQueryData<
-        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], (oldPosts) => {
-        if (!oldPosts) {
-          return undefined;
-        }
-
-        return {
-          ...oldPosts,
-          pages: oldPosts.pages.map((page) => {
-            // ไม่ใข่ page target ข้าม
-            if (!page.posts.some((prevPost) => prevPost.id === postId)) {
-              return page;
-            }
-
-            return {
-              ...page,
-              posts: page.posts.filter((post) => post.id !== postId && post.parentId !== postId),
-            };
-          }),
-        };
-      });
-
-      queryClient.setQueryData<
-        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts", activeUserId], (oldPosts) => {
-        if (!oldPosts) {
-          return undefined;
-        }
-
-        return {
-          ...oldPosts,
-          pages: oldPosts.pages.map((page) => {
-            // ไม่ใข่ page target ข้าม
-            if (!page.posts.some((prevPost) => prevPost.id === postId)) {
-              return page;
-            }
-
-            return {
-              ...page,
-              posts: page.posts.filter((post) => post.id !== postId && post.parentId !== postId),
-            };
-          }),
-        };
-      });
-
       queryClient.removeQueries({ queryKey: ["post", postId] });
 
       return {

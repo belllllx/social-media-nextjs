@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { ICommonResponse, ILike, IPost, IUser } from "@/utils/types";
+import { ICommonResponse, IPost, IUser } from "@/utils/types";
 import { InfiniteData, QueryClient, useMutation } from "@tanstack/react-query";
 
 interface MutationType {
@@ -20,17 +20,15 @@ export function usePostLike(queryClient: QueryClient) {
     }
   >({
     mutationFn: async ({
-      activeUser,
       postId,
     }) => {
       const res = await callApi(
         "post",
-        `post/toggle-like/${activeUser.id}/${postId}`,
+        `post/toggle-like/${postId}`,
       );
       return res;
     },
     onMutate: async ({
-      activeUser,
       postId,
       userId,
     }) => {
@@ -47,127 +45,6 @@ export function usePostLike(queryClient: QueryClient) {
       >(["posts", userId]);
 
       const prevPost = queryClient.getQueryData<IPost>(["post", postId]);
-
-      const newLike: ILike = {
-        id: -1,
-        userId: activeUser.id,
-        postId,
-        commentId: null,
-        user: activeUser,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-
-      queryClient.setQueryData<
-        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], (oldPosts) => {
-        if (!oldPosts) {
-          return undefined;
-        }
-
-        return {
-          ...oldPosts,
-          pages: oldPosts.pages.map((page) => {
-            // ไม่ใข่ page target ข้าม
-            if (!page.posts.some((prevPost) => prevPost.id === postId)) {
-              return page;
-            }
-
-            return {
-              ...page,
-              posts: page.posts.map((post) => {
-                // ไม่ใข่ post target ข้าม
-                if (post.id !== postId) {
-                  return post;
-                }
-
-                // แก้เฉพาะ target
-                const copyPost = {
-                  ...post,
-                  likes: [...post.likes],
-                }
-                const index = copyPost.likes.findIndex((prevLike) =>
-                  prevLike.userId === activeUser.id
-                );
-                if (index !== -1) {
-                  copyPost.likes.splice(index, 1);
-                } else {
-                  copyPost.likes.unshift(newLike);
-                }
-
-                return copyPost;
-              }),
-            };
-          }),
-        };
-      });
-
-      if (userId) {
-        queryClient.setQueryData<
-          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-        >(["posts", userId], (oldPosts) => {
-          if (!oldPosts) {
-            return undefined;
-          }
-
-          return {
-            ...oldPosts,
-            pages: oldPosts.pages.map((page) => {
-              // ไม่ใข่ page target ข้าม
-              if (!page.posts.some((prevPost) => prevPost.id === postId)) {
-                return page;
-              }
-
-              return {
-                ...page,
-                posts: page.posts.map((post) => {
-                  // ไม่ใข่ post target ข้าม
-                  if (post.id !== postId) {
-                    return post;
-                  }
-
-                  // แก้เฉพาะ target
-                  const copyPost = {
-                    ...post,
-                    likes: [...post.likes],
-                  }
-                  const index = copyPost.likes.findIndex((prevLike) =>
-                    prevLike.userId === activeUser.id
-                  );
-                  if (index !== -1) {
-                    copyPost.likes.splice(index, 1);
-                  } else {
-                    copyPost.likes.unshift(newLike);
-                  }
-
-                  return copyPost;
-                }),
-              };
-            }),
-          };
-        });
-      }
-
-      queryClient.setQueryData<IPost>(["post", postId], (oldPost) => {
-        if (!oldPost) {
-          return undefined;
-        }
-
-        const copyPost = {
-          ...oldPost,
-          likes: [...oldPost.likes],
-        }
-        const index = copyPost.likes.findIndex((prevLike) =>
-          prevLike.userId === activeUser.id
-        );
-        if (index !== -1) {
-          copyPost.likes.splice(index, 1);
-        } else {
-          copyPost.likes.unshift(newLike);
-        }
-
-        return copyPost;
-      });
 
       return {
         prevPosts,

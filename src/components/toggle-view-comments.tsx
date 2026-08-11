@@ -22,7 +22,7 @@ export function ToggleViewComments({ post }: ToggleViewCommentsProps) {
 
   return (
     <>
-      {post.commentsCount ? (
+      {post.commentsCount > 0 ? (
         <Text
           onClick={() =>
             setShowCommentOnPostId({ postId: post.id, open: !showCommentData?.open })

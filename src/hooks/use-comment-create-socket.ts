@@ -20,7 +20,7 @@ export function useCommentCreateSocket(
           return undefined;
         }
 
-        // ถ้าเป็น reply comment
+        // ถ้าเป็น reply or tag
         if (newComment.parentId) {
           return {
             ...oldComments,
@@ -67,6 +67,7 @@ export function useCommentCreateSocket(
           post: IPost;
         } = {
           ...newComment,
+          repliesCount: 0,
           likes: [],
           replies: [],
         }
@@ -81,49 +82,91 @@ export function useCommentCreateSocket(
         };
       });
 
-      queryClient.setQueryData<
-        InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
-      >(["posts"], (oldPosts) => {
-        if (!oldPosts) {
-          return undefined;
-        }
+      // count comment of post
+      if (!newComment.parentId) {
+        queryClient.setQueryData<
+          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+        >(["posts"], (oldPosts) => {
+          if (!oldPosts) {
+            return undefined;
+          }
 
-        return {
-          ...oldPosts,
-          pages: oldPosts.pages.map((page) => {
-            // ไม่ใช่เพจ target ข้าม
-            if (!page.posts.some((post) => post.id === newComment.postId)) {
-              return page;
-            }
+          return {
+            ...oldPosts,
+            pages: oldPosts.pages.map((page) => {
+              // ถ้าไม่ใช้ post target ข้าม
+              if (!page.posts.some((post) => post.id === newComment.postId)) {
+                return page;
+              }
 
-            return {
-              ...page,
-              posts: page.posts.map((post) => {
-                // ไม่ใข่ post target ข้าม
-                if (post.id !== newComment.postId) {
-                  return post;
-                }
+              return {
+                ...page,
+                posts: page.posts.map((post) => {
+                  // ถ้าไม่ใช่ post ที่ comment ให้ข้าม
+                  if (post.id !== newComment.postId) {
+                    return post;
+                  }
 
-                return {
-                  ...post,
-                  commentsCount: post.commentsCount + 1,
-                }
-              }),
-            }
-          }),
-        }
-      });
+                  const updatePost = {
+                    ...post,
+                    commentsCount: post.commentsCount + 1,
+                  };
 
-      queryClient.setQueryData<IPost>(["post", newComment.postId], (oldPost) => {
-        if (!oldPost) {
-          return undefined;
-        }
+                  return updatePost;
+                }),
+              };
+            }),
+          };
+        });
 
-        return {
-          ...oldPost,
-          commentsCount: oldPost.commentsCount + 1,
-        }
-      });
+        queryClient.setQueryData<
+          InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
+        >(["posts", newComment.post.userId], (oldPosts) => {
+          if (!oldPosts) {
+            return undefined;
+          }
+
+          return {
+            ...oldPosts,
+            pages: oldPosts.pages.map((page) => {
+              // ถ้าไม่ใช้ post target ข้าม
+              if (!page.posts.some((post) => post.id === newComment.postId)) {
+                return page;
+              }
+
+              return {
+                ...page,
+                posts: page.posts.map((post) => {
+                  // ถ้าไม่ใช่ post ที่ comment ให้ข้าม
+                  if (post.id !== newComment.postId) {
+                    return post;
+                  }
+
+                  const updatePost = {
+                    ...post,
+                    commentsCount: post.commentsCount + 1,
+                  };
+
+                  return updatePost;
+                }),
+              };
+            }),
+          };
+        });
+
+        queryClient.setQueryData<IPost>(["post", newComment.postId], (oldPost) => {
+          if (!oldPost) {
+            return undefined;
+          }
+
+          const updatePost = {
+            ...oldPost,
+            commentsCount: oldPost.commentsCount + 1,
+          };
+
+          return updatePost;
+        });
+      }
     });
 
     return () => {
