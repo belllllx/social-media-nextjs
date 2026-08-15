@@ -18,7 +18,7 @@ export function useNotifySocket(
   useEffect(() => {
     socket?.on(`notification:${activeUserId}`, (newNotify) => {
       queryClient.setQueryData<
-        InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
+        InfiniteData<{ notifications: INotify[]; nextCursor: string | null }>
       >(["notifies"], (oldNotifies) => {
         if (!oldNotifies) {
           return undefined;
@@ -27,18 +27,18 @@ export function useNotifySocket(
         let found = false;
 
         const newNotifyPages = oldNotifies.pages.map((group, pageIndex) => {
-          const index = group.notifies.findIndex((oldNotify) => oldNotify.id === newNotify.id);
+          const index = group.notifications.findIndex((oldNotify) => oldNotify.id === newNotify.id);
 
           // เจอ notify เดิม → แก้ page นี้
           if (index !== -1) {
             found = true;
 
-            const copyNotifies = [...group.notifies];
+            const copyNotifies = [...group.notifications];
             copyNotifies.splice(index, 1);
 
             return {
               ...group,
-              notifies: copyNotifies,
+              notifications: copyNotifies,
             };
           } 
 
@@ -48,7 +48,7 @@ export function useNotifySocket(
 
             return {
               ...group,
-              notifies: [newNotify, ...group.notifies],
+              notifications: [newNotify, ...group.notifications],
             };
           }
 

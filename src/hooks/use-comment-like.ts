@@ -16,11 +16,12 @@ export function useCommentLike(queryClient: QueryClient) {
     InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
   >({
     mutationFn: async ({
+      postId,
       commentId,
     }) => {
       const res = await callApi(
         "post",
-        `comment/toggle-like/${commentId}`,
+        `comment/toggle-like/${postId}/${commentId}`,
       );
       return res;
     },

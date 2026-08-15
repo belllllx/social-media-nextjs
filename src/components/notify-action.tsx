@@ -4,35 +4,22 @@ import { Badge, Circle, Portal } from "@chakra-ui/react";
 import { Popover } from "@chakra-ui/react";
 import { FaBell } from "react-icons/fa";
 import { Notifies } from "./notifies";
-import { useCallback, useEffect, useState } from "react";
-import { INotify } from "@/utils/types";
+import { useCallback, useState } from "react";
 import { useReadNotify } from "@/hooks/use-read-notify";
 
 export function NotifyAction() {
   const [open, setOpen] = useState(false);
-  const [unReadNotify, setUnReadNotify] = useState<INotify[]>([]);
+  const [unReadNotifiesId, setUnReadNotifiesId] = useState<string[]>([]);
 
-  const mutation = useReadNotify();
+  const readNotify = useReadNotify();
 
-  const handleNotifyCount = useCallback((notify: INotify[]) => {
-    setUnReadNotify(notify);
+  const handleNotifyCount = useCallback((unReadNotifiesId: string[]) => {
+    setUnReadNotifiesId(unReadNotifiesId);
   }, []);
 
   const handleReadNotify = useCallback(() => {
-    if (unReadNotify.length) {
-      unReadNotify.forEach((notify) => {
-        mutation.mutate(notify.id);
-      });
-    }
-  }, [mutation, unReadNotify]);
-
-  useEffect(() => {
-    if (open && unReadNotify.length) {
-      unReadNotify.forEach((notify) => {
-        mutation.mutate(notify.id);
-      });
-    }
-  }, [open, unReadNotify, mutation]);
+    readNotify.mutate(unReadNotifiesId);
+  }, [readNotify, unReadNotifiesId]);
 
   return (
     <Popover.Root
@@ -53,7 +40,7 @@ export function NotifyAction() {
           }}
         >
           <FaBell />
-          {unReadNotify && unReadNotify.length > 0 ? (
+          {unReadNotifiesId && unReadNotifiesId.length > 0 ? (
             <Badge
               size="sm"
               colorPalette="red"
@@ -63,7 +50,7 @@ export function NotifyAction() {
               variant="solid"
               borderRadius="full"
             >
-              {unReadNotify.length}
+              {unReadNotifiesId.length}
             </Badge>
           ) : null}
         </Circle>

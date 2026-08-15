@@ -7,7 +7,6 @@ import { Spinner } from "./spinner";
 import { Fragment, useEffect } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import { useNotifySocket } from "@/hooks/use-notify-socket";
-import { INotify } from "@/utils/types";
 import { Notify } from "./notify";
 import { ItemsNotFound } from "./items-not-found";
 import { NotifiesSkeleton } from "./notifies-skeleton";
@@ -16,7 +15,7 @@ import { useSocketIo } from "@/providers/socket-io-provider";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface NotifiesProps {
-  onNotifyCount: (notify: INotify[]) => void;
+  onNotifyCount: (notifiesId: string[]) => void;
 }
 
 export function Notifies({ onNotifyCount }: NotifiesProps) {
@@ -53,9 +52,9 @@ export function Notifies({ onNotifyCount }: NotifiesProps) {
   useEffect(() => {
     if (notifies) {
       const unReadNotifies = notifies.pages
-        .flatMap((page) => page.notifies)
+        .flatMap((page) => page.notifications)
         .filter((notification) => !notification.isRead);
-      onNotifyCount(unReadNotifies);
+      onNotifyCount(unReadNotifies.map((unReadNotify) => unReadNotify.id));
     }
   }, [notifies, onNotifyCount]);
 
@@ -78,9 +77,9 @@ export function Notifies({ onNotifyCount }: NotifiesProps) {
         notifies &&
         notifies.pages.map((group, i) => (
           <Fragment key={i}>
-            {group.notifies.length ? (
-              group.notifies.map((notify) => (
-                <Notify key={notify.id} notify={notify} />
+            {group.notifications.length ? (
+              group.notifications.map((notification) => (
+                <Notify key={notification.id} notification={notification} />
               ))
             ) : (
               <ItemsNotFound title="notify" />

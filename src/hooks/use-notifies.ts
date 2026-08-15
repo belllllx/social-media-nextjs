@@ -8,8 +8,8 @@ export function useNotifies(limit: number, activeUserId?: string) {
     queryFn: async ({ pageParam }: { pageParam: string | null }) => {
       const url =
         pageParam && activeUserId
-          ? `notification/finds/${activeUserId}?&cursor=${pageParam}&limit=${limit}`
-          : `notification/finds/${activeUserId}?&limit=${limit}`;
+          ? `notification/finds?cursor=${pageParam}&limit=${limit}`
+          : `notification/finds?limit=${limit}`;
 
       await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));     
       const res = await callApi("get", url);
@@ -17,7 +17,7 @@ export function useNotifies(limit: number, activeUserId?: string) {
         return Promise.reject(res);
       }
 
-      return res.data as { notifies: INotify[]; nextCursor: string | null };
+      return res.data as { notifications: INotify[]; nextCursor: string | null };
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,

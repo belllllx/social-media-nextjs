@@ -1,5 +1,5 @@
 import { callApi } from "@/utils/helpers/call-api";
-import { INotify } from "@/utils/types";
+import { INotify, ReadNotifiesSchema } from "@/utils/types";
 import {
   InfiniteData,
   useMutation,
@@ -10,26 +10,30 @@ export function useReadNotify() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (notifyId: string) => {
-      const res = await callApi(
+    mutationFn: async (notifiesId: string[]) => {
+      const res = await callApi<ReadNotifiesSchema>(
         "patch",
-        `${process.env.NEXT_PUBLIC_API_URL}/notification/update/read/${notifyId}`
+        `notification/read-all`,
+        {
+          notificationsId: notifiesId,
+        },
       );
+
       if (!res.success) {
         return Promise.reject(res);
       }
 
       return res;
     },
-    onMutate: async (notifyId: string) => {
+    onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["notifies"] });
 
       const prevNoifies = queryClient.getQueryData<
-        InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
+        InfiniteData<{ notifications: INotify[]; nextCursor: string | null }>
       >(["notifies"]);
 
       queryClient.setQueryData<
-        InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
+        InfiniteData<{ notifications: INotify[]; nextCursor: string | null }>
       >(["notifies"], (oldNotifies) => {
         if (!oldNotifies) {
           return undefined;
@@ -39,8 +43,10 @@ export function useReadNotify() {
           ...oldNotifies,
           pages: oldNotifies.pages.map((page) => ({
             ...page,
-            notifies: page.notifies.map((notify) =>
-              notify.id === notifyId ? { ...notify, isRead: true } : notify
+            notifications: page.notifications.map((notification) => ({
+              ...notification,
+              isRead: true,
+            })
             ),
           })),
         };
@@ -49,30 +55,37 @@ export function useReadNotify() {
       return prevNoifies;
     },
     onError: (error, notifyId, prevNoifies) => {
-      if(!prevNoifies){
+      if (!prevNoifies) {
         return;
       }
 
       queryClient.setQueryData<
-        InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
+        InfiniteData<{ notifications: INotify[]; nextCursor: string | null }>
       >(["notifies"], prevNoifies);
     },
     onSuccess: (res) => {
-      const notifyData = res.data as unknown as INotify;
+      const notifyData = res.data as unknown as INotify[];
 
       queryClient.setQueryData<
-        InfiniteData<{ notifies: INotify[]; nextCursor: string | null }>
+        InfiniteData<{ notifications: INotify[]; nextCursor: string | null }>
       >(["notifies"], (oldNotifies) => {
         if (!oldNotifies) {
           return undefined;
         }
 
+        const updatedIds = new Set(notifyData.map((notify) => notify.id));
+
         return {
           ...oldNotifies,
           pages: oldNotifies.pages.map((page) => ({
             ...page,
-            notifies: page.notifies.map((notify) =>
-              notify.id === notifyData.id ? notifyData : notify
+            notifications: page.notifications.map((notification) =>
+              updatedIds.has(notification.id)
+                ? {
+                  ...notification,
+                  isRead: notification.isRead,
+                }
+                : notification,
             ),
           })),
         };

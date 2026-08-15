@@ -4,10 +4,10 @@ import { Avatar, Flex, HStack, Link, Text, VStack } from "@chakra-ui/react";
 import NextLink from "next/link";
 
 interface NotifyPops {
-  notify: INotify;
+  notification: INotify;
 }
 
-export function Notify({ notify }: NotifyPops) {
+export function Notify({ notification }: NotifyPops) {
   return (
     <Link
       cursor="pointer"
@@ -24,20 +24,20 @@ export function Notify({ notify }: NotifyPops) {
     >
       <NextLink
         href={
-          notify.postId
-            ? `/post/${notify.postId}`
-            : `/profile/${notify.senderId}`
+          notification.postId
+            ? `/post/${notification.postId}`
+            : `/profile/${notification.senderId}`
         }
       >
         <HStack alignItems="center" gapX="3" padding="2.5">
-          {notify.sender.profileUrl ? (
+          {notification.sender.profileUrl ? (
             <Avatar.Root size="xl">
-              <Avatar.Fallback name={notify.sender.fullname} />
-              <Avatar.Image src={notify.sender.profileUrl} />
+              <Avatar.Fallback name={notification.sender.fullname} />
+              <Avatar.Image src={notification.sender.profileUrl} />
             </Avatar.Root>
           ) : (
             <Avatar.Root size="xl">
-              <Avatar.Fallback name={notify.sender.fullname} />
+              <Avatar.Fallback name={notification.sender.fullname} />
             </Avatar.Root>
           )}
           <VStack alignItems="start" justifyContent="center" gap="0">
@@ -48,15 +48,15 @@ export function Notify({ notify }: NotifyPops) {
               textOverflow="ellipsis"
               whiteSpace="nowrap"
             >
-              {notify.sender.fullname}
+              {notification.sender.fullname}
             </Text>
             <Flex maxW="200px">
               <Text fontWeight="normal" truncate>
-                {notify.message}
+                {notification.message}
               </Text>
             </Flex>
             <Text color="fg.muted" textStyle="sm">
-              {formatDate(notify.createdAt)}
+              {formatDate(notification.createdAt)}
             </Text>
           </VStack>
         </HStack>

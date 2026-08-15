@@ -176,3 +176,7 @@ export type EditUserInfoPayload = {
   dateOfBirth?: Date | null;
   info?: string | null;
 }
+
+export type ReadNotifiesSchema = {
+ notificationsId: string[];
+}
