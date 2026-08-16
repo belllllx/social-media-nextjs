@@ -7,8 +7,8 @@ export function useUsers(search: string, limit: number, activeUserId?: string) {
     queryKey: ["users", search],
     queryFn: async ({ pageParam }: { pageParam: string | null }) => {
       const url = pageParam
-        ? `user/find-by-fullname/${activeUserId}?fullname=${search}&cursor=${pageParam}&limit=${limit}`
-        : `user/find-by-fullname/${activeUserId}?fullname=${search}&limit=${limit}`;
+        ? `user/finds-with-fullname?fullname=${search}&cursor=${pageParam}&limit=${limit}`
+        : `user/finds-with-fullname?fullname=${search}&limit=${limit}`;
 
       await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));
       const res = await callApi("get", url);
