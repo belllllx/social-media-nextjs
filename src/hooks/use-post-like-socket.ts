@@ -13,7 +13,7 @@ export function usePostLikeSocket(
   userId?: string,
 ) {
   useEffect(() => {
-    socket?.on("newLikePost", (like) => {
+    socket?.on("toggleLikePost", (like) => {
       queryClient.setQueryData<
         InfiniteData<{ posts: IPost[]; nextCursor: string | null }>
       >(["posts"], (oldPosts) => {
@@ -127,7 +127,7 @@ export function usePostLikeSocket(
     });
 
     return () => {
-      socket?.off("newLikePost");
+      socket?.off("toggleLikePost");
     };
   }, [socket, queryClient, userId]);
 }

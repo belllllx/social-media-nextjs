@@ -16,7 +16,7 @@ export function useNotifySocket(
   activeUserId?: string,
 ) {
   useEffect(() => {
-    socket?.on(`notification:${activeUserId}`, (newNotify) => {
+    socket?.on("notification", (newNotify) => {
       queryClient.setQueryData<
         InfiniteData<{ notifications: INotify[]; nextCursor: string | null }>
       >(["notifies"], (oldNotifies) => {
@@ -64,7 +64,7 @@ export function useNotifySocket(
     });
 
     return () => {
-      socket?.off(`notification:${activeUserId}`);
+      socket?.off("notification");
     };
   }, [socket, queryClient, activeUserId]);
 }

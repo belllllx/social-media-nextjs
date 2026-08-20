@@ -7,8 +7,8 @@ export function useUsersSuggest(limit: number, activeUserId?: string) {
     queryKey: ["usersSuggest"],
     queryFn: async ({ pageParam }: { pageParam: string | null }) => {
       const url = pageParam
-        ? `user/finds/${activeUserId}?cursor=${pageParam}&limit=${limit}`
-        : `user/finds/${activeUserId}?limit=${limit}`;
+        ? `user/finds?cursor=${pageParam}&limit=${limit}`
+        : `user/finds?limit=${limit}`;
 
       await new Promise((resolve) => setTimeout(() => resolve(undefined), 300));
       const res = await callApi("get", url);

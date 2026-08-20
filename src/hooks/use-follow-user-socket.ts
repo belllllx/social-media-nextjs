@@ -1,6 +1,6 @@
 import { ClientToServerEvents, ServerToClientEvents } from "@/providers/socket-io-provider";
 import { IUser } from "@/utils/types";
-import { QueryClient } from "@tanstack/react-query";
+import { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Socket } from "socket.io-client";
 
@@ -9,7 +9,7 @@ export function useFollowUserSocket(
   queryClient: QueryClient,
 ) {
   useEffect(() => {
-    socket?.on("follow", (follow) => {
+    socket?.on("toggleFollow", (follow) => {
       queryClient.setQueryData<IUser>(["profile"], (oldUser) => {
         if (!oldUser) {
           return undefined;
@@ -83,10 +83,46 @@ export function useFollowUserSocket(
             [follow, ...oldUser.followings],
         }
       });
+
+      queryClient.setQueryData<
+        InfiniteData<{
+          users: IUser[];
+          nextCursor: string | null;
+        }>
+      >(["usersSuggest"], (oldUsersSuggest) => {
+        if (!oldUsersSuggest) {
+          return undefined;
+        }
+
+        return {
+          ...oldUsersSuggest,
+          pages: oldUsersSuggest.pages.map((page) => {
+            return {
+              ...page,
+              users: page.users.map((oldUserSuggest) => {
+                if (oldUserSuggest.id !== follow.followingId) {
+                  return oldUserSuggest;
+                }
+
+                const isFollowing = oldUserSuggest.followers.some((follower) => follower.followerId === follow.followerId);
+
+                return {
+                  ...oldUserSuggest,
+                  followers: isFollowing
+                    ?
+                    [...oldUserSuggest.followers.filter((follower) => follower.followerId !== follow.followerId)]
+                    :
+                    [follow, ...oldUserSuggest.followers]
+                };
+              }),
+            };
+          }),
+        };
+      });
     });
 
     return () => {
-      socket?.off("follow");
+      socket?.off("toggleFollow");
     };
   }, [socket, queryClient]);
 }

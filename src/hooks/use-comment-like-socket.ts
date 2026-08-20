@@ -13,7 +13,7 @@ export function useCommentLikeSocket(
   queryClient: QueryClient,
 ) {
   useEffect(() => {
-    socket?.on("newLikeComment", (like) => {
+    socket?.on("toggleLikeComment", (like) => {
       queryClient.setQueryData<
         InfiniteData<{ comments: IComment[]; nextCursor: string | null }>
       >(["comments", postId], (oldComments) => {
@@ -103,7 +103,7 @@ export function useCommentLikeSocket(
     });
 
     return () => {
-      socket?.off("newLikeComment");
+      socket?.off("toggleLikeComment");
     };
   }, [socket, queryClient, postId]);
 }

@@ -21,18 +21,18 @@ const SocketIoContext = createContext<SocketIoCoxtentType | undefined>(
 );
 
 export interface ServerToClientEvents {
-  [event: `notification:${string}`]: (notifications: INotify) => void;
+  notification: (notifications: INotify) => void;
   usersActive: (users: (IUser & { active: boolean })[]) => void;
   exception: (error: { success: boolean; message: string }) => void;
   newPost: (post: IPost) => void;
   updatePost: (post: IPost) => void;
   deletePost: (post: IPost) => void;
-  newLikePost: (like: ILike) => void;
+  toggleLikePost: (like: ILike) => void;
   newComment: (comment: IComment & { post: IPost }) => void;
   updateComment: (comment: IComment) => void;
   deleteComment: (comment: IComment & { post: IPost }) => void;
-  newLikeComment: (like: ILike) => void;
-  follow: (
+  toggleLikeComment: (like: ILike) => void;
+  toggleFollow: (
     follower: IFollower & {
       following: IUser & { followers: IFollower[] };
       follower: IUser & { followers: IFollower[] };

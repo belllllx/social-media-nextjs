@@ -1,5 +1,6 @@
 "use client";
 
+import { useFollowUserSocket } from "@/hooks/use-follow-user-socket";
 import { useUser } from "@/hooks/use-user";
 import { useUsersOnlineSocket } from "@/hooks/use-users-online-socket";
 import { useSocketIo } from "@/providers/socket-io-provider";
@@ -14,6 +15,7 @@ export function UserInit() {
     const { data: user, isLoading } = useUser();
     const { setUser, setLoading } = useUserStore((state) => state);
 
+    useFollowUserSocket(socket, queryClient);
     useUsersOnlineSocket(user?.id, queryClient);
 
     useEffect(() => {
