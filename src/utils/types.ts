@@ -173,7 +173,7 @@ export type UpdateCommentPayload = {
 
 export type EditUserInfoPayload = {
   fullname?: string | undefined;
-  dateOfBirth?: Date | null;
+  dateOfBirth?: string | null;
   info?: string | null;
 }
 

@@ -70,8 +70,8 @@ export function UploadUserProfileImageBtn({ user }: UploadUserProfileImageBtnPro
       formData.append("file", cropFile);
 
       const res = await callApi(
-        "put",
-        `user/profile/edit/${activeUser.id}`,
+        "patch",
+        "user/avatar/upload-file",
         formData,
       );
       if (!res.success) {
@@ -140,13 +140,11 @@ export function UploadUserProfileImageBtn({ user }: UploadUserProfileImageBtnPro
       }
 
       setDisabled(true);
-      const res = await callApi<{ data: DeleteFilePayload }>(
-        "delete",
-        `user/profile/delete/file/${activeUser.id}`,
+      const res = await callApi<DeleteFilePayload>(
+        "patch",
+        "user/avatar/delete-file",
         {
-          data: {
-            fileUrl,
-          },
+          fileUrl,
         },
       )
       if (!res.success) {

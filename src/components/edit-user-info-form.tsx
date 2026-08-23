@@ -51,9 +51,9 @@ export function EditUserInfoForm({
       const payload: EditUserInfoPayload = {
         fullname: data.fullname ? data.fullname : undefined,
         dateOfBirth:
-          data.dateOfBirth === undefined
+          !data.dateOfBirth
             ? null
-            : new Date(data.dateOfBirth),
+            : data.dateOfBirth,
 
         info:
           data.info === ""
@@ -61,11 +61,11 @@ export function EditUserInfoForm({
             : data.info ?? undefined,
       };
 
-      const res = await callApi<EditUserInfoPayload>("put", `user/edit-info/${activeUser.id}`, payload);
+      const res = await callApi<EditUserInfoPayload>("put", "user/edit-info", payload);
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
       } else {
-        const updatedUser = (res.data as unknown as { user: IUser }).user;
+        const updatedUser = (res.data as unknown as IUser );
 
         reset({
           fullname: updatedUser.fullname,

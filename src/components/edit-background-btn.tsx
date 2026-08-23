@@ -69,14 +69,14 @@ export function EditBackgroundBtn({ user }: EditBackgroundBtnProps) {
       formData.append("file", cropFile);
 
       const res = await callApi(
-        "put",
-        `user/background/edit/${activeUser.id}`,
+        "patch",
+        "user/background/upload-file",
         formData,
       );
       if (!res.success) {
         toast.error(formatToastMessages(res.message));
         return;
-      } 
+      }
 
       setOpenDialog(false);
       handleClearCropImage();
@@ -134,13 +134,11 @@ export function EditBackgroundBtn({ user }: EditBackgroundBtnProps) {
       }
 
       setDisabled(true);
-      const res = await callApi<{ data: DeleteFilePayload }>(
-        "delete",
-        `user/background/delete/file/${activeUser.id}`,
+      const res = await callApi<DeleteFilePayload>(
+        "patch",
+        "user/background/delete-file",
         {
-          data: {
-            fileUrl,
-          },
+          fileUrl,
         },
       )
       if (!res.success) {
