@@ -5,9 +5,7 @@ import { IUser } from "@/utils/types";
 import { Avatar, Circle, Flex, Float, Stack, Text } from "@chakra-ui/react";
 
 interface UserStatusProps {
-  user: IUser & {
-    active?: boolean;
-  };
+  user: Pick<IUser, "id" | "profileUrl" | "fullname" | "email">;
 }
 
 export function UserStatus({ user }: UserStatusProps) {
@@ -34,42 +32,24 @@ export function UserStatus({ user }: UserStatusProps) {
           <Avatar.Fallback name={user.fullname} />
           <Avatar.Image src={user.profileUrl} />
           <Float placement="bottom-end" offsetX="1" offsetY="1">
-            {user.active ? (
-              <Circle
-                bg="green.500"
-                size="8px"
-                outline="0.2em solid"
-                outlineColor="bg"
-              />
-            ) : (
-              <Circle
-                bg="gray.300"
-                size="8px"
-                outline="0.2em solid"
-                outlineColor="bg"
-              />
-            )}
+            <Circle
+              bg="green.500"
+              size="8px"
+              outline="0.2em solid"
+              outlineColor="bg"
+            />
           </Float>
         </Avatar.Root>
       ) : (
         <Avatar.Root size="xl">
           <Avatar.Fallback name={user.fullname} />
           <Float placement="bottom-end" offsetX="1" offsetY="1">
-            {user.active ? (
-              <Circle
-                bg="green.500"
-                size="8px"
-                outline="0.2em solid"
-                outlineColor="bg"
-              />
-            ) : (
-              <Circle
-                bg="gray.300"
-                size="8px"
-                outline="0.2em solid"
-                outlineColor="bg"
-              />
-            )}
+            <Circle
+              bg="green.500"
+              size="8px"
+              outline="0.2em solid"
+              outlineColor="bg"
+            />
           </Float>
         </Avatar.Root>
       )}

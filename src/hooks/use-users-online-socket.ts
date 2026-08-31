@@ -7,7 +7,7 @@ export function useUsersOnlineSocket(userId: string | undefined, queryClient: Qu
   const { socket } = useSocketIo();
 
   useEffect(() => {
-    socket?.on("usersActive", (users) => {
+    socket?.on("activeUsers", (users) => {
       if (!userId) {
         return;
       };
@@ -16,7 +16,7 @@ export function useUsersOnlineSocket(userId: string | undefined, queryClient: Qu
     });
 
     return () => {
-      socket?.off("usersActive");
+      socket?.off("activeUsers");
     };
   }, [socket, queryClient, userId]);
 }

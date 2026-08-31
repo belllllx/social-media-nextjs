@@ -5,6 +5,7 @@ import { useUser } from "@/hooks/use-user";
 import { useUsersOnlineSocket } from "@/hooks/use-users-online-socket";
 import { useSocketIo } from "@/providers/socket-io-provider";
 import { useUserStore } from "@/providers/user-store-provider";
+import { IUser } from "@/utils/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
@@ -34,7 +35,10 @@ export function UserInit() {
 
     useEffect(() => {
         if (user) {
-            socket?.emit("connected", user);
+            const userPick: Pick<IUser, "id"> = {
+                id: user.id,
+            }
+            socket?.emit("connected", userPick);
         }
     }, [socket, user]);
 

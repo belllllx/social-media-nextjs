@@ -95,9 +95,7 @@ export interface IFollower {
   followingId: string;
 }
 
-export type OnlineUsers = (IUser & {
-  active: boolean;
-});
+export type OnlineUsers = Pick<IUser, "id" | "profileUrl" | "fullname" | "email">;
 
 export interface ILike {
   id: number;

@@ -22,8 +22,8 @@ const SocketIoContext = createContext<SocketIoCoxtentType | undefined>(
 
 export interface ServerToClientEvents {
   notification: (notifications: INotify) => void;
-  usersActive: (users: (IUser & { active: boolean })[]) => void;
-  exception: (error: { success: boolean; message: string }) => void;
+  activeUsers: (users: Pick<IUser, "id" | "profileUrl" | "fullname" | "email">[]) => void;
+  error: (error: string) => void;
   newPost: (post: IPost) => void;
   updatePost: (post: IPost) => void;
   deletePost: (post: IPost) => void;
@@ -41,7 +41,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  connected: (activeUser: IUser) => void;
+  connected: (activeUser: Pick<IUser, "id">) => void;
 }
 
 export function SocketIoProvider({ children }: SocketIoProviderProps) {
@@ -76,6 +76,10 @@ export function SocketIoProvider({ children }: SocketIoProviderProps) {
 
     socketInstance.on("connect_error", async (error) => {
       toast.error(formatToastMessages(error.message));
+    });
+
+    socketInstance.on("error", (error) => {
+      toast.error(error);
     });
 
     setSocket(socketInstance);
