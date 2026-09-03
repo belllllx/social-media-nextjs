@@ -56,7 +56,7 @@ export function PostLikeBtn({
     } finally {
       setIsLoading(false);
     }
-  }, [activeUser.id, post.id]);
+  }, [activeUser, postLikeMutation, userId, post.id]);
 
   return (
     <Dialog.Root placement="center" motionPreset="scale">

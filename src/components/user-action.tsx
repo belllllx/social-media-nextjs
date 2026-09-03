@@ -22,11 +22,10 @@ export function UserAction() {
 
   const handleLogout = useCallback(async () => {
     try {
-      socket?.disconnect();
-
       setDisabled(true);
       const data = await callApi("post", "auth/logout");
       if (data.success || !data.success) {
+        socket?.disconnect();
         navigate("/");
         setTimeout(() => clearUser(), 500);
       }

@@ -8,7 +8,7 @@ import { useCallback, useState } from "react";
 import { useReadNotify } from "@/hooks/use-read-notify";
 
 export function NotifyAction() {
-  const [open, setOpen] = useState(false);
+  const [_, setOpen] = useState(false);
   const [unReadNotifiesId, setUnReadNotifiesId] = useState<string[]>([]);
 
   const readNotify = useReadNotify();
